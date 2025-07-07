@@ -16,6 +16,7 @@ import { sdk } from '@farcaster/frame-sdk';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useInputState } from '@mantine/hooks';
 import { isAddress } from 'viem';
+import { Login } from './Login';
 
 export default function App() {
   const [addressStr, setAddressStr] = useInputState('');
@@ -38,7 +39,6 @@ export default function App() {
     },
   });
 
-  console.log('data', data);
   // useEffect(() => {
   //   // const data = fetch('http://localhost:3000/test');
 
@@ -98,8 +98,11 @@ export default function App() {
     <MantineProvider theme={theme}>
       <Flex h="100vh" justify="center" align="center">
         <Stack gap="52" maw="450">
+          <Group justify="end">
+            <Login />
+          </Group>
           <Box>
-            <Title fz="h2" mb="md">
+            {/* <Title fz="h2" mb="md">
               Members
             </Title>
             <Stack gap="md">
@@ -109,7 +112,7 @@ export default function App() {
                   <Text>{member.units}</Text>
                 </Group>
               ))}
-            </Stack>
+            </Stack> */}
           </Box>
           <Stack>
             <Title fz="h2">Update Shares</Title>
