@@ -1,8 +1,10 @@
-import { Avatar, Box, Button, Group, Text } from '@mantine/core';
+import { Avatar, Box, Button, Group, Text, Tooltip } from '@mantine/core';
 import { useAccount, useConnect } from 'wagmi';
 import sdk from '@farcaster/frame-sdk';
 import { useEffect, useState } from 'react';
 import { Context } from '@farcaster/frame-sdk';
+import { useMiniAppContext } from './hooks/useMiniAppContext';
+import { truncateAddress } from './utils/common';
 
 export const Login = () => {
   const { isConnected, address } = useAccount();
@@ -11,38 +13,35 @@ export const Login = () => {
   const [userContext, setUserContext] = useState<Context.UserContext | null>(
     null
   );
+  // sdf
+  const { user, isMiniApp } = useMiniAppContext();
 
-  useEffect(() => {
-    const getContext = async () => {
-      const isMiniApp = await sdk.isInMiniApp();
+  console.log('user', user);
 
-      console.log('isMiniApp:', isMiniApp);
-
-      if (!isMiniApp) {
-        return;
-      }
-
-      const user = (await sdk.context).user;
-
-      if (user) {
-        setUserContext(user);
-      }
-    };
-
-    if (isConnected && address) {
-      console.log('Connected address:', address);
-      getContext();
-    }
-  }, [isConnected, address]);
-
-  if (userContext && address) {
+  if (user && address && isMiniApp) {
     return (
       <Box m="md">
         <Group gap="4">
-          <Avatar src={userContext.pfpUrl} size="32" />
-          <Text>{userContext.displayName}</Text>
+          <Avatar src={user.pfpUrl} size="32" />
+          <Text>{user.displayName}</Text>
+          <Tooltip label="In Farcaster">
+            <Avatar bg="plum" size="6" />
+          </Tooltip>
         </Group>
-        {/* <Text>Address: {truncateAddress(address)}</Text> */}
+      </Box>
+    );
+  }
+
+  if (address && isConnected) {
+    return (
+      <Box m="md">
+        <Group gap="8">
+          <Avatar src={`https://effigy.im/a/${address}.svg`} size="32" />
+          <Text>{truncateAddress(address)}</Text>
+          <Tooltip label="Operating outside of Farcaster">
+            <Avatar bg="red" size="6" />
+          </Tooltip>
+        </Group>
       </Box>
     );
   }

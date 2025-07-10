@@ -4,6 +4,7 @@ import App from './App.tsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { config } from './utils/connect.ts';
+import { MiniAppProvider } from './context/MiniAppContext.tsx';
 
 const queryClient = new QueryClient();
 
@@ -11,7 +12,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <MiniAppProvider>
+          <App />
+        </MiniAppProvider>
       </QueryClientProvider>
     </WagmiProvider>
   </React.StrictMode>
