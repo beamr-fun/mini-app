@@ -17,6 +17,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useInputState } from '@mantine/hooks';
 import { isAddress } from 'viem';
 import { Login } from './Login';
+import { truncateAddress } from './utils/common';
 
 export default function App() {
   const [addressStr, setAddressStr] = useInputState('');
@@ -25,7 +26,7 @@ export default function App() {
   const [messages, setMessages] = useState<any>([]);
   const client = useQueryClient();
 
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ['members'],
     queryFn: async () => {
       const response = await fetch('http://localhost:3000/members');
@@ -56,6 +57,10 @@ export default function App() {
 
   useEffect(() => {
     sdk.actions.ready();
+
+    // setTimeout(() => {
+    //   sdk.actions.addMiniApp();
+    // }, 2000);
   }, []);
 
   const updateShares = async () => {
@@ -96,25 +101,26 @@ export default function App() {
 
   return (
     <MantineProvider theme={theme}>
-      <Flex h="100vh" justify="center" align="center">
-        <Stack gap="52" maw="450">
-          <Group justify="end">
-            <Login />
-          </Group>
+      <Group justify="end">
+        <Login />
+      </Group>
+      <Flex h="90vh" justify="center" align="center" p="md">
+        <Stack gap="52">
           <Box>
-            {/* <Title fz="h2" mb="md">
+            <Title fz="h2" mb="md">
               Members
             </Title>
-            <Stack gap="md">
+            <Stack gap="md" mb="xl">
               {data?.map((member: any) => (
                 <Group key={member.account}>
-                  <Text>{member.account}</Text>
+                  <Text>{truncateAddress(member.account)}</Text>
                   <Text>{member.units}</Text>
                 </Group>
               ))}
-            </Stack> */}
+            </Stack>
+            <Button onClick={() => refetch()}>Refetch</Button>
           </Box>
-          <Stack>
+          {/* <Stack>
             <Title fz="h2">Update Shares</Title>
             <TextInput
               placeholder="0x..."
@@ -126,11 +132,7 @@ export default function App() {
             <Button onClick={updateShares} loading={isLoading}>
               Add Shares
             </Button>
-          </Stack>
-          <Stack>
-            <Title fz="h2">Test Associated Wallet Query</Title>
-            <Button>Test</Button>
-          </Stack>
+          </Stack> */}
         </Stack>
       </Flex>
     </MantineProvider>
