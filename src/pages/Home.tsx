@@ -1,4 +1,4 @@
-import { Stack } from '@mantine/core';
+import { Button, Stack } from '@mantine/core';
 
 export const Home = () => {
   // Are you logged in?
@@ -16,9 +16,13 @@ export const Home = () => {
   // if no, prompt to see leaderboard
 
   // if no user pool,
+
+  const createCampaign = async () => {};
+
   return (
     <Stack gap="52">
       <Stack>Campaigns</Stack>
+      <Button>Create a Campaign</Button>
     </Stack>
   );
 };

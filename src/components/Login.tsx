@@ -9,9 +9,6 @@ export const Login = () => {
   const { isConnected, address } = useAccount();
   const { connect, connectors } = useConnect();
 
-  const [userContext, setUserContext] = useState<Context.UserContext | null>(
-    null
-  );
   // sdf
   const { user, isMiniApp } = useMiniAppContext();
 
