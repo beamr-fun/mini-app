@@ -1,10 +1,9 @@
 import { Avatar, Box, Button, Group, Text, Tooltip } from '@mantine/core';
 import { useAccount, useConnect } from 'wagmi';
-import sdk from '@farcaster/frame-sdk';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Context } from '@farcaster/frame-sdk';
-import { useMiniAppContext } from './hooks/useMiniAppContext';
-import { truncateAddress } from './utils/common';
+import { useMiniAppContext } from '../hooks/useMiniAppContext';
+import { truncateAddress } from '../utils/common';
 
 export const Login = () => {
   const { isConnected, address } = useAccount();

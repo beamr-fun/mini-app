@@ -1,23 +1,13 @@
 import '@mantine/core/styles.css';
-import {
-  Box,
-  Button,
-  Flex,
-  Group,
-  MantineProvider,
-  Stack,
-  Text,
-  TextInput,
-  Title,
-} from '@mantine/core';
+import { Flex, Group, MantineProvider, Stack } from '@mantine/core';
 import { theme } from './theme';
 import { useEffect, useState } from 'react';
 import { sdk } from '@farcaster/frame-sdk';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useInputState } from '@mantine/hooks';
 import { isAddress } from 'viem';
-import { Login } from './Login';
-import { truncateAddress } from './utils/common';
+import { Login } from './components/Login';
+import { ClientRoutes } from './Routes';
 
 export default function App() {
   const [addressStr, setAddressStr] = useInputState('');
@@ -26,19 +16,19 @@ export default function App() {
   const [messages, setMessages] = useState<any>([]);
   const client = useQueryClient();
 
-  const { data, refetch } = useQuery({
-    queryKey: ['members'],
-    queryFn: async () => {
-      const response = await fetch('http://localhost:3000/members');
+  // const { data, refetch } = useQuery({
+  //   queryKey: ['members'],
+  //   queryFn: async () => {
+  //     const response = await fetch('http://localhost:3000/members');
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
+  //     if (!response.ok) {
+  //       throw new Error('Network response was not ok');
+  //     }
+  //     const data = await response.json();
 
-      return data.members;
-    },
-  });
+  //     return data.members;
+  //   },
+  // });
 
   // useEffect(() => {
   //   // const data = fetch('http://localhost:3000/test');
@@ -105,8 +95,13 @@ export default function App() {
         <Login />
       </Group>
       <Flex h="90vh" justify="center" align="center" p="md">
-        <Stack gap="52">
-          <Box>
+        <ClientRoutes />
+      </Flex>
+    </MantineProvider>
+  );
+}
+{
+  /* <Box>
             <Title fz="h2" mb="md">
               Members
             </Title>
@@ -119,8 +114,10 @@ export default function App() {
               ))}
             </Stack>
             <Button onClick={() => refetch()}>Refetch</Button>
-          </Box>
-          {/* <Stack>
+          </Box> */
+}
+{
+  /* <Stack>
             <Title fz="h2">Update Shares</Title>
             <TextInput
               placeholder="0x..."
@@ -132,9 +129,5 @@ export default function App() {
             <Button onClick={updateShares} loading={isLoading}>
               Add Shares
             </Button>
-          </Stack> */}
-        </Stack>
-      </Flex>
-    </MantineProvider>
-  );
+          </Stack> */
 }
