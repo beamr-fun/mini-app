@@ -1,6 +1,4 @@
-import { useMemo } from 'react';
 import { Abi, Address, erc20Abi } from 'viem';
-import { useAccount, useReadContracts } from 'wagmi';
 import { publicClient } from '../utils/connect';
 import { useQuery } from '@tanstack/react-query';
 
@@ -13,15 +11,25 @@ type Calls = {
   allowance?: boolean;
 };
 
-type TokenHookProps = {
-  abi?: Abi;
-  address: Address;
-  calls?: Calls;
-  spender?: Address;
+type TokenHookValues = {
+  balanceOf?: bigint;
+  totalSupply?: bigint;
+  name?: string;
+  symbol?: string;
+  decimals?: number;
+  allowance?: bigint;
 };
 
-const getReads = async (args: TokenHookProps & { userAddress?: Address }) => {
-  const { abi, address: tokenAddress, calls, spender, userAddress } = args;
+type TokenHookProps = {
+  abi?: Abi;
+  tokenAddress: Address;
+  calls?: Calls;
+  spender?: Address;
+  userAddress?: Address;
+};
+
+const getReads = async (args: TokenHookProps) => {
+  const { abi, tokenAddress, calls, spender, userAddress } = args;
 
   if (!calls || !abi || !tokenAddress) {
     return {
@@ -36,8 +44,8 @@ const getReads = async (args: TokenHookProps & { userAddress?: Address }) => {
 
   let reads = [];
 
-  if (calls.balanceOf) {
-    if (!tokenAddress) {
+  if (calls.balanceOf || userAddress) {
+    if (!userAddress) {
       console.warn('Token address is required for balanceOf call');
     } else {
       reads.push({
@@ -91,7 +99,7 @@ const getReads = async (args: TokenHookProps & { userAddress?: Address }) => {
         address: tokenAddress,
         abi,
         functionName: 'allowance',
-        args: [spender],
+        args: [userAddress, spender],
       });
     }
   }
@@ -110,13 +118,14 @@ const getReads = async (args: TokenHookProps & { userAddress?: Address }) => {
       return acc;
     },
     {} as Record<keyof Calls, any>
-  );
+  ) as TokenHookValues;
 };
 
 export const useToken = ({
   abi = erc20Abi,
   spender,
-  address,
+  tokenAddress,
+  userAddress,
   calls = {
     balanceOf: false,
     totalSupply: true,
@@ -126,10 +135,10 @@ export const useToken = ({
     allowance: false,
   },
 }: TokenHookProps) => {
-  const { address: userAddress } = useAccount();
   const { data, error, isLoading } = useQuery({
-    queryKey: ['token', address, Object.keys(calls), spender, userAddress],
-    queryFn: () => getReads({ abi, address, calls, spender, userAddress }),
+    queryKey: ['token', tokenAddress, Object.keys(calls), spender, userAddress],
+    queryFn: () => getReads({ abi, tokenAddress, calls, spender, userAddress }),
+    enabled: !!tokenAddress && !!abi,
   });
 
   return {
