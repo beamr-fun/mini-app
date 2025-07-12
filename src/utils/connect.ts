@@ -13,5 +13,5 @@ export const config = createConfig({
 
 export const publicClient = createPublicClient({
   chain: optimismSepolia,
-  transport: http(),
+  transport: http('https://opt-sepolia.g.alchemy.com/v2/IZOo16NkH3ZcDuCgGjYUS'),
 });
