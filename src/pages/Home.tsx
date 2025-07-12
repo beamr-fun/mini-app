@@ -1,5 +1,9 @@
 import { Button, Stack } from '@mantine/core';
-import { gdaForwarderAbi, gdaForwarderAddress } from '@sfpro/sdk/abi';
+import {
+  gdaForwarderAbi,
+  gdaForwarderAddress,
+  superTokenAbi,
+} from '@sfpro/sdk/abi';
 import { ADDR_DEV } from '../const/addresses';
 import { optimismSepolia } from 'viem/chains';
 import { useWalletClient } from 'wagmi';

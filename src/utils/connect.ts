@@ -1,17 +1,21 @@
 import { http, createConfig } from 'wagmi';
-import { optimismSepolia } from 'wagmi/chains';
+import { base, optimismSepolia } from 'wagmi/chains';
 import { farcasterMiniApp as miniAppConnector } from '@farcaster/miniapp-wagmi-connector';
-import { createPublicClient } from 'viem';
+import { Chain, createPublicClient } from 'viem';
+import { isDev, RPC } from './setup';
+
+const network = isDev ? optimismSepolia : base;
 
 export const config = createConfig({
-  chains: [optimismSepolia],
+  chains: isDev ? [optimismSepolia] : [base],
   transports: {
     [optimismSepolia.id]: http(),
+    [base.id]: http(),
   },
   connectors: [miniAppConnector()],
 });
 
 export const publicClient = createPublicClient({
-  chain: optimismSepolia,
-  transport: http('https://opt-sepolia.g.alchemy.com/v2/IZOo16NkH3ZcDuCgGjYUS'),
+  chain: network,
+  transport: http(RPC),
 });
