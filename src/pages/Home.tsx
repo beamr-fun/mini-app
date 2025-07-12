@@ -4,14 +4,18 @@ import {
   gdaForwarderAddress,
   superTokenAbi,
 } from '@sfpro/sdk/abi';
-import { ADDR_DEV } from '../const/addresses';
+import { ADDR, ADDR_DEV } from '../const/addresses';
 import { optimismSepolia } from 'viem/chains';
 import { useWalletClient } from 'wagmi';
 import { publicClient } from '../utils/connect';
 import { decodeEventLog } from 'viem';
+import { useToken } from '../hooks/useToken';
 
 export const Home = () => {
   const { data: walletClient } = useWalletClient();
+  const { data: baseToken } = useToken({ address: ADDR.BASE_TOKEN });
+
+  console.log('baseToken', baseToken);
 
   // console.log('walletClient', walletClient);
   // Are you logged in?

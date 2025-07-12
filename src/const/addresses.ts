@@ -11,3 +11,5 @@ export const ADDR_PROD: Record<string, Address> = {
   SUPER_TOKEN: '0x',
   ADMIN: '0x',
 } as const;
+
+export const ADDR = import.meta.env.VITE_ENV === 'dev' ? ADDR_DEV : ADDR_PROD;
