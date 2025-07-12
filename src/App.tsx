@@ -1,5 +1,5 @@
 import '@mantine/core/styles.css';
-import { Flex, Group, MantineProvider, Stack } from '@mantine/core';
+import { Flex, Group, MantineProvider } from '@mantine/core';
 import { theme } from './theme';
 import { useEffect, useState } from 'react';
 import { sdk } from '@farcaster/frame-sdk';
@@ -8,6 +8,7 @@ import { useInputState } from '@mantine/hooks';
 import { isAddress } from 'viem';
 import { Login } from './components/Login';
 import { ClientRoutes } from './Routes';
+import { useSSE } from './hooks/useSSE';
 
 export default function App() {
   const [addressStr, setAddressStr] = useInputState('');
@@ -15,6 +16,8 @@ export default function App() {
   const [isLoading, setLoading] = useState(false);
   const [messages, setMessages] = useState<any>([]);
   const client = useQueryClient();
+
+  // const { data, status } = useSSE({ url: 'http://localhost:3000/pool' });
 
   // const { data, refetch } = useQuery({
   //   queryKey: ['members'],

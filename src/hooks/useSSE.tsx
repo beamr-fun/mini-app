@@ -1,11 +1,11 @@
-import { use, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 enum Status {
-  None,
-  Connected,
-  Disconnected,
-  Reconnecting,
-  Error,
+  None = 'none',
+  Connected = 'connected',
+  Disconnected = 'disconnected',
+  Reconnecting = 'reconnecting',
+  Error = 'error',
 }
 
 export function useSSE<T>({
@@ -19,7 +19,7 @@ export function useSSE<T>({
   validator?: (data: any) => T;
   maxReconnectAttempts?: number;
   reconnectDelay?: number;
-  auto: boolean;
+  auto?: boolean;
 }) {
   const [isConnected, setIsConnected] = useState(false);
   const [status, setStatus] = useState<Status>(Status.None);
@@ -82,9 +82,9 @@ export function useSSE<T>({
     switch (parsed.type) {
       case 'connected':
         setIsConnected(true);
-        parsed.data = validator ? validator(parsed.data) : parsed.data;
+        setData(validator ? validator(parsed.data) : parsed.data);
         break;
-      case 'state_update':
+      case 'update':
         if (validator) {
           parsed.data = validator(parsed.data);
         }
