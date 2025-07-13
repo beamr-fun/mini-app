@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "tunnel": "cloudflared tunnel --url http://localhost:5173"
+    "tunnel": "cloudflared tunnel --url http://localhost:5173",
+    "gen-key": "node scripts/genKey.js"
   },
   "dependencies": {
     "@farcaster/frame-sdk": "^0.0.63",

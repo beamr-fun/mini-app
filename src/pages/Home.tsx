@@ -1,9 +1,5 @@
 import { Button, Stack } from '@mantine/core';
-import {
-  gdaForwarderAbi,
-  gdaForwarderAddress,
-  superTokenAbi,
-} from '@sfpro/sdk/abi';
+import { gdaForwarderAbi, gdaPoolAbi, superTokenAbi } from '@sfpro/sdk/abi';
 import GDAAbi from '../abi/GDA.json';
 import SuperfluidAbi from '../abi/Superfluid.json';
 import {} from '@sfpro/sdk/config';
@@ -11,16 +7,15 @@ import { calculateFlowratePerSecond } from '@sfpro/sdk/util';
 import {
   prepareOperation,
   OPERATION_TYPE,
-  TimeUnit,
   TIME_UNIT,
 } from '@sfpro/sdk/constant';
 import { ADDR, ADDR_DEV } from '../const/addresses';
 import { optimismSepolia } from 'viem/chains';
 import { useAccount, useWalletClient } from 'wagmi';
 import { publicClient } from '../utils/connect';
-import { Abi, decodeEventLog, encodeFunctionData, erc20Abi } from 'viem';
+import { createWalletClient, encodeFunctionData, http } from 'viem';
 import { useToken } from '../hooks/useToken';
-import { network } from '../utils/setup';
+import { privateKeyToAccount } from 'viem/accounts';
 
 export const Home = () => {
   const { data: walletClient } = useWalletClient();
@@ -39,37 +34,7 @@ export const Home = () => {
     },
   });
 
-  const {} = useToken({
-    tokenAddress: ADDR.SUPER_TOKEN,
-    userAddress: address,
-    calls: {
-      balanceOf: true,
-      totalSupply: true,
-      name: true,
-      symbol: true,
-      decimals: true,
-    },
-    abi: superTokenAbi,
-  });
-
-  console.log('baseToken', baseToken);
-
-  // console.log('walletClient', walletClient);
-  // Are you logged in?
-
-  // If yes, check to see if you have a pool
-
-  // if yes, display pools (still display button to create more pools)
-  // if no, prompt to create a pool
-
-  // If yes, check to see if anyone is streaming to you
-
-  // if yes, display streams (still display link to leaderboard)
-  // if no, prompt to see leaderboard
-
-  // if no user pool,
-
-  const test = async () => {
+  const runTest = async () => {
     if (!walletClient) {
       console.error('Wallet client is not available');
       return;
@@ -80,11 +45,17 @@ export const Home = () => {
       return;
     }
 
+    // Pull private key from .env
+    const admin = privateKeyToAccount(
+      import.meta.env.VITE_PK_DELETE_BEFORE_PROD
+    );
+
+    // Run simulate to get the new pool address
     const { results } = await publicClient.simulateCalls({
-      account: walletClient.account.address,
+      account: admin.address,
       calls: [
         {
-          to: gdaForwarderAddress[optimismSepolia.id],
+          to: ADDR.GDA,
           abi: gdaForwarderAbi,
           functionName: 'createPool',
           args: [
@@ -93,76 +64,91 @@ export const Home = () => {
             {
               distributionFromAnyAddress: true,
               transferabilityForUnitsOwner: false,
-            }, // Pool ID
+            },
           ],
         },
       ],
     });
 
+    // extract the new pool address from the results
     const newAddress = results[0]?.result?.[1];
 
     if (!newAddress) {
       console.error('No new address returned from simulateCalls');
       return;
     }
+    console.log('newAddress', newAddress);
 
-    // const decodedLogs = results[0]?.logs?.map((log) => {
-    //   try {
-    //     return decodeEventLog({
-    //       abi: gdaForwarderAbi,
-    //       data: log.data,
-    //       topics: log.topics,
-    //     });
-    //   } catch (error) {
-    //     // Log might be from a different contract or unknown event
-    //     return { ...log, decoded: false };
-    //   }
-    // });
+    console.log('*********** ADMIN FUNCTIONS ***********');
 
-    // console.log('decodedLogs', decodedLogs);
+    const adminClient = createWalletClient({
+      chain: optimismSepolia,
+      transport: http(optimismSepolia.rpcUrls.default.http[0]),
+      account: admin,
+    });
 
-    // const
-    // const hash = await walletClient.writeContract({
-    //   address: ADDR.GDA,
-    //   abi: gdaForwarderAbi,
-    //   functionName: 'createPool',
-    //   args: [
-    //     ADDR_DEV.SUPER_TOKEN, // Super Token address
-    //     ADDR_DEV.ADMIN, // Admin address
-    //     {
-    //       distributionFromAnyAddress: true,
-    //       transferabilityForUnitsOwner: false,
-    //     }, // Pool ID
-    //   ],
-    // });
+    console.log('CREATE POOL');
 
-    // const approve = await walletClient.writeContract({
-    //   abi: erc20Abi,
-    //   address: ADDR.BASE_TOKEN,
-    //   functionName: 'approve',
-    //   args: [ADDR.SUPER_TOKEN, BigInt(10e18)],
-    // });
+    // Create the pool using the admin client
+    const hash = await adminClient.writeContract({
+      address: ADDR.GDA_FORWARDER,
+      abi: gdaForwarderAbi,
+      functionName: 'createPool',
+      args: [
+        ADDR.SUPER_TOKEN,
+        ADDR.ADMIN,
+        {
+          distributionFromAnyAddress: true,
+          transferabilityForUnitsOwner: false,
+        },
+      ],
+    });
 
-    console.log('ADDR.GDA_FORWARDER', ADDR.GDA_FORWARDER);
-    console.log('ADDR.ADMIN', ADDR.ADMIN);
+    console.log('hash', hash);
+    console.log('newAddress', newAddress);
+
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+    console.log('receipt', receipt);
+
+    console.log('UPDATE POOL');
+
+    const hash2 = await adminClient.writeContract({
+      abi: gdaPoolAbi,
+      functionName: 'updateMemberUnits',
+      address: newAddress,
+      args: ['0x756ee8B8E898D497043c2320d9909f1DD5a7077F', 5n],
+    });
+
+    console.log('hash2', hash2);
+
+    const receipt2 = await publicClient.waitForTransactionReceipt({
+      hash: hash2,
+    });
+
+    console.log('************ USER FUNCTION ************');
+
+    console.log('receipt2', receipt2);
+
+    const hasAllowance =
+      baseToken?.allowance && baseToken.allowance > BigInt(1e18);
+
+    if (!hasAllowance) {
+      console.error('Insufficient allowance for the super token upgrade');
+      return;
+    }
+
+    console.log('hasAllowance', hasAllowance);
+    console.log('allowance', baseToken?.allowance);
+
+    const flowratePerSecond = calculateFlowratePerSecond({
+      amountWei: BigInt(1e18),
+      timeUnit: TIME_UNIT.month,
+    });
+
+    console.log('flowRate', flowratePerSecond);
 
     const operations = [
-      prepareOperation({
-        operationType: OPERATION_TYPE.SIMPLE_FORWARD_CALL,
-        target: ADDR.GDA,
-        data: encodeFunctionData({
-          abi: gdaForwarderAbi,
-          functionName: 'createPool',
-          args: [
-            ADDR.SUPER_TOKEN,
-            ADDR.ADMIN,
-            {
-              distributionFromAnyAddress: true,
-              transferabilityForUnitsOwner: false,
-            },
-          ],
-        }),
-      }),
       prepareOperation({
         operationType: OPERATION_TYPE.SUPERTOKEN_UPGRADE,
         target: ADDR.SUPER_TOKEN,
@@ -176,66 +162,42 @@ export const Home = () => {
         operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
         target: ADDR.GDA,
         data: encodeFunctionData({
-          abi: gdaForwarderAbi,
+          abi: GDAAbi,
           functionName: 'distributeFlow',
           args: [
             ADDR.SUPER_TOKEN,
             address,
             newAddress,
-            calculateFlowratePerSecond({
-              amountWei: BigInt(1e18),
-              timeUnit: TIME_UNIT.month,
-            }),
+            flowratePerSecond,
             '0x',
           ],
         }),
       }),
     ];
 
-    const hash = await walletClient.writeContract({
+    console.log('BATCH CALL');
+    console.log('operations', operations);
+
+    const hash3 = await walletClient.writeContract({
       abi: SuperfluidAbi,
       address: ADDR.SUPER_FLUID,
       functionName: 'batchCall',
       args: [operations],
     });
 
-    // const hash2 = await walletClient.writeContract({
-    //   abi: GDAAbi,
-    //   functionName: 'distributeFlow',
-    //   address: ADDR.GDA_FORWARDER,
+    console.log('hash3', hash3);
 
-    //   args: [
-    //     ADDR.SUPER_TOKEN,
-    //     address,
-    //     '0xD6E2320592bf96f0FC273dE1750A6b2c77ecEd6E',
-    //     calculateFlowratePerSecond({
-    //       amountWei: BigInt(1e18),
-    //       timeUnit: TIME_UNIT.month,
-    //     }),
-    //     '0x',
-    //   ],
-    // });
+    const receipt3 = await publicClient.waitForTransactionReceipt({
+      hash: hash3,
+    });
 
-    // // const hash = await walletClient.writeContract({
-
-    // // });
+    console.log('receipt3', receipt3);
   };
-
-  // const hash = await walletClient.writeContract({
-  //   address: gdaForwarderAddress[mainnet.id],
-  //   abi: gdaForwarderAbi,
-  //   functionName: 'createPool',
-  //   args: [
-  //     '0x...', // Super Token address
-  //     account.address, // Admin address
-  //     keccak256(toHex('pool1')), // Pool ID
-  //   ],
-  // });
 
   return (
     <Stack gap="52">
       <Stack>Campaigns</Stack>
-      <Button onClick={test}>Test</Button>
+      <Button onClick={runTest}>Test</Button>
     </Stack>
   );
 };
