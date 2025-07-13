@@ -1,7 +1,6 @@
 import { http, createConfig } from 'wagmi';
 import { base, optimismSepolia } from 'wagmi/chains';
-import { farcasterMiniApp as miniAppConnector } from '@farcaster/miniapp-wagmi-connector';
-import { Chain, createPublicClient } from 'viem';
+import { createPublicClient } from 'viem';
 import { isDev, network, RPC } from './setup';
 
 export const config = createConfig({
@@ -10,7 +9,7 @@ export const config = createConfig({
     [optimismSepolia.id]: http(),
     [base.id]: http(),
   },
-  connectors: [miniAppConnector()],
+  // connectors: [miniAppConnector()],
 });
 
 export const publicClient = createPublicClient({

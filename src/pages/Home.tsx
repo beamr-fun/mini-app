@@ -1,8 +1,7 @@
-import { Button, Stack } from '@mantine/core';
+import { Box, Button, Stack, Text } from '@mantine/core';
 import { gdaForwarderAbi, gdaPoolAbi, superTokenAbi } from '@sfpro/sdk/abi';
 import GDAAbi from '../abi/GDA.json';
 import SuperfluidAbi from '../abi/Superfluid.json';
-import {} from '@sfpro/sdk/config';
 import { calculateFlowratePerSecond } from '@sfpro/sdk/util';
 import {
   prepareOperation,
@@ -13,7 +12,12 @@ import { ADDR, ADDR_DEV } from '../const/addresses';
 import { optimismSepolia } from 'viem/chains';
 import { useAccount, useWalletClient } from 'wagmi';
 import { publicClient } from '../utils/connect';
-import { createWalletClient, encodeFunctionData, http } from 'viem';
+import {
+  createWalletClient,
+  encodeFunctionData,
+  formatUnits,
+  http,
+} from 'viem';
 import { useToken } from '../hooks/useToken';
 import { privateKeyToAccount } from 'viem/accounts';
 
@@ -34,6 +38,20 @@ export const Home = () => {
     },
   });
 
+  const { data: wrappedToken } = useToken({
+    tokenAddress: ADDR.SUPER_TOKEN,
+    userAddress: address,
+    // spender: ADDR.SUPER_TOKEN,
+    calls: {
+      balanceOf: true,
+      totalSupply: true,
+      name: true,
+      symbol: true,
+      decimals: true,
+      // allowance: true,
+    },
+  });
+
   const runTest = async () => {
     if (!walletClient) {
       console.error('Wallet client is not available');
@@ -46,6 +64,7 @@ export const Home = () => {
     }
 
     // Pull private key from .env
+    // THIS IS ONLY FOR TEST
     const admin = privateKeyToAccount(
       import.meta.env.VITE_PK_DELETE_BEFORE_PROD
     );
@@ -55,7 +74,7 @@ export const Home = () => {
       account: admin.address,
       calls: [
         {
-          to: ADDR.GDA,
+          to: ADDR.GDA_FORWARDER,
           abi: gdaForwarderAbi,
           functionName: 'createPool',
           args: [
@@ -194,10 +213,55 @@ export const Home = () => {
     console.log('receipt3', receipt3);
   };
 
+  const approve = async () => {
+    if (!walletClient) {
+      console.error('Wallet client is not available');
+      return;
+    }
+
+    if (!address) {
+      console.error('No address found in account');
+      return;
+    }
+
+    const hash = await walletClient.writeContract({
+      address: ADDR.BASE_TOKEN,
+      abi: superTokenAbi,
+      functionName: 'approve',
+      args: [ADDR.SUPER_TOKEN, BigInt(10e18)],
+    });
+
+    console.log('Approval hash:', hash);
+  };
+
   return (
-    <Stack gap="52">
-      <Stack>Campaigns</Stack>
-      <Button onClick={runTest}>Test</Button>
+    <Stack>
+      <Button onClick={runTest} mb="40">
+        Run Test
+      </Button>
+      <Box>
+        <Text>Underlying Token: {baseToken?.symbol || ''}</Text>
+        <Text>
+          Balance:{' '}
+          {baseToken?.balanceOf && baseToken?.decimals
+            ? formatUnits(baseToken?.balanceOf, baseToken?.decimals)
+            : '0'}
+        </Text>
+        <Text mb="lg">
+          Amt Approved:{' '}
+          {baseToken?.allowance && baseToken?.decimals
+            ? formatUnits(baseToken?.allowance, baseToken?.decimals)
+            : '0'}{' '}
+        </Text>
+        <Text>Wrapped Token: {wrappedToken?.symbol || ''}</Text>
+        <Text>
+          Balance:{' '}
+          {wrappedToken?.balanceOf && wrappedToken?.decimals
+            ? formatUnits(wrappedToken?.balanceOf, wrappedToken?.decimals)
+            : '0'}
+        </Text>
+      </Box>
+      <Button onClick={approve}>Approve 10</Button>
     </Stack>
   );
 };

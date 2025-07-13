@@ -9,10 +9,10 @@ export const Login = () => {
   const { isConnected, address } = useAccount();
   const { connect, connectors } = useConnect();
 
+  console.log('connectors', connectors);
+
   // sdf
   const { user, isMiniApp } = useMiniAppContext();
-
-  console.log('user', user);
 
   if (user && address && isMiniApp) {
     return (
