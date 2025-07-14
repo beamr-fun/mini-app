@@ -29,66 +29,76 @@ export function useSSE<T>({
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectAttemptsRef = useRef(0);
 
-  const connect = useCallback(
-    (url: string) => {
+  const connect = useCallback(() => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+
+    const eventSource = new EventSource(url);
+
+    eventSourceRef.current = eventSource;
+
+    eventSource.onopen = () => {
+      setIsConnected(true);
+      console.log('OPEN');
+      setStatus(Status.Connected);
+      reconnectAttemptsRef.current = 0;
+    };
+
+    eventSource.onmessage = (event) => {
+      try {
+        console.log('MESSAGE');
+
+        console.log('event', event);
+        const parsed = JSON.parse(event.data);
+        // console.log('ev', ev);
+        handleMessage(parsed);
+      } catch (err: any) {
+        console.error('Error parsing SSE message:', err);
+        setError(err.message);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.log('ERROR');
+
+      setError('An error occurred while connecting to the SSE stream.');
+      setIsConnected(false);
+      setStatus(Status.Error);
+
+      if (eventSource.readyState === EventSource.CLOSED) {
+        handleReconnect(url);
+      }
+    };
+
+    return () => {
       if (eventSourceRef.current) {
         eventSourceRef.current.close();
-      }
-
-      const eventSource = new EventSource(url);
-
-      eventSourceRef.current = eventSource;
-
-      eventSource.onopen = () => {
-        setIsConnected(true);
-        setStatus(Status.Connected);
-        reconnectAttemptsRef.current = 0;
-      };
-
-      eventSource.onmessage = (event) => {
-        try {
-          const parsed = JSON.parse(event.data);
-
-          handleMessage(parsed);
-        } catch (err: any) {
-          console.error('Error parsing SSE message:', err);
-          setError(err.message);
-        }
-      };
-
-      eventSource.onerror = (err) => {
-        setError('An error occurred while connecting to the SSE stream.');
         setIsConnected(false);
-        setStatus(Status.Error);
-
-        if (eventSource.readyState === EventSource.CLOSED) {
-          handleReconnect(url);
-        }
-      };
-
-      return () => {
-        if (eventSourceRef.current) {
-          eventSourceRef.current.close();
-          setIsConnected(false);
-          setStatus(Status.Disconnected);
-          eventSourceRef.current = null;
-        }
-      };
-    },
-    [url]
-  );
+        setStatus(Status.Disconnected);
+        eventSourceRef.current = null;
+      }
+    };
+  }, [url]);
 
   const handleMessage = useCallback((parsed: any) => {
     switch (parsed.type) {
       case 'connected':
+        console.log('CONNECTED', parsed.data);
         setIsConnected(true);
-        setData(validator ? validator(parsed.data) : parsed.data);
         break;
       case 'update':
+        console.log('UPDATE', parsed.data);
         if (validator) {
           parsed.data = validator(parsed.data);
         }
         setData(parsed.data);
+        break;
+      case 'server_error':
+        setError(parsed.error);
+        setStatus(Status.Error);
+        setIsConnected(false);
+        // handleReconnect(url);
         break;
       default:
         console.warn('Unhandled SSE message type:', parsed.type);
@@ -98,6 +108,7 @@ export function useSSE<T>({
 
   const handleReconnect = useCallback(
     (url: string) => {
+      console.log('ATTEMPT_RECONNECT');
       if (reconnectAttemptsRef.current < maxReconnectAttempts) {
         reconnectAttemptsRef.current++;
         const delay =
@@ -106,7 +117,7 @@ export function useSSE<T>({
         setStatus(Status.Reconnecting);
 
         setTimeout(() => {
-          connect(url);
+          connect();
         }, delay);
       } else {
         setStatus(Status.Error);
@@ -127,7 +138,7 @@ export function useSSE<T>({
 
   useEffect(() => {
     if (auto) {
-      connect(url);
+      connect();
     }
 
     return () => {

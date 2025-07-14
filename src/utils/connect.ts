@@ -6,7 +6,7 @@ import { isDev, network, RPC } from './setup';
 export const config = createConfig({
   chains: isDev ? [optimismSepolia] : [base],
   transports: {
-    [optimismSepolia.id]: http(),
+    [optimismSepolia.id]: http(RPC),
     [base.id]: http(),
   },
   // connectors: [miniAppConnector()],

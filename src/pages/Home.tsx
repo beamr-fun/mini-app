@@ -13,6 +13,7 @@ import { optimismSepolia } from 'viem/chains';
 import { useAccount, useWalletClient } from 'wagmi';
 import { publicClient } from '../utils/connect';
 import {
+  Address,
   createWalletClient,
   encodeFunctionData,
   formatUnits,
@@ -20,10 +21,19 @@ import {
 } from 'viem';
 import { useToken } from '../hooks/useToken';
 import { privateKeyToAccount } from 'viem/accounts';
+import { API_URL } from '../utils/setup';
+import { useSSE } from '../hooks/useSSE';
 
 export const Home = () => {
   const { data: walletClient } = useWalletClient();
   const { address } = useAccount();
+  const { connect, data } = useSSE<{
+    status: string;
+    poolAddress: Address | undefined;
+  }>({
+    url: `${API_URL}/pool/init/${address}`,
+    auto: false,
+  });
   const { data: baseToken } = useToken({
     tokenAddress: ADDR.BASE_TOKEN,
     userAddress: address,
@@ -51,6 +61,8 @@ export const Home = () => {
       // allowance: true,
     },
   });
+
+  console.log('data', data);
 
   const runTest = async () => {
     if (!walletClient) {
@@ -115,7 +127,7 @@ export const Home = () => {
       functionName: 'createPool',
       args: [
         ADDR.SUPER_TOKEN,
-        ADDR.ADMIN,
+        adminClient.account.address,
         {
           distributionFromAnyAddress: true,
           transferabilityForUnitsOwner: false,
@@ -194,13 +206,32 @@ export const Home = () => {
       }),
     ];
 
-    console.log('BATCH CALL');
-    console.log('operations', operations);
+    const simulation = await publicClient.simulateContract({
+      abi: SuperfluidAbi,
+      account: address,
+      address: ADDR.SUPER_FLUID,
+      functionName: 'batchCall',
+
+      args: [operations],
+    });
+
+    console.log('simulation', simulation);
+
+    const gas = await publicClient.estimateContractGas({
+      abi: SuperfluidAbi,
+      address: ADDR.SUPER_FLUID,
+      functionName: 'batchCall',
+      args: [operations],
+      account: address,
+    });
+
+    const gasWithBuffer = BigInt(Math.floor(Number(gas) * 1.2)); // Add a buffer of 20% to the estimated gas
 
     const hash3 = await walletClient.writeContract({
       abi: SuperfluidAbi,
       address: ADDR.SUPER_FLUID,
       functionName: 'batchCall',
+      gas: gasWithBuffer,
       args: [operations],
     });
 
@@ -228,17 +259,34 @@ export const Home = () => {
       address: ADDR.BASE_TOKEN,
       abi: superTokenAbi,
       functionName: 'approve',
+
       args: [ADDR.SUPER_TOKEN, BigInt(10e18)],
     });
 
     console.log('Approval hash:', hash);
   };
 
+  const testSSE = async () => {
+    if (!walletClient) {
+      console.error('Wallet client is not available');
+      return;
+    }
+
+    if (!address) {
+      console.error('No address found in account');
+      return;
+    }
+
+    connect();
+  };
+
   return (
     <Stack>
-      <Button onClick={runTest} mb="40">
-        Run Test
-      </Button>
+      <Box mb="40">
+        <Button onClick={testSSE}>Run Test</Button>
+        {data?.status && <Text fz="sm">{data?.status}</Text>}
+      </Box>
+
       <Box>
         <Text>Underlying Token: {baseToken?.symbol || ''}</Text>
         <Text>
