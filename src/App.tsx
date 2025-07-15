@@ -8,17 +8,11 @@ import { useInputState } from '@mantine/hooks';
 import { Login } from './components/Login';
 import { ClientRoutes } from './Routes';
 
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { SOCKET_URL } from './utils/setup';
+import { useAccount } from 'wagmi';
 
 export default function App() {
-  const [addressStr, setAddressStr] = useInputState('');
-  // const [io, setIO] = useState<Socket | null>(null);
-  const [amount, setAmount] = useInputState(0);
-  const [isLoading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<any>([]);
-  const client = useQueryClient();
-
   // const { data, status } = useSSE({ url: 'http://localhost:3000/pool' });
 
   // const { data, refetch } = useQuery({
@@ -56,35 +50,6 @@ export default function App() {
     // setTimeout(() => {
     //   sdk.actions.addMiniApp();
     // }, 2000);
-  }, []);
-
-  useEffect(() => {
-    const socket = io(SOCKET_URL, {
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      autoConnect: true,
-      transports: ['websocket'],
-    });
-
-    socket.on('connect', () => {
-      console.log('Socket connected:', socket.id);
-    });
-
-    socket.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
-    });
-
-    socket.on('error', (error) => {
-      console.error('Socket error:', error);
-    });
-
-    () => {
-      if (socket) {
-        console.log('Disconnecting socket...');
-        socket.disconnect();
-      }
-    };
   }, []);
 
   // const updateShares = async () => {
