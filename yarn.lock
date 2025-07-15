@@ -5188,7 +5188,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"socket.io-client@npm:^4.5.1":
+"socket.io-client@npm:^4.5.1, socket.io-client@npm:^4.8.1":
   version: 4.8.1
   resolution: "socket.io-client@npm:4.8.1"
   dependencies:
@@ -5898,6 +5898,7 @@ __metadata:
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
     react-router-dom: "npm:^7.6.3"
+    socket.io-client: "npm:^4.8.1"
     typescript: "npm:^5.8.3"
     viem: "npm:^2.31.4"
     vite: "npm:^6.3.5"

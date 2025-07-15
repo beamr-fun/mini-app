@@ -27,7 +27,7 @@ import { useSSE } from '../hooks/useSSE';
 export const Home = () => {
   const { data: walletClient } = useWalletClient();
   const { address } = useAccount();
-  const { connect, data } = useSSE<{
+  const { connect, data, error } = useSSE<{
     status: string;
     poolAddress: Address | undefined;
   }>({
@@ -61,8 +61,6 @@ export const Home = () => {
       // allowance: true,
     },
   });
-
-  console.log('data', data);
 
   const runTest = async () => {
     if (!walletClient) {
@@ -284,7 +282,12 @@ export const Home = () => {
     <Stack>
       <Box mb="40">
         <Button onClick={testSSE}>Run Test</Button>
-        {data?.status && <Text fz="sm">{data?.status}</Text>}
+        {data?.status && !error && <Text fz="sm">{data?.status}</Text>}
+        {error && (
+          <Text fz="sm" c="red">
+            Error: {error}
+          </Text>
+        )}
       </Box>
 
       <Box>

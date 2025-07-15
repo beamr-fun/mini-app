@@ -5,13 +5,15 @@ import { useEffect, useState } from 'react';
 import { sdk } from '@farcaster/frame-sdk';
 import { useQueryClient } from '@tanstack/react-query';
 import { useInputState } from '@mantine/hooks';
-import { isAddress } from 'viem';
 import { Login } from './components/Login';
 import { ClientRoutes } from './Routes';
-import { useSSE } from './hooks/useSSE';
+
+import { io } from 'socket.io-client';
+import { SOCKET_URL } from './utils/setup';
 
 export default function App() {
   const [addressStr, setAddressStr] = useInputState('');
+  // const [io, setIO] = useState<Socket | null>(null);
   const [amount, setAmount] = useInputState(0);
   const [isLoading, setLoading] = useState(false);
   const [messages, setMessages] = useState<any>([]);
@@ -56,41 +58,70 @@ export default function App() {
     // }, 2000);
   }, []);
 
-  const updateShares = async () => {
-    try {
-      if (!isAddress(addressStr)) {
-        alert('Please provide a valid address');
-        return;
+  useEffect(() => {
+    const socket = io(SOCKET_URL, {
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      autoConnect: true,
+      transports: ['websocket'],
+    });
+
+    socket.on('connect', () => {
+      console.log('Socket connected:', socket.id);
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.log('Socket disconnected:', reason);
+    });
+
+    socket.on('error', (error) => {
+      console.error('Socket error:', error);
+    });
+
+    () => {
+      if (socket) {
+        console.log('Disconnecting socket...');
+        socket.disconnect();
       }
+    };
+  }, []);
 
-      if (!amount || isNaN(amount) || amount <= 0) {
-        alert('Please provide a valid amount');
-        return;
-      }
+  // const updateShares = async () => {
+  //   try {
+  //     if (!isAddress(addressStr)) {
+  //       alert('Please provide a valid address');
+  //       return;
+  //     }
 
-      const response = await fetch(
-        `http://localhost:3000/send/${addressStr}/${amount}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+  //     if (!amount || isNaN(amount) || amount <= 0) {
+  //       alert('Please provide a valid amount');
+  //       return;
+  //     }
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+  //     const response = await fetch(
+  //       `http://localhost:3000/send/${addressStr}/${amount}`,
+  //       {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //       }
+  //     );
 
-      const data = await response.json();
+  //     if (!response.ok) {
+  //       throw new Error('Network response was not ok');
+  //     }
 
-      console.log('Response data:', data);
+  //     const data = await response.json();
 
-      client.setQueryData(['members'], () => data.members);
-    } catch (error) {
-      console.error('Error updating shares:', error);
-    }
-  };
+  //     console.log('Response data:', data);
+
+  //     client.setQueryData(['members'], () => data.members);
+  //   } catch (error) {
+  //     console.error('Error updating shares:', error);
+  //   }
+  // };
 
   return (
     <MantineProvider theme={theme}>

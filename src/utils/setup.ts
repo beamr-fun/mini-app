@@ -16,3 +16,7 @@ export const API_URL = isAPIDev
 export const API_KEY = isAPIDev
   ? import.meta.env.VITE_API_KEY_DEV
   : import.meta.env.VITE_API_KEY_PROD;
+
+export const SOCKET_URL = isDev
+  ? import.meta.env.VITE_SOCKET_DEV
+  : import.meta.env.VITE_SOCKET_PROD;

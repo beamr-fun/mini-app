@@ -60,13 +60,21 @@ export function useSSE<T>({
     };
 
     eventSource.onerror = (err) => {
-      console.log('ERROR');
+      try {
+        console.error('SSE Error:', err);
+        // const parsedError = JSON.parse(err.data);
+      } catch (error) {
+        setError('An error occurred while connecting to the SSE stream.');
+        setIsConnected(false);
+        setStatus(Status.Error);
+      }
 
-      setError('An error occurred while connecting to the SSE stream.');
-      setIsConnected(false);
-      setStatus(Status.Error);
+      if (!auto) {
+        eventSource.close();
+        eventSourceRef.current = null;
+      }
 
-      if (eventSource.readyState === EventSource.CLOSED) {
+      if (eventSource.readyState === EventSource.CLOSED && auto) {
         handleReconnect(url);
       }
     };
@@ -95,7 +103,7 @@ export function useSSE<T>({
         setData(parsed.data);
         break;
       case 'server_error':
-        setError(parsed.error);
+        setError(parsed.message);
         setStatus(Status.Error);
         setIsConnected(false);
         // handleReconnect(url);
