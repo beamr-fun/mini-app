@@ -12,7 +12,7 @@ type UserContextType = {
   socket?: Socket;
 };
 
-const UserContext = createContext<UserContextType>({
+export const UserContext = createContext<UserContextType>({
   isSocketConnected: false,
   isWalletConnected: false,
   address: undefined,
