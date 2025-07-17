@@ -12,7 +12,7 @@ export const useUser = () => {
 
   return {
     ...userContext,
-    user: miniAppContext.user,
+    userFC: miniAppContext.user,
     isMiniApp: miniAppContext.isMiniApp,
   };
 };

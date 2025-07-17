@@ -11,6 +11,6 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['applies-name-programme-bases.trycloudflare.com'],
+    allowedHosts: ['frozen-practices-infrastructure-at.trycloudflare.com'],
   },
 });

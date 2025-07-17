@@ -51,6 +51,7 @@ export const UserProvider = ({
     });
 
     setSocket(socket);
+    setIsSocketConnected(true);
 
     () => {
       if (socket) {
@@ -63,9 +64,14 @@ export const UserProvider = ({
   useEffect(() => {
     if (!address || !socket) return;
 
-    console.log('Address changed:', address);
-
     socket.emit('wallet:connected', { address });
+
+    socket.on('wallet:connected', (data) => {
+      setIsWalletConnected(true);
+      console.log('Wallet connected:', data);
+    });
+
+    socket.on('wallet:disconnected', (data) => {});
   }, [address, socket]);
 
   return (

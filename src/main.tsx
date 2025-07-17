@@ -6,6 +6,7 @@ import { WagmiProvider } from 'wagmi';
 import { config } from './utils/connect.ts';
 import { MiniAppProvider } from './context/MiniAppContext.tsx';
 import { BrowserRouter } from 'react-router-dom';
+import { UserProvider } from './context/UserContext.tsx';
 
 const queryClient = new QueryClient();
 
@@ -14,9 +15,11 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <MiniAppProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <UserProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </UserProvider>
         </MiniAppProvider>
       </QueryClientProvider>
     </WagmiProvider>

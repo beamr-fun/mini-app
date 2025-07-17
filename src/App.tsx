@@ -1,48 +1,18 @@
 import '@mantine/core/styles.css';
 import { Flex, Group, MantineProvider } from '@mantine/core';
 import { theme } from './theme';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { sdk } from '@farcaster/frame-sdk';
-import { useQueryClient } from '@tanstack/react-query';
-import { useInputState } from '@mantine/hooks';
 import { Login } from './components/Login';
 import { ClientRoutes } from './Routes';
 
 import { io, Socket } from 'socket.io-client';
 import { SOCKET_URL } from './utils/setup';
 import { useAccount } from 'wagmi';
+import { useUser } from './hooks/useUser';
 
 export default function App() {
-  // const { data, status } = useSSE({ url: 'http://localhost:3000/pool' });
-
-  // const { data, refetch } = useQuery({
-  //   queryKey: ['members'],
-  //   queryFn: async () => {
-  //     const response = await fetch('http://localhost:3000/members');
-
-  //     if (!response.ok) {
-  //       throw new Error('Network response was not ok');
-  //     }
-  //     const data = await response.json();
-
-  //     return data.members;
-  //   },
-  // });
-
-  // useEffect(() => {
-  //   // const data = fetch('http://localhost:3000/test');
-
-  //   console.log('Connecting to SSE...');
-  //   const eventSource = new EventSource(' http://localhost:3000/stream');
-
-  //   eventSource.onmessage = (event) => {
-  //     const data = JSON.parse(event.data);
-
-  //     console.log('data', data);
-
-  //     setMessages((prevMessages: any) => data.data.likes || []);
-  //   };
-  // }, []);
+  const { isSocketConnected } = useUser();
 
   useEffect(() => {
     sdk.actions.ready();
@@ -98,35 +68,4 @@ export default function App() {
       </Flex>
     </MantineProvider>
   );
-}
-{
-  /* <Box>
-            <Title fz="h2" mb="md">
-              Members
-            </Title>
-            <Stack gap="md" mb="xl">
-              {data?.map((member: any) => (
-                <Group key={member.account}>
-                  <Text>{truncateAddress(member.account)}</Text>
-                  <Text>{member.units}</Text>
-                </Group>
-              ))}
-            </Stack>
-            <Button onClick={() => refetch()}>Refetch</Button>
-          </Box> */
-}
-{
-  /* <Stack>
-            <Title fz="h2">Update Shares</Title>
-            <TextInput
-              placeholder="0x..."
-              label="address"
-              value={addressStr}
-              onChange={setAddressStr}
-            />
-            <TextInput label="amount" value={amount} onChange={setAmount} />
-            <Button onClick={updateShares} loading={isLoading}>
-              Add Shares
-            </Button>
-          </Stack> */
 }
