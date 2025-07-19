@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "tunnel": "cloudflared tunnel --url http://localhost:5173",
-    "gen-key": "node scripts/genKey.js"
+    "gen-key": "node scripts/genKey.js",
+    "sync-types": "node scripts/copyTypes.js"
   },
   "dependencies": {
     "@farcaster/frame-sdk": "^0.0.63",
