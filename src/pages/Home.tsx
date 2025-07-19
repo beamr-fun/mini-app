@@ -1,39 +1,29 @@
 import { Box, Button, Stack, Text } from '@mantine/core';
-import { gdaForwarderAbi, gdaPoolAbi, superTokenAbi } from '@sfpro/sdk/abi';
-import GDAAbi from '../abi/GDA.json';
-import SuperfluidAbi from '../abi/Superfluid.json';
-import { calculateFlowratePerSecond } from '@sfpro/sdk/util';
-import {
-  prepareOperation,
-  OPERATION_TYPE,
-  TIME_UNIT,
-} from '@sfpro/sdk/constant';
-import { ADDR, ADDR_DEV } from '../const/addresses';
-import { optimismSepolia } from 'viem/chains';
+import { ADDR } from '../const/addresses';
 import { useAccount, useWalletClient } from 'wagmi';
-import { publicClient } from '../utils/connect';
-import {
-  Address,
-  createWalletClient,
-  encodeFunctionData,
-  formatUnits,
-  http,
-} from 'viem';
+import { Address, formatUnits } from 'viem';
 import { useToken } from '../hooks/useToken';
-import { privateKeyToAccount } from 'viem/accounts';
 import { API_URL } from '../utils/setup';
 import { useSSE } from '../hooks/useSSE';
+import { useEffect, useState } from 'react';
+import { useUser } from '../hooks/useUser';
 
 export const Home = () => {
-  const { data: walletClient } = useWalletClient();
   const { address } = useAccount();
-  const { connect, data, error } = useSSE<{
+  const { socket } = useUser();
+  const [initData, setInitData] = useState<{
     status: string;
     poolAddress: Address | undefined;
-  }>({
-    url: `${API_URL}/pool/init/${address}`,
-    auto: false,
-  });
+    error: string | null;
+  } | null>(null);
+
+  // const { connect, data, error } = useSSE<{
+  //   status: string;
+  //   poolAddress: Address | undefined;
+  // }>({
+  //   url: `${API_URL}/pool/init/${address}`,
+  //   auto: false,
+  // });
   const { data: baseToken } = useToken({
     tokenAddress: ADDR.BASE_TOKEN,
     userAddress: address,
@@ -62,230 +52,262 @@ export const Home = () => {
     },
   });
 
-  const runTest = async () => {
-    if (!walletClient) {
-      console.error('Wallet client is not available');
-      return;
-    }
-
+  const testInitPool = async () => {
     if (!address) {
       console.error('No address found in account');
       return;
     }
 
-    // Pull private key from .env
-    // THIS IS ONLY FOR TEST
-    const admin = privateKeyToAccount(
-      import.meta.env.VITE_PK_DELETE_BEFORE_PROD
+    const url = `${API_URL}/pool/init/${address}`;
+
+    try {
+      const res = await fetch(url, { method: 'POST' });
+
+      const json = await res.json();
+    } catch (error) {
+      console.error('Error initializing pool:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (!socket || !address) return;
+
+    socket.on(
+      'pool:initialize',
+      (data: {
+        userAddress: Address;
+        status: string;
+        newPoolAddress: Address | undefined;
+        error: string | null;
+      }) => {
+        console.log('data', data);
+        if (data.userAddress !== address) return;
+
+        setInitData({
+          status: data.status,
+          poolAddress: data.newPoolAddress,
+          error: data.error,
+        });
+      }
     );
 
-    // Run simulate to get the new pool address
-    const { results } = await publicClient.simulateCalls({
-      account: admin.address,
-      calls: [
-        {
-          to: ADDR.GDA_FORWARDER,
-          abi: gdaForwarderAbi,
-          functionName: 'createPool',
-          args: [
-            ADDR_DEV.SUPER_TOKEN, // Super Token address
-            ADDR_DEV.ADMIN, // Admin address
-            {
-              distributionFromAnyAddress: true,
-              transferabilityForUnitsOwner: false,
-            },
-          ],
-        },
-      ],
-    });
+    () => {
+      socket.off('pool:initialize');
+    };
+  }, [socket, address]);
 
-    // extract the new pool address from the results
-    const newAddress = results[0]?.result?.[1];
+  // const runTest = async () => {
+  //   if (!walletClient) {
+  //     console.error('Wallet client is not available');
+  //     return;
+  //   }
 
-    if (!newAddress) {
-      console.error('No new address returned from simulateCalls');
-      return;
-    }
-    console.log('newAddress', newAddress);
+  //   if (!address) {
+  //     console.error('No address found in account');
+  //     return;
+  //   }
 
-    console.log('*********** ADMIN FUNCTIONS ***********');
+  //   // Pull private key from .env
+  //   // THIS IS ONLY FOR TEST
+  //   const admin = privateKeyToAccount(
+  //     import.meta.env.VITE_PK_DELETE_BEFORE_PROD
+  //   );
 
-    const adminClient = createWalletClient({
-      chain: optimismSepolia,
-      transport: http(optimismSepolia.rpcUrls.default.http[0]),
-      account: admin,
-    });
+  //   // Run simulate to get the new pool address
+  //   const { results } = await publicClient.simulateCalls({
+  //     account: admin.address,
+  //     calls: [
+  //       {
+  //         to: ADDR.GDA_FORWARDER,
+  //         abi: gdaForwarderAbi,
+  //         functionName: 'createPool',
+  //         args: [
+  //           ADDR_DEV.SUPER_TOKEN, // Super Token address
+  //           ADDR_DEV.ADMIN, // Admin address
+  //           {
+  //             distributionFromAnyAddress: true,
+  //             transferabilityForUnitsOwner: false,
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //   });
 
-    console.log('CREATE POOL');
+  //   // extract the new pool address from the results
+  //   const newAddress = results[0]?.result?.[1];
 
-    // Create the pool using the admin client
-    const hash = await adminClient.writeContract({
-      address: ADDR.GDA_FORWARDER,
-      abi: gdaForwarderAbi,
-      functionName: 'createPool',
-      args: [
-        ADDR.SUPER_TOKEN,
-        adminClient.account.address,
-        {
-          distributionFromAnyAddress: true,
-          transferabilityForUnitsOwner: false,
-        },
-      ],
-    });
+  //   if (!newAddress) {
+  //     console.error('No new address returned from simulateCalls');
+  //     return;
+  //   }
+  //   console.log('newAddress', newAddress);
 
-    console.log('hash', hash);
-    console.log('newAddress', newAddress);
+  //   console.log('*********** ADMIN FUNCTIONS ***********');
 
-    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  //   const adminClient = createWalletClient({
+  //     chain: optimismSepolia,
+  //     transport: http(optimismSepolia.rpcUrls.default.http[0]),
+  //     account: admin,
+  //   });
 
-    console.log('receipt', receipt);
+  //   console.log('CREATE POOL');
 
-    console.log('UPDATE POOL');
+  //   // Create the pool using the admin client
+  //   const hash = await adminClient.writeContract({
+  //     address: ADDR.GDA_FORWARDER,
+  //     abi: gdaForwarderAbi,
+  //     functionName: 'createPool',
+  //     args: [
+  //       ADDR.SUPER_TOKEN,
+  //       adminClient.account.address,
+  //       {
+  //         distributionFromAnyAddress: true,
+  //         transferabilityForUnitsOwner: false,
+  //       },
+  //     ],
+  //   });
 
-    const hash2 = await adminClient.writeContract({
-      abi: gdaPoolAbi,
-      functionName: 'updateMemberUnits',
-      address: newAddress,
-      args: ['0x756ee8B8E898D497043c2320d9909f1DD5a7077F', 5n],
-    });
+  //   console.log('hash', hash);
+  //   console.log('newAddress', newAddress);
 
-    console.log('hash2', hash2);
+  //   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-    const receipt2 = await publicClient.waitForTransactionReceipt({
-      hash: hash2,
-    });
+  //   console.log('receipt', receipt);
 
-    console.log('************ USER FUNCTION ************');
+  //   console.log('UPDATE POOL');
 
-    console.log('receipt2', receipt2);
+  //   const hash2 = await adminClient.writeContract({
+  //     abi: gdaPoolAbi,
+  //     functionName: 'updateMemberUnits',
+  //     address: newAddress,
+  //     args: ['0x756ee8B8E898D497043c2320d9909f1DD5a7077F', 5n],
+  //   });
 
-    const hasAllowance =
-      baseToken?.allowance && baseToken.allowance > BigInt(1e18);
+  //   console.log('hash2', hash2);
 
-    if (!hasAllowance) {
-      console.error('Insufficient allowance for the super token upgrade');
-      return;
-    }
+  //   const receipt2 = await publicClient.waitForTransactionReceipt({
+  //     hash: hash2,
+  //   });
 
-    console.log('hasAllowance', hasAllowance);
-    console.log('allowance', baseToken?.allowance);
+  //   console.log('************ USER FUNCTION ************');
 
-    const flowratePerSecond = calculateFlowratePerSecond({
-      amountWei: BigInt(1e18),
-      timeUnit: TIME_UNIT.month,
-    });
+  //   console.log('receipt2', receipt2);
 
-    console.log('flowRate', flowratePerSecond);
+  //   const hasAllowance =
+  //     baseToken?.allowance && baseToken.allowance > BigInt(1e18);
 
-    const operations = [
-      prepareOperation({
-        operationType: OPERATION_TYPE.SUPERTOKEN_UPGRADE,
-        target: ADDR.SUPER_TOKEN,
-        data: encodeFunctionData({
-          abi: superTokenAbi,
-          functionName: 'upgrade',
-          args: [BigInt(1e18)],
-        }),
-      }),
-      prepareOperation({
-        operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
-        target: ADDR.GDA,
-        data: encodeFunctionData({
-          abi: GDAAbi,
-          functionName: 'distributeFlow',
-          args: [
-            ADDR.SUPER_TOKEN,
-            address,
-            newAddress,
-            flowratePerSecond,
-            '0x',
-          ],
-        }),
-      }),
-    ];
+  //   if (!hasAllowance) {
+  //     console.error('Insufficient allowance for the super token upgrade');
+  //     return;
+  //   }
 
-    const simulation = await publicClient.simulateContract({
-      abi: SuperfluidAbi,
-      account: address,
-      address: ADDR.SUPER_FLUID,
-      functionName: 'batchCall',
+  //   console.log('hasAllowance', hasAllowance);
+  //   console.log('allowance', baseToken?.allowance);
 
-      args: [operations],
-    });
+  //   const flowratePerSecond = calculateFlowratePerSecond({
+  //     amountWei: BigInt(1e18),
+  //     timeUnit: TIME_UNIT.month,
+  //   });
 
-    console.log('simulation', simulation);
+  //   console.log('flowRate', flowratePerSecond);
 
-    const gas = await publicClient.estimateContractGas({
-      abi: SuperfluidAbi,
-      address: ADDR.SUPER_FLUID,
-      functionName: 'batchCall',
-      args: [operations],
-      account: address,
-    });
+  //   const operations = [
+  //     prepareOperation({
+  //       operationType: OPERATION_TYPE.SUPERTOKEN_UPGRADE,
+  //       target: ADDR.SUPER_TOKEN,
+  //       data: encodeFunctionData({
+  //         abi: superTokenAbi,
+  //         functionName: 'upgrade',
+  //         args: [BigInt(1e18)],
+  //       }),
+  //     }),
+  //     prepareOperation({
+  //       operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
+  //       target: ADDR.GDA,
+  //       data: encodeFunctionData({
+  //         abi: GDAAbi,
+  //         functionName: 'distributeFlow',
+  //         args: [
+  //           ADDR.SUPER_TOKEN,
+  //           address,
+  //           newAddress,
+  //           flowratePerSecond,
+  //           '0x',
+  //         ],
+  //       }),
+  //     }),
+  //   ];
 
-    const gasWithBuffer = BigInt(Math.floor(Number(gas) * 1.2)); // Add a buffer of 20% to the estimated gas
+  //   const simulation = await publicClient.simulateContract({
+  //     abi: SuperfluidAbi,
+  //     account: address,
+  //     address: ADDR.SUPER_FLUID,
+  //     functionName: 'batchCall',
 
-    const hash3 = await walletClient.writeContract({
-      abi: SuperfluidAbi,
-      address: ADDR.SUPER_FLUID,
-      functionName: 'batchCall',
-      gas: gasWithBuffer,
-      args: [operations],
-    });
+  //     args: [operations],
+  //   });
 
-    console.log('hash3', hash3);
+  //   console.log('simulation', simulation);
 
-    const receipt3 = await publicClient.waitForTransactionReceipt({
-      hash: hash3,
-    });
+  //   const gas = await publicClient.estimateContractGas({
+  //     abi: SuperfluidAbi,
+  //     address: ADDR.SUPER_FLUID,
+  //     functionName: 'batchCall',
+  //     args: [operations],
+  //     account: address,
+  //   });
 
-    console.log('receipt3', receipt3);
-  };
+  //   const gasWithBuffer = BigInt(Math.floor(Number(gas) * 1.2)); // Add a buffer of 20% to the estimated gas
 
-  const approve = async () => {
-    if (!walletClient) {
-      console.error('Wallet client is not available');
-      return;
-    }
+  //   const hash3 = await walletClient.writeContract({
+  //     abi: SuperfluidAbi,
+  //     address: ADDR.SUPER_FLUID,
+  //     functionName: 'batchCall',
+  //     gas: gasWithBuffer,
+  //     args: [operations],
+  //   });
 
-    if (!address) {
-      console.error('No address found in account');
-      return;
-    }
+  //   console.log('hash3', hash3);
 
-    const hash = await walletClient.writeContract({
-      address: ADDR.BASE_TOKEN,
-      abi: superTokenAbi,
-      functionName: 'approve',
+  //   const receipt3 = await publicClient.waitForTransactionReceipt({
+  //     hash: hash3,
+  //   });
 
-      args: [ADDR.SUPER_TOKEN, BigInt(10e18)],
-    });
+  //   console.log('receipt3', receipt3);
+  // };
 
-    console.log('Approval hash:', hash);
-  };
+  // const approve = async () => {
+  //   if (!walletClient) {
+  //     console.error('Wallet client is not available');
+  //     return;
+  //   }
 
-  const testSSE = async () => {
-    if (!walletClient) {
-      console.error('Wallet client is not available');
-      return;
-    }
+  //   if (!address) {
+  //     console.error('No address found in account');
+  //     return;
+  //   }
 
-    if (!address) {
-      console.error('No address found in account');
-      return;
-    }
+  //   const hash = await walletClient.writeContract({
+  //     address: ADDR.BASE_TOKEN,
+  //     abi: superTokenAbi,
+  //     functionName: 'approve',
 
-    connect();
-  };
+  //     args: [ADDR.SUPER_TOKEN, BigInt(10e18)],
+  //   });
+
+  //   console.log('Approval hash:', hash);
+  // };
 
   return (
     <Stack>
       <Box mb="40">
-        <Button onClick={testSSE}>Run Test</Button>
-        {data?.status && !error && <Text fz="sm">{data?.status}</Text>}
-        {error && (
+        <Button onClick={testInitPool}>Run Test</Button>
+        {initData?.status && !initData?.error && (
+          <Text fz="sm">{initData?.status}</Text>
+        )}
+        {initData?.error && (
           <Text fz="sm" c="red">
-            Error: {error}
+            Error: {initData?.error}
           </Text>
         )}
       </Box>
@@ -312,7 +334,7 @@ export const Home = () => {
             : '0'}
         </Text>
       </Box>
-      <Button onClick={approve}>Approve 10</Button>
+      {/* <Button onClick={approve}>Approve 10</Button> */}
     </Stack>
   );
 };

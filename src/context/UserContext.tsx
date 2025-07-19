@@ -54,10 +54,7 @@ export const UserProvider = ({
     setIsSocketConnected(true);
 
     () => {
-      if (socket) {
-        console.log('Disconnecting socket...');
-        socket.disconnect();
-      }
+      socket.disconnect();
     };
   }, []);
 
