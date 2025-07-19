@@ -4,17 +4,36 @@ import { Address } from 'viem';
 
 import { useAccount } from 'wagmi';
 import { SOCKET_URL } from '../utils/setup';
+import {
+  Beam,
+  ClientToServerEvents,
+  IOEvent,
+  Pool,
+  PoolResponse,
+} from '../types/sharedTypes';
+
+import { IOServer, ServerToClientEvents } from '../types/sharedTypes';
 
 type UserContextType = {
   isSocketConnected: boolean;
-  isWalletConnected: boolean;
   address?: Address;
+  pool: Pool | null;
+  incomingBeams: Beam[] | null;
+  outgoingBeams: Beam[] | null;
+  isPoolLoading: boolean;
+  poolLoadErrors: string[] | null;
   socket?: Socket;
 };
 
+type IOSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
+
 export const UserContext = createContext<UserContextType>({
+  pool: null,
+  incomingBeams: null,
+  outgoingBeams: null,
+  isPoolLoading: false,
+  poolLoadErrors: null,
   isSocketConnected: false,
-  isWalletConnected: false,
   address: undefined,
   socket: undefined,
 });
@@ -25,18 +44,25 @@ export const UserProvider = ({
   children: ReactNode | ReactNode[];
 }) => {
   const { address } = useAccount();
-  const [socket, setSocket] = useState<Socket | undefined>();
+  const [socket, setSocket] = useState<IOSocket | undefined>();
   const [isSocketConnected, setIsSocketConnected] = useState(false);
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [pool, setPool] = useState<Pool | null>(null);
+  const [incomingBeams, setIncomingBeams] = useState<Beam[] | null>(null);
+  const [outgoingBeams, setOutgoingBeams] = useState<Beam[] | null>(null);
+  const [isPoolLoading, setIsPoolLoading] = useState(false);
+  const [poolLoadErrors, setPoolLoadErrors] = useState<string[] | null>([]);
 
   useEffect(() => {
-    const socket = io(SOCKET_URL, {
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      autoConnect: true,
-      transports: ['websocket'],
-    });
+    const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
+      SOCKET_URL,
+      {
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        autoConnect: true,
+        transports: ['websocket'],
+      }
+    );
 
     socket.on('connect', () => {
       console.log('Socket connected:', socket.id);
@@ -46,34 +72,61 @@ export const UserProvider = ({
       console.log('Socket disconnected:', reason);
     });
 
-    socket.on('error', (error) => {
-      console.error('Socket error:', error);
-    });
-
     setSocket(socket);
     setIsSocketConnected(true);
 
-    () => {
+    return () => {
       socket.disconnect();
+      setSocket(undefined);
+      setIsSocketConnected(false);
     };
   }, []);
 
   useEffect(() => {
+    const handlePoolLoad = (poolResponse: PoolResponse) => {
+      setPool(poolResponse.pool || null);
+      setIsPoolLoading(!!poolResponse.isLoading);
+      setIncomingBeams(poolResponse.incomingBeams || null);
+      setOutgoingBeams(poolResponse.outgoingBeams || null);
+      setPoolLoadErrors(poolResponse.errors || null);
+    };
+
     if (!address || !socket) return;
 
-    socket.emit('wallet:connected', { address });
+    socket.emit(IOEvent.WalletConnected, { address });
 
-    socket.on('wallet:connected', (data) => {
-      setIsWalletConnected(true);
-      console.log('Wallet connected:', data);
+    socket.on(IOEvent.PoolLoad, (poolResponse) => {
+      handlePoolLoad(poolResponse);
     });
 
-    socket.on('wallet:disconnected', (data) => {});
+    socket.on(IOEvent.WalletConnectError, (error) => {
+      console.error('Wallet connection error:', error);
+      setPoolLoadErrors([error.error]);
+    });
+
+    return () => {
+      socket.off(IOEvent.PoolLoad, handlePoolLoad); // Remove specific listener
+      // Clear state when address changes
+      setPool(null);
+      setIncomingBeams(null);
+      setOutgoingBeams(null);
+      setIsPoolLoading(false);
+      setPoolLoadErrors([]);
+    };
   }, [address, socket]);
 
   return (
     <UserContext.Provider
-      value={{ address, socket, isSocketConnected, isWalletConnected }}
+      value={{
+        address,
+        socket,
+        isSocketConnected,
+        pool,
+        incomingBeams,
+        outgoingBeams,
+        isPoolLoading,
+        poolLoadErrors,
+      }}
     >
       {children}
     </UserContext.Provider>
