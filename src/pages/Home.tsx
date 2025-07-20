@@ -10,7 +10,16 @@ import { useUser } from '../hooks/useUser';
 
 export const Home = () => {
   const { address } = useAccount();
-  const { socket } = useUser();
+  const {
+    socket,
+    pool,
+    incomingBeams,
+    outgoingBeams,
+    isPoolLoading,
+    poolLoadErrors,
+    isSocketConnected,
+    hasPool,
+  } = useUser();
   const [initData, setInitData] = useState<{
     status: string;
     poolAddress: Address | undefined;
@@ -24,33 +33,33 @@ export const Home = () => {
   //   url: `${API_URL}/pool/init/${address}`,
   //   auto: false,
   // });
-  const { data: baseToken } = useToken({
-    tokenAddress: ADDR.BASE_TOKEN,
-    userAddress: address,
-    spender: ADDR.SUPER_TOKEN,
-    calls: {
-      balanceOf: true,
-      totalSupply: true,
-      name: true,
-      symbol: true,
-      decimals: true,
-      allowance: true,
-    },
-  });
+  // const { data: baseToken } = useToken({
+  //   tokenAddress: ADDR.BASE_TOKEN,
+  //   userAddress: address,
+  //   spender: ADDR.SUPER_TOKEN,
+  //   calls: {
+  //     balanceOf: true,
+  //     totalSupply: true,
+  //     name: true,
+  //     symbol: true,
+  //     decimals: true,
+  //     allowance: true,
+  //   },
+  // });
 
-  const { data: wrappedToken } = useToken({
-    tokenAddress: ADDR.SUPER_TOKEN,
-    userAddress: address,
-    // spender: ADDR.SUPER_TOKEN,
-    calls: {
-      balanceOf: true,
-      totalSupply: true,
-      name: true,
-      symbol: true,
-      decimals: true,
-      // allowance: true,
-    },
-  });
+  // const { data: wrappedToken } = useToken({
+  //   tokenAddress: ADDR.SUPER_TOKEN,
+  //   userAddress: address,
+  //   // spender: ADDR.SUPER_TOKEN,
+  //   calls: {
+  //     balanceOf: true,
+  //     totalSupply: true,
+  //     name: true,
+  //     symbol: true,
+  //     decimals: true,
+  //     // allowance: true,
+  //   },
+  // });
 
   const testInitPool = async () => {
     if (!address) {
@@ -276,65 +285,9 @@ export const Home = () => {
   //   console.log('receipt3', receipt3);
   // };
 
-  // const approve = async () => {
-  //   if (!walletClient) {
-  //     console.error('Wallet client is not available');
-  //     return;
-  //   }
+  // IF the user is not connected, we'll show the main feed and ask them to connect
 
-  //   if (!address) {
-  //     console.error('No address found in account');
-  //     return;
-  //   }
+  // IF the user is connected, but they don't have a pool, we'll show the main feed and ask them to create a pool
 
-  //   const hash = await walletClient.writeContract({
-  //     address: ADDR.BASE_TOKEN,
-  //     abi: superTokenAbi,
-  //     functionName: 'approve',
-
-  //     args: [ADDR.SUPER_TOKEN, BigInt(10e18)],
-  //   });
-
-  //   console.log('Approval hash:', hash);
-  // };
-
-  return (
-    <Stack>
-      <Box mb="40">
-        <Button onClick={testInitPool}>Run Test</Button>
-        {initData?.status && !initData?.error && (
-          <Text fz="sm">{initData?.status}</Text>
-        )}
-        {initData?.error && (
-          <Text fz="sm" c="red">
-            Error: {initData?.error}
-          </Text>
-        )}
-      </Box>
-
-      <Box>
-        <Text>Underlying Token: {baseToken?.symbol || ''}</Text>
-        <Text>
-          Balance:{' '}
-          {baseToken?.balanceOf && baseToken?.decimals
-            ? formatUnits(baseToken?.balanceOf, baseToken?.decimals)
-            : '0'}
-        </Text>
-        <Text mb="lg">
-          Amt Approved:{' '}
-          {baseToken?.allowance && baseToken?.decimals
-            ? formatUnits(baseToken?.allowance, baseToken?.decimals)
-            : '0'}{' '}
-        </Text>
-        <Text>Wrapped Token: {wrappedToken?.symbol || ''}</Text>
-        <Text>
-          Balance:{' '}
-          {wrappedToken?.balanceOf && wrappedToken?.decimals
-            ? formatUnits(wrappedToken?.balanceOf, wrappedToken?.decimals)
-            : '0'}
-        </Text>
-      </Box>
-      {/* <Button onClick={approve}>Approve 10</Button> */}
-    </Stack>
-  );
+  // IF the user is connected, we'll show their pool,
 };

@@ -12,7 +12,7 @@ import {
   PoolResponse,
 } from '../types/sharedTypes';
 
-import { IOServer, ServerToClientEvents } from '../types/sharedTypes';
+import { ServerToClientEvents } from '../types/sharedTypes';
 
 type UserContextType = {
   isSocketConnected: boolean;
@@ -20,6 +20,7 @@ type UserContextType = {
   pool: Pool | null;
   incomingBeams: Beam[] | null;
   outgoingBeams: Beam[] | null;
+  hasPool: boolean;
   isPoolLoading: boolean;
   poolLoadErrors: string[] | null;
   socket?: Socket;
@@ -33,6 +34,7 @@ export const UserContext = createContext<UserContextType>({
   outgoingBeams: null,
   isPoolLoading: false,
   poolLoadErrors: null,
+  hasPool: false,
   isSocketConnected: false,
   address: undefined,
   socket: undefined,
@@ -47,6 +49,7 @@ export const UserProvider = ({
   const [socket, setSocket] = useState<IOSocket | undefined>();
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const [pool, setPool] = useState<Pool | null>(null);
+  const [hasPool, setHasPool] = useState(false);
   const [incomingBeams, setIncomingBeams] = useState<Beam[] | null>(null);
   const [outgoingBeams, setOutgoingBeams] = useState<Beam[] | null>(null);
   const [isPoolLoading, setIsPoolLoading] = useState(false);
@@ -85,6 +88,7 @@ export const UserProvider = ({
   useEffect(() => {
     const handlePoolLoad = (poolResponse: PoolResponse) => {
       setPool(poolResponse.pool || null);
+      setHasPool(!!poolResponse.hasPool);
       setIsPoolLoading(!!poolResponse.isLoading);
       setIncomingBeams(poolResponse.incomingBeams || null);
       setOutgoingBeams(poolResponse.outgoingBeams || null);
@@ -124,6 +128,7 @@ export const UserProvider = ({
         pool,
         incomingBeams,
         outgoingBeams,
+        hasPool,
         isPoolLoading,
         poolLoadErrors,
       }}

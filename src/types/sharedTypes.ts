@@ -10,8 +10,6 @@ export const IOEvent = {
 export type IOEvent = (typeof IOEvent)[keyof typeof IOEvent];
 
 export type ServerToClientEvents = {
-  //   [IOEvent.Connect]: () => void;
-  //   [IOEvent.Disconnect]: () => void;
   [IOEvent.PoolLoad]: (data: PoolResponse) => void;
   [IOEvent.WalletConnected]: (data: { address: Address }) => void;
   [IOEvent.WalletConnectError]: (data: {
@@ -29,9 +27,10 @@ export type IOServer = Server<ClientToServerEvents, ServerToClientEvents>;
 export type PoolResponse = {
   pool?: Pool;
   poolId?: string;
+  hasPool: boolean;
   incomingBeams?: Beam[];
   outgoingBeams?: Beam[];
-  isLoading?: boolean;
+  isLoading: boolean;
   errors?: string[];
 };
 

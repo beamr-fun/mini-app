@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Context } from '@farcaster/frame-sdk';
 import { useMiniAppContext } from '../hooks/useMiniAppContext';
 import { truncateAddress } from '../utils/common';
+import { useUser } from '../hooks/useUser';
+import { ConnectionIndicator } from './ConnectionIndicator';
 
 export const Login = () => {
   const { isConnected, address } = useAccount();
@@ -12,15 +14,15 @@ export const Login = () => {
   // sdf
   const { user, isMiniApp } = useMiniAppContext();
 
+  const { isSocketConnected } = useUser();
+
   if (user && address && isMiniApp) {
     return (
       <Box m="md">
         <Group gap="4">
           <Avatar src={user.pfpUrl} size="32" />
           <Text>{user.displayName}</Text>
-          <Tooltip label="In Farcaster">
-            <Avatar bg="plum" size="6" />
-          </Tooltip>
+          <ConnectionIndicator />
         </Group>
       </Box>
     );
@@ -32,9 +34,7 @@ export const Login = () => {
         <Group gap="8">
           <Avatar src={`https://effigy.im/a/${address}.svg`} size="32" />
           <Text>{truncateAddress(address)}</Text>
-          <Tooltip label="Operating outside of Farcaster">
-            <Avatar bg="red" size="6" />
-          </Tooltip>
+          <ConnectionIndicator />
         </Group>
       </Box>
     );
