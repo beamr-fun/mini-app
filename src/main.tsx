@@ -7,6 +7,7 @@ import { config } from './utils/connect.ts';
 import { MiniAppProvider } from './context/MiniAppContext.tsx';
 import { BrowserRouter } from 'react-router-dom';
 import { UserProvider } from './context/UserContext.tsx';
+import { MantineProvider } from '@mantine/core';
 
 const queryClient = new QueryClient();
 
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <MiniAppProvider>
           <UserProvider>
             <BrowserRouter>
-              <App />
+              <MantineProvider defaultColorScheme="dark">
+                <App />
+              </MantineProvider>
             </BrowserRouter>
           </UserProvider>
         </MiniAppProvider>

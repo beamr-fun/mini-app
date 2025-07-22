@@ -1,9 +1,9 @@
 import '@mantine/core/styles.css';
-import { Flex, Group, MantineProvider } from '@mantine/core';
+import { Box, Flex, Group, MantineProvider } from '@mantine/core';
 import { theme } from './theme';
 import { useEffect } from 'react';
 import { sdk } from '@farcaster/frame-sdk';
-import { Login } from './components/Login';
+import { Header } from './components/Header';
 import { ClientRoutes } from './Routes';
 
 export default function App() {
@@ -13,12 +13,29 @@ export default function App() {
 
   return (
     <MantineProvider theme={theme}>
-      <Group justify="end">
-        <Login />
-      </Group>
-      <Flex h="90vh" justify="center" align="center" p="md">
-        <ClientRoutes />
-      </Flex>
+      <Layout>
+        <Group justify="center">
+          <Header />
+        </Group>
+        <Flex justify="center" align="center">
+          <ClientRoutes />
+        </Flex>
+      </Layout>
     </MantineProvider>
   );
 }
+
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <Flex
+      direction="column"
+      style={{ height: '100vh' }}
+      px="md"
+      py="xs"
+      maw="393px"
+      bg="dark.8"
+    >
+      {children}
+    </Flex>
+  );
+};

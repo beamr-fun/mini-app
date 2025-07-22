@@ -43,8 +43,6 @@ export const MiniAppProvider = ({
     queryFn: getMiniAppContext,
   });
 
-  console.log('isLoading', isLoading);
-
   return (
     <MiniAppContext.Provider
       value={{

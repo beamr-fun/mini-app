@@ -52,52 +52,43 @@ export const UserProvider = ({
   const [hasPool, setHasPool] = useState(false);
   const [incomingBeams, setIncomingBeams] = useState<Beam[] | null>(null);
   const [outgoingBeams, setOutgoingBeams] = useState<Beam[] | null>(null);
-  const [isPoolLoading, setIsPoolLoading] = useState(false);
+  const [isPoolLoading, setIsPoolLoading] = useState(true);
   const [poolLoadErrors, setPoolLoadErrors] = useState<string[] | null>([]);
 
   useEffect(() => {
+    const handlePoolLoad = (poolResponse: PoolResponse) => {
+      setPool(poolResponse.pool || null);
+      setHasPool(!!poolResponse.hasPool);
+      setIsPoolLoading(false);
+      setIncomingBeams(poolResponse.incomingBeams || null);
+      setOutgoingBeams(poolResponse.outgoingBeams || null);
+      setPoolLoadErrors(poolResponse.errors || null);
+    };
+
     const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
       SOCKET_URL,
       {
         reconnection: true,
-        reconnectionAttempts: 5,
+        reconnectionAttempts: 7,
         reconnectionDelay: 1000,
+        reconnectionDelayMax: 180_000,
+        randomizationFactor: 0.5,
         autoConnect: true,
         transports: ['websocket'],
       }
     );
 
     socket.on('connect', () => {
+      setIsPoolLoading(true);
+      setIsSocketConnected(true);
       console.log('Socket connected:', socket.id);
     });
 
     socket.on('disconnect', (reason) => {
+      setIsPoolLoading(false);
+      setIsSocketConnected(false);
       console.log('Socket disconnected:', reason);
     });
-
-    setSocket(socket);
-    setIsSocketConnected(true);
-
-    return () => {
-      socket.disconnect();
-      setSocket(undefined);
-      setIsSocketConnected(false);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handlePoolLoad = (poolResponse: PoolResponse) => {
-      setPool(poolResponse.pool || null);
-      setHasPool(!!poolResponse.hasPool);
-      setIsPoolLoading(!!poolResponse.isLoading);
-      setIncomingBeams(poolResponse.incomingBeams || null);
-      setOutgoingBeams(poolResponse.outgoingBeams || null);
-      setPoolLoadErrors(poolResponse.errors || null);
-    };
-
-    if (!address || !socket) return;
-
-    socket.emit(IOEvent.WalletConnected, { address });
 
     socket.on(IOEvent.PoolLoad, (poolResponse) => {
       handlePoolLoad(poolResponse);
@@ -106,18 +97,31 @@ export const UserProvider = ({
     socket.on(IOEvent.WalletConnectError, (error) => {
       console.error('Wallet connection error:', error);
       setPoolLoadErrors([error.error]);
+      setIsPoolLoading(false);
     });
+    setSocket(socket);
 
     return () => {
-      socket.off(IOEvent.PoolLoad, handlePoolLoad); // Remove specific listener
-      // Clear state when address changes
+      socket.disconnect();
+      setSocket(undefined);
+      setIsSocketConnected(false);
+      socket.off(IOEvent.PoolLoad); // Remove specific listener
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!address || !socket || !isSocketConnected) return;
+
+    socket.emit(IOEvent.WalletConnected, { address });
+
+    return () => {
       setPool(null);
       setIncomingBeams(null);
       setOutgoingBeams(null);
       setIsPoolLoading(false);
       setPoolLoadErrors([]);
     };
-  }, [address, socket]);
+  }, [address, socket, isSocketConnected]);
 
   return (
     <UserContext.Provider

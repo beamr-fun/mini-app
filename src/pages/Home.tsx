@@ -1,12 +1,9 @@
-import { Box, Button, Stack, Text } from '@mantine/core';
-import { ADDR } from '../const/addresses';
-import { useAccount, useWalletClient } from 'wagmi';
-import { Address, formatUnits } from 'viem';
-import { useToken } from '../hooks/useToken';
+import { useAccount } from 'wagmi';
+import { Address } from 'viem';
 import { API_URL } from '../utils/setup';
-import { useSSE } from '../hooks/useSSE';
 import { useEffect, useState } from 'react';
 import { useUser } from '../hooks/useUser';
+import { Box, Button, Stack, Text, Title } from '@mantine/core';
 
 export const Home = () => {
   const { address } = useAccount();
@@ -26,41 +23,6 @@ export const Home = () => {
     error: string | null;
   } | null>(null);
 
-  // const { connect, data, error } = useSSE<{
-  //   status: string;
-  //   poolAddress: Address | undefined;
-  // }>({
-  //   url: `${API_URL}/pool/init/${address}`,
-  //   auto: false,
-  // });
-  // const { data: baseToken } = useToken({
-  //   tokenAddress: ADDR.BASE_TOKEN,
-  //   userAddress: address,
-  //   spender: ADDR.SUPER_TOKEN,
-  //   calls: {
-  //     balanceOf: true,
-  //     totalSupply: true,
-  //     name: true,
-  //     symbol: true,
-  //     decimals: true,
-  //     allowance: true,
-  //   },
-  // });
-
-  // const { data: wrappedToken } = useToken({
-  //   tokenAddress: ADDR.SUPER_TOKEN,
-  //   userAddress: address,
-  //   // spender: ADDR.SUPER_TOKEN,
-  //   calls: {
-  //     balanceOf: true,
-  //     totalSupply: true,
-  //     name: true,
-  //     symbol: true,
-  //     decimals: true,
-  //     // allowance: true,
-  //   },
-  // });
-
   const testInitPool = async () => {
     if (!address) {
       console.error('No address found in account');
@@ -77,33 +39,6 @@ export const Home = () => {
       console.error('Error initializing pool:', error);
     }
   };
-
-  useEffect(() => {
-    if (!socket || !address) return;
-
-    socket.on(
-      'pool:initialize',
-      (data: {
-        userAddress: Address;
-        status: string;
-        newPoolAddress: Address | undefined;
-        error: string | null;
-      }) => {
-        console.log('data', data);
-        if (data.userAddress !== address) return;
-
-        setInitData({
-          status: data.status,
-          poolAddress: data.newPoolAddress,
-          error: data.error,
-        });
-      }
-    );
-
-    () => {
-      socket.off('pool:initialize');
-    };
-  }, [socket, address]);
 
   // const runTest = async () => {
   //   if (!walletClient) {
@@ -285,9 +220,105 @@ export const Home = () => {
   //   console.log('receipt3', receipt3);
   // };
 
-  // IF the user is not connected, we'll show the main feed and ask them to connect
+  if (!isPoolLoading && address && pool) {
+    return (
+      <Stack w="100%" h="100%" justify="space-between">
+        <Box>
+          <Stack>
+            <Title order={1} ta={'center'} fz="18" c="dark.3" fw="700">
+              Your Pool
+            </Title>
 
-  // IF the user is connected, but they don't have a pool, we'll show the main feed and ask them to create a pool
+            <OutgoingBeams />
+          </Stack>
+        </Box>
+        <Box>
+          <Text fz="sm" fw="600" c="dark.2" mb="4">
+            Incoming Beams
+          </Text>
+          <Box h="225px" bg="dark.6"></Box>
+        </Box>
+      </Stack>
+    );
+  }
+
+  if (!isPoolLoading && (!address || !pool)) {
+    if (incomingBeams && incomingBeams?.length > 0) {
+      return (
+        <Stack w="100%" h="100%" justify="space-between">
+          <Box>
+            <Stack>
+              <GlobalFeed />
+              <IncomingBeams />
+            </Stack>
+          </Box>
+          {!address && (
+            <Button mt="lg" size="lg" w="100%" variant="default">
+              Connect Wallet
+            </Button>
+          )}
+          {!pool && (
+            <Button mt="lg" size="lg" w="100%" variant="default">
+              Start Beaming
+            </Button>
+          )}
+        </Stack>
+      );
+    }
+
+    return (
+      <Stack w="100%" h="100%" justify="space-between">
+        <Box>
+          <Stack>
+            <GlobalFeed extended />
+          </Stack>
+          {!address && (
+            <Button mt="lg" size="lg" w="100%" variant="default">
+              Connect Wallet
+            </Button>
+          )}
+        </Box>
+        {!pool && (
+          <Button mt="lg" size="lg" w="100%" variant="default">
+            Start Beaming
+          </Button>
+        )}
+      </Stack>
+    );
+  }
 
   // IF the user is connected, we'll show their pool,
+};
+
+const GlobalFeed = ({ extended = false }: { extended?: boolean }) => {
+  return (
+    <Box>
+      <Text fz="sm" fw="600" c="dark.2" mb="4">
+        Who's beaming who?
+      </Text>
+      <Box h={extended ? '400px' : '225px'} bg="dark.6"></Box>
+    </Box>
+  );
+};
+
+const IncomingBeams = () => {
+  return (
+    <Box>
+      <Text fz="sm" fw="600" c="dark.2" mb="4">
+        Incoming Beams
+      </Text>
+      <Box h="225px" bg="dark.6"></Box>
+    </Box>
+  );
+};
+
+const OutgoingBeams = () => {
+  return (
+    <Box>
+      <Text fz="sm" fw="600" c="dark.2" mb="4">
+        Outgoing Beams
+      </Text>
+      <Box h="225px" bg="dark.6"></Box>
+    </Box>
+  );
 };

@@ -30,7 +30,6 @@ export type PoolResponse = {
   hasPool: boolean;
   incomingBeams?: Beam[];
   outgoingBeams?: Beam[];
-  isLoading: boolean;
   errors?: string[];
 };
 
@@ -68,5 +67,6 @@ export type Beam = {
   to: Address;
   flowRate: string;
   status: BeamStatus;
+  units: string;
   // isConnected: boolean;
 };
