@@ -13,6 +13,7 @@ import {
 } from '../types/sharedTypes';
 
 import { ServerToClientEvents } from '../types/sharedTypes';
+import sdk from '@farcaster/miniapp-sdk';
 
 type UserContextType = {
   isSocketConnected: boolean;
@@ -56,6 +57,8 @@ export const UserProvider = ({
   const [poolLoadErrors, setPoolLoadErrors] = useState<string[] | null>([]);
 
   useEffect(() => {
+    let socket: IOSocket;
+
     const handlePoolLoad = (poolResponse: PoolResponse) => {
       setPool(poolResponse.pool || null);
       setHasPool(!!poolResponse.hasPool);
@@ -65,47 +68,68 @@ export const UserProvider = ({
       setPoolLoadErrors(poolResponse.errors || null);
     };
 
-    const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
-      SOCKET_URL,
-      {
+    const handleLoadSocket = async () => {
+      const isMiniApp = await sdk.isInMiniApp();
+      const tokenRes = await sdk.quickAuth.getToken();
+      const context = await sdk.context;
+
+      const token = tokenRes?.token || null;
+
+      if (!token) {
+        console.error('No token provided for socket connection');
+        return;
+      }
+
+      if (!context?.user) {
+        console.error('No user context found for socket connection');
+        return;
+      }
+
+      socket = io(SOCKET_URL, {
         reconnection: true,
+        auth: {
+          token,
+        },
         reconnectionAttempts: 7,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 180_000,
         randomizationFactor: 0.5,
         autoConnect: true,
         transports: ['websocket'],
-      }
-    );
+      });
 
-    socket.on('connect', () => {
-      setIsPoolLoading(true);
-      setIsSocketConnected(true);
-      console.log('Socket connected:', socket.id);
-    });
+      socket.on('connect', () => {
+        setIsPoolLoading(true);
+        setIsSocketConnected(true);
+        sdk.actions.ready();
+        console.log('Socket connected:', socket.id);
+      });
 
-    socket.on('disconnect', (reason) => {
-      setIsPoolLoading(false);
-      setIsSocketConnected(false);
-      console.log('Socket disconnected:', reason);
-    });
+      socket.on('disconnect', (reason) => {
+        setIsPoolLoading(false);
+        setIsSocketConnected(false);
+        console.log('Socket disconnected:', reason);
+      });
 
-    socket.on(IOEvent.PoolLoad, (poolResponse) => {
-      handlePoolLoad(poolResponse);
-    });
+      socket.on(IOEvent.PoolLoad, (poolResponse) => {
+        handlePoolLoad(poolResponse);
+      });
 
-    socket.on(IOEvent.WalletConnectError, (error) => {
-      console.error('Wallet connection error:', error);
-      setPoolLoadErrors([error.error]);
-      setIsPoolLoading(false);
-    });
-    setSocket(socket);
+      socket.on(IOEvent.WalletConnectError, (error) => {
+        console.error('Wallet connection error:', error);
+        setPoolLoadErrors([error.error]);
+        setIsPoolLoading(false);
+      });
+      setSocket(socket);
+    };
+
+    handleLoadSocket();
 
     return () => {
-      socket.disconnect();
+      socket?.disconnect?.();
       setSocket(undefined);
       setIsSocketConnected(false);
-      socket.off(IOEvent.PoolLoad); // Remove specific listener
+      socket?.off?.(IOEvent.PoolLoad); // Remove specific listener
     };
   }, []);
 

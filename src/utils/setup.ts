@@ -3,7 +3,7 @@ import { base, optimismSepolia } from 'viem/chains';
 export const isDev = import.meta.env.VITE_ENV === 'dev';
 export const isAPIDev = import.meta.env.VITE_API_ENV === 'dev';
 
-export const network = isDev ? optimismSepolia : base;
+export const network = isDev ? base : base;
 
 export const RPC = isDev
   ? import.meta.env.VITE_RPC_DEV

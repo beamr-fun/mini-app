@@ -1,27 +1,14 @@
 import { useAccount } from 'wagmi';
 import { Address } from 'viem';
 import { API_URL } from '../utils/setup';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useUser } from '../hooks/useUser';
 import { Box, Button, Stack, Text, Title } from '@mantine/core';
+import { Link } from 'react-router-dom';
 
 export const Home = () => {
   const { address } = useAccount();
-  const {
-    socket,
-    pool,
-    incomingBeams,
-    outgoingBeams,
-    isPoolLoading,
-    poolLoadErrors,
-    isSocketConnected,
-    hasPool,
-  } = useUser();
-  const [initData, setInitData] = useState<{
-    status: string;
-    poolAddress: Address | undefined;
-    error: string | null;
-  } | null>(null);
+  const { pool, incomingBeams, isPoolLoading } = useUser();
 
   const testInitPool = async () => {
     if (!address) {
@@ -279,7 +266,14 @@ export const Home = () => {
           )}
         </Box>
         {!pool && (
-          <Button mt="lg" size="lg" w="100%" variant="default">
+          <Button
+            component={Link}
+            to="/create-pool"
+            mt="lg"
+            size="lg"
+            w="100%"
+            variant="default"
+          >
             Start Beaming
           </Button>
         )}

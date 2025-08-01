@@ -1,27 +1,19 @@
 import '@mantine/core/styles.css';
-import { Box, Flex, Group, MantineProvider } from '@mantine/core';
-import { theme } from './theme';
+import '@mantine/notifications/styles.css';
+import { Flex, Group } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import { useEffect } from 'react';
 import { sdk } from '@farcaster/frame-sdk';
-import { Header } from './components/Header';
-import { ClientRoutes } from './Routes';
 
 export default function App() {
-  useEffect(() => {
-    sdk.actions.ready();
-  }, []);
-
   return (
-    <MantineProvider theme={theme}>
-      <Layout>
-        <Group justify="center">
-          <Header />
-        </Group>
-        <Flex justify="center" align="center">
-          <ClientRoutes />
-        </Flex>
-      </Layout>
-    </MantineProvider>
+    <Layout>
+      <Notifications />
+      <Group justify="center">{/* <Header /> */}</Group>
+      <Flex justify="center" align="center">
+        {/* <ClientRoutes /> */}
+      </Flex>
+    </Layout>
   );
 }
 
