@@ -14,16 +14,18 @@ import {
 
 import { ServerToClientEvents } from '../types/sharedTypes';
 import sdk from '@farcaster/miniapp-sdk';
+import { User } from '@neynar/nodejs-sdk/build/api';
 
 type UserContextType = {
   isSocketConnected: boolean;
   address?: Address;
+  user: User | null;
   pool: Pool | null;
   incomingBeams: Beam[] | null;
   outgoingBeams: Beam[] | null;
   hasPool: boolean;
-  isPoolLoading: boolean;
-  poolLoadErrors: string[] | null;
+  isLoading: boolean;
+  userErrors: string[] | null;
   socket?: Socket;
 };
 
@@ -31,10 +33,11 @@ type IOSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 export const UserContext = createContext<UserContextType>({
   pool: null,
+  user: null,
   incomingBeams: null,
   outgoingBeams: null,
-  isPoolLoading: false,
-  poolLoadErrors: null,
+  isLoading: false,
+  userErrors: null,
   hasPool: false,
   isSocketConnected: false,
   address: undefined,
@@ -48,39 +51,55 @@ export const UserProvider = ({
 }) => {
   const { address } = useAccount();
   const [socket, setSocket] = useState<IOSocket | undefined>();
+  const [user, setUser] = useState<User | null>(null);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [pool, setPool] = useState<Pool | null>(null);
-  const [hasPool, setHasPool] = useState(false);
   const [incomingBeams, setIncomingBeams] = useState<Beam[] | null>(null);
   const [outgoingBeams, setOutgoingBeams] = useState<Beam[] | null>(null);
-  const [isPoolLoading, setIsPoolLoading] = useState(true);
-  const [poolLoadErrors, setPoolLoadErrors] = useState<string[] | null>([]);
+  const [userErrors, setErrors] = useState<string[] | null>([]);
+
+  const hasPool = !!pool;
 
   useEffect(() => {
     let socket: IOSocket;
 
     const handlePoolLoad = (poolResponse: PoolResponse) => {
       setPool(poolResponse.pool || null);
-      setHasPool(!!poolResponse.hasPool);
-      setIsPoolLoading(false);
       setIncomingBeams(poolResponse.incomingBeams || null);
       setOutgoingBeams(poolResponse.outgoingBeams || null);
-      setPoolLoadErrors(poolResponse.errors || null);
+      setErrors(poolResponse.errors || null);
+      setIsLoading(false);
     };
 
     const handleLoadSocket = async () => {
-      const isMiniApp = await sdk.isInMiniApp();
-      const tokenRes = await sdk.quickAuth.getToken();
-      const context = await sdk.context;
+      setIsLoading(true);
+
+      const [isMiniApp, tokenRes, context] = await Promise.all([
+        sdk.isInMiniApp(),
+        sdk.quickAuth.getToken(),
+        sdk.context,
+      ]);
+
+      if (!isMiniApp) {
+        console.error('Not running in a mini app context');
+        setIsLoading(false);
+        // TODO: Handle this case appropriately, maybe redirect or show a message
+        return;
+      }
 
       const token = tokenRes?.token || null;
 
       if (!token) {
+        // TODO: Handle error
+        setIsLoading(false);
         console.error('No token provided for socket connection');
         return;
       }
 
       if (!context?.user) {
+        // TODO: Handle error
+        setIsLoading(false);
         console.error('No user context found for socket connection');
         return;
       }
@@ -98,18 +117,26 @@ export const UserProvider = ({
         transports: ['websocket'],
       });
 
+      /// Socket connection listeners //////
       socket.on('connect', () => {
-        setIsPoolLoading(true);
-        setIsSocketConnected(true);
-        sdk.actions.ready();
-        console.log('Socket connected:', socket.id);
+        console.log('Socket Connected 🛜');
+      });
+      socket.on('disconnect', (reason) => {
+        setIsSocketConnected(false);
+        console.log('🛸 Disconnected:', reason);
       });
 
-      socket.on('disconnect', (reason) => {
-        setIsPoolLoading(false);
-        setIsSocketConnected(false);
-        console.log('Socket disconnected:', reason);
+      //// User authentication listeners ////
+      socket.on(IOEvent.UserAuthSuccess, ({ user }: { user: User }) => {
+        console.log('User Authed! 🔒');
+        setIsSocketConnected(true);
+        sdk.actions.ready();
+        setUser(user);
       });
+
+      // Todo: Handle user auth error
+
+      //// Pool load listeners ////
 
       socket.on(IOEvent.PoolLoad, (poolResponse) => {
         handlePoolLoad(poolResponse);
@@ -117,8 +144,8 @@ export const UserProvider = ({
 
       socket.on(IOEvent.WalletConnectError, (error) => {
         console.error('Wallet connection error:', error);
-        setPoolLoadErrors([error.error]);
-        setIsPoolLoading(false);
+        setIsLoading(false);
+        setErrors([error.error]);
       });
       setSocket(socket);
     };
@@ -128,13 +155,14 @@ export const UserProvider = ({
     return () => {
       socket?.disconnect?.();
       setSocket(undefined);
+      setIsLoading(false);
       setIsSocketConnected(false);
       socket?.off?.(IOEvent.PoolLoad); // Remove specific listener
     };
   }, []);
 
   useEffect(() => {
-    if (!address || !socket || !isSocketConnected) return;
+    if (!address || !socket || !isSocketConnected || !user) return;
 
     socket.emit(IOEvent.WalletConnected, { address });
 
@@ -142,23 +170,23 @@ export const UserProvider = ({
       setPool(null);
       setIncomingBeams(null);
       setOutgoingBeams(null);
-      setIsPoolLoading(false);
-      setPoolLoadErrors([]);
+      setErrors([]);
     };
-  }, [address, socket, isSocketConnected]);
+  }, [address, socket, isSocketConnected, user]);
 
   return (
     <UserContext.Provider
       value={{
         address,
+        user,
         socket,
+        isLoading,
         isSocketConnected,
         pool,
         incomingBeams,
         outgoingBeams,
         hasPool,
-        isPoolLoading,
-        poolLoadErrors,
+        userErrors,
       }}
     >
       {children}

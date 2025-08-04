@@ -7,6 +7,6 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['techniques-domestic-wrist-xml.trycloudflare.com'],
+    allowedHosts: ['unlike-senators-cj-states.trycloudflare.com'],
   },
 });

@@ -1,9 +1,14 @@
+import { User } from '@neynar/nodejs-sdk/build/api';
 import { Server } from 'socket.io';
 import { Address } from 'viem';
+
+export type CFID = `${number}:${Address}`;
 
 export const IOEvent = {
   PoolLoad: 'pool:load',
   WalletConnected: 'wallet:connect',
+  UserAuthSuccess: 'user:auth_success',
+  UserAuthError: 'user:auth_error',
   WalletConnectError: 'wallet:connect_error',
 } as const;
 
@@ -16,6 +21,8 @@ export type ServerToClientEvents = {
     error: string;
     message: string;
   }) => void;
+  [IOEvent.UserAuthSuccess]: (data: { user: User }) => void;
+  [IOEvent.UserAuthError]: (data: { error: string; message: string }) => void;
 };
 
 export type ClientToServerEvents = {
@@ -61,12 +68,14 @@ export type Pool = {
 };
 
 export type Beam = {
-  // pool address - receiver address
-  id: `${Address}-${Address}`;
+  // cfid - pool address - receiver address
+  id: `${CFID}-${Address}-${Address}`;
   from: Address;
   to: Address;
   flowRate: string;
   status: BeamStatus;
   units: string;
+  senderProfile?: User;
+  receiverProfile?: User;
   // isConnected: boolean;
 };
