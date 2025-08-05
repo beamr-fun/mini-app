@@ -10,6 +10,9 @@ export const IOEvent = {
   UserAuthSuccess: 'user:auth_success',
   UserAuthError: 'user:auth_error',
   WalletConnectError: 'wallet:connect_error',
+  PoolInit: 'pool:init',
+  PoolCreate: 'pool:create',
+  PoolComplete: 'pool:create_success',
 } as const;
 
 export type IOEvent = (typeof IOEvent)[keyof typeof IOEvent];
@@ -23,9 +26,12 @@ export type ServerToClientEvents = {
   }) => void;
   [IOEvent.UserAuthSuccess]: (data: { user: User }) => void;
   [IOEvent.UserAuthError]: (data: { error: string; message: string }) => void;
+  [IOEvent.PoolCreate]: (data: PoolCreateResponse) => void;
 };
 
 export type ClientToServerEvents = {
+  [IOEvent.PoolInit]: () => void;
+  [IOEvent.PoolComplete]: () => void;
   [IOEvent.WalletConnected]: (data: { address: Address }) => void;
 };
 
@@ -38,6 +44,10 @@ export type PoolResponse = {
   incomingBeams?: Beam[];
   outgoingBeams?: Beam[];
   errors?: string[];
+};
+
+export type PoolCreateResponse = {
+  poolId: string;
 };
 
 export enum PoolStatus {

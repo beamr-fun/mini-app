@@ -1,6 +1,8 @@
 import { Box, Button, Stack } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useUser } from '../../hooks/useUser';
+import { IOEvent } from '../../types/sharedTypes';
 
 enum Status {
   Idle,
@@ -12,21 +14,34 @@ enum Status {
 
 export const CreatePool = () => {
   const [status, setStatus] = useState<Status>(Status.Idle);
+  const { socket } = useUser();
   const [error, setError] = useState<string | null>(null);
   const [poolAddress, setPoolAddress] = useState<string | null>(null);
 
   const isLoading =
     status === Status.Initializing || status === Status.Creating;
 
+  useEffect(() => {
+    if (!socket) return;
+    socket.on(IOEvent.PoolCreate, (poolResponse) => {});
+
+    return () => {
+      socket.off(IOEvent.PoolCreate);
+    };
+  }, []);
+
   const handleCreatePool = async () => {
-    try {
-    } catch (error: any) {
-      notifications.show({
-        title: 'Error',
-        message: error?.message || 'Failed to create pool',
-        color: 'red',
-      });
+    if (status !== Status.Idle) return;
+
+    setStatus(Status.Initializing);
+
+    if (!socket) {
+      setError('Socket is not connected');
+      setStatus(Status.Error);
+      return;
     }
+
+    socket.emit(IOEvent.PoolInit);
   };
 
   return (
@@ -41,6 +56,7 @@ export const CreatePool = () => {
         variant="default"
         loading={isLoading}
         disabled={isLoading}
+        onClick={handleCreatePool}
       >
         Create Pool
       </Button>

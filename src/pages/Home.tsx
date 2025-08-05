@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useUser } from '../hooks/useUser';
 import { Box, Button, Stack, Text, Title } from '@mantine/core';
 import { Link } from 'react-router-dom';
+import { Global } from '../components/Home/Global';
 
 export const Home = () => {
   const { address } = useAccount();
@@ -64,7 +65,7 @@ export const Home = () => {
     return <UserDash incomingOnly />;
   }
 
-  return <GlobalFeed />;
+  return <Global />;
 };
 
 const UserDash = ({ incomingOnly = false }: { incomingOnly?: boolean }) => {
@@ -77,16 +78,7 @@ const UserDash = ({ incomingOnly = false }: { incomingOnly?: boolean }) => {
   );
 };
 
-const GlobalFeed = ({ extended = false }: { extended?: boolean }) => {
-  return (
-    <Box>
-      <Text fz="sm" fw="600" c="dark.2" mb="4">
-        Who's beaming who?
-      </Text>
-      <Box h={extended ? '400px' : '225px'} bg="dark.6"></Box>
-    </Box>
-  );
-};
+const GlobalFeed = ({ extended = false }: { extended?: boolean }) => {};
 
 const IncomingBeams = () => {
   return (

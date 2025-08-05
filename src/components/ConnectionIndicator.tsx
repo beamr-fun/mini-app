@@ -1,4 +1,3 @@
-import { useAccount } from 'wagmi';
 import { useUser } from '../hooks/useUser';
 
 import { Avatar, Group, Tooltip } from '@mantine/core';
