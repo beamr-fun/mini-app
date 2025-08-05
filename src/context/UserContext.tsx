@@ -50,6 +50,7 @@ export const UserProvider = ({
   children: ReactNode | ReactNode[];
 }) => {
   const { address } = useAccount();
+
   const [socket, setSocket] = useState<IOSocket | undefined>();
   const [user, setUser] = useState<User | null>(null);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
@@ -59,7 +60,7 @@ export const UserProvider = ({
   const [outgoingBeams, setOutgoingBeams] = useState<Beam[] | null>(null);
   const [userErrors, setErrors] = useState<string[] | null>([]);
 
-  const hasPool = !!pool;
+  const hasPool = !!user && !isLoading && !!pool;
 
   useEffect(() => {
     let socket: IOSocket;
@@ -68,8 +69,17 @@ export const UserProvider = ({
       setPool(poolResponse.pool || null);
       setIncomingBeams(poolResponse.incomingBeams || null);
       setOutgoingBeams(poolResponse.outgoingBeams || null);
-      setErrors(poolResponse.errors || null);
+      setErrors(
+        poolResponse.errors
+          ? (prevErrors) =>
+              prevErrors
+                ? [...prevErrors, ...(poolResponse.errors || [])]
+                : prevErrors
+          : null
+      );
       setIsLoading(false);
+      console.log('Beampool Request Complete ☄️ ☄️ ☄️');
+      sdk.actions.ready();
     };
 
     const handleLoadSocket = async () => {
@@ -134,7 +144,13 @@ export const UserProvider = ({
         setUser(user);
       });
 
-      // Todo: Handle user auth error
+      socket.on(IOEvent.UserAuthError, (error) => {
+        console.error('User auth error:', error);
+        setIsLoading(false);
+        setErrors((prevErrors) =>
+          prevErrors ? [...prevErrors, error.error || 'Auth error'] : prevErrors
+        );
+      });
 
       //// Pool load listeners ////
 
@@ -145,8 +161,13 @@ export const UserProvider = ({
       socket.on(IOEvent.WalletConnectError, (error) => {
         console.error('Wallet connection error:', error);
         setIsLoading(false);
-        setErrors([error.error]);
+        setErrors((prevErrors) =>
+          prevErrors
+            ? [...prevErrors, error.error || 'Wallet connection error']
+            : prevErrors
+        );
       });
+
       setSocket(socket);
     };
 

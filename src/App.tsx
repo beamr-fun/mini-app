@@ -4,14 +4,18 @@ import { Flex, Group } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { useEffect } from 'react';
 import { sdk } from '@farcaster/frame-sdk';
+import { ClientRoutes } from './Routes';
+import { Header } from './components/Header';
 
 export default function App() {
   return (
     <Layout>
       <Notifications />
-      <Group justify="center">{/* <Header /> */}</Group>
+      <Group justify="center">
+        <Header />
+      </Group>
       <Flex justify="center" align="center">
-        {/* <ClientRoutes /> */}
+        <ClientRoutes />
       </Flex>
     </Layout>
   );
