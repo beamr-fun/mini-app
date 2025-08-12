@@ -1,115 +1,86 @@
-// import React from 'react';
-// import { createClient } from 'graphql-ws';
-
-import { Box, Button, Stack, Text } from '@mantine/core';
-import { Address, WalletClient } from 'viem';
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { useWalletClient } from 'wagmi';
-import { BeamRABI } from '../abi/BeamR';
-import { createClient } from 'graphql-ws';
-import { useEffect, useState } from 'react';
-
-// const subscription = {
-//   query: `
-//   subscription Test {
-//   BeamR {
-//     id
-//     adminRole {
-//       admins
-//     }
-//   }
-// }`,
-// };
-
-// create a random address with Viem
-
-const createRandomAddress = () => {
-  const privateKey = generatePrivateKey();
-  const account = privateKeyToAccount(privateKey);
-
-  return account.address;
-};
+import { Box, Button, Stack, Text, Title } from '@mantine/core';
+import { Address } from 'viem';
+import { useAccount, useWalletClient } from 'wagmi';
+import { useState } from 'react';
+import { useUser } from '../hooks/useUser';
+import { createPool } from '../utils/interactions';
 
 export const SubTest = () => {
-  const walletClient = useWalletClient();
+  const { address } = useAccount();
   const [data, setData] = useState<any>(null);
+  const { data: walletClient } = useWalletClient();
 
-  useEffect(() => {
-    const subscription = {
-      query: `
-        subscription Test {
-            BeamR {
-    id
-    adminRole {
-      admins
-    }
-  }
-}`,
-    };
+  const _createPool = async () => {
+    if (!address) return;
 
-    const client = createClient({
-      url: 'wss://indexer.dev.hyperindex.xyz/970509e/v1/graphql',
-      connectionParams: {
-        'x-hasura-admin-secret': 'testing',
-      },
-      // Debug logging
-      on: {
-        connected: () => console.log('✅ Connected'),
-        error: (error) => console.error('❌ Error:', error),
-        closed: (...rest) => {
-          console.log('❌ Closed', ...rest);
-          console.log('🔌 Disconnected');
-        },
-      },
-    });
-
-    const unsub = client.subscribe(subscription, {
-      next: (result: any) => {
-        console.log('result', result);
-        setData(result.data?.BeamR?.[0]?.adminRole?.admins || []);
-        // setError(null);
-      },
-      error: (err) => {
-        // setError(err.message);
-        console.error('Subscription error:', err);
-      },
-      complete: () => {
-        console.log('Subscription completed');
-      },
-    });
-
-    return () => {
-      unsub();
-    };
-  }, []);
-
-  const addRole = async () => {
-    if (!walletClient?.data) {
-      console.error('Wallet client is not available');
-      return;
-    }
-    const address = createRandomAddress();
-
-    console.log('Adding role for address:', address);
-
-    const ROLE =
-      '0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775';
-
-    walletClient.data.writeContract({
-      abi: BeamRABI,
-      address: '0xf8405d14CF994017015fd94Db54C9D0899FD465B',
-      functionName: 'grantRole',
-      args: [ROLE, address],
-    });
+    createPool(address, 11650);
   };
 
-  console.log('data', data);
+  const _distributeFlow = async () => {};
+
+  const _grantRole = async () => {};
+
+  const _revokeRole = async () => {};
+
+  const _updateMemberUnits = async () => {};
+
+  const _updateMetadata = async () => {};
 
   return (
     <Box>
-      <Button onClick={addRole} mb="xl">
-        Add Admin
-      </Button>
+      <Title order={2} mb="md">
+        Core Functions
+      </Title>
+      <Stack>
+        <Box>
+          <Title order={4} mb="md">
+            Create Pool
+          </Title>
+          <Button onClick={_createPool} mb="md">
+            Create Pool
+          </Button>
+        </Box>
+        <Box>
+          <Title order={4} mb="md">
+            Distribute Flow
+          </Title>
+          <Button onClick={_distributeFlow} mb="md">
+            Distribute Flow
+          </Button>
+        </Box>
+        <Box>
+          <Title order={4} mb="md">
+            Grant Role
+          </Title>
+          <Button onClick={_grantRole} mb="md">
+            Grant Role
+          </Button>
+        </Box>
+        <Box>
+          <Title order={4} mb="md">
+            Revoke Role
+          </Title>
+          <Button onClick={_revokeRole} mb="md">
+            Revoke Role
+          </Button>
+        </Box>
+        <Box>
+          <Title order={4} mb="md">
+            Update Member Units
+          </Title>
+          <Button onClick={_updateMemberUnits} mb="md">
+            Update Member Units
+          </Button>
+        </Box>
+        <Box>
+          <Title order={4} mb="md">
+            Update Metadata
+          </Title>
+          <Button onClick={_updateMetadata} mb="md">
+            Update Metadata
+          </Button>
+        </Box>
+      </Stack>
 
       <Stack>
         {data?.map((addr: Address) => (

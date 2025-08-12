@@ -1,4 +1,4 @@
-import { Address, createWalletClient, Hash, http, WalletClient } from 'viem';
+import { Address, createWalletClient, Hash, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { appChain, publicClient } from './connect';
 import { RPC } from './setup';
@@ -31,12 +31,20 @@ const testWallet = () => {
   return walletClient;
 };
 
-export const createPool = async (creator: Address, fid: number) => {
+export const createPool = async (
+  creator: Address,
+  fid: number
+  //   wallet: any
+) => {
   if (!testPubK) {
     throw new Error('Test public key is not set in environment variables');
   }
 
+  console.log('testPubK', testPubK);
+
   const wallet = testWallet();
+
+  console.log('wallet.', wallet.account.address);
 
   // function createPool(
   //     ISuperToken _poolSuperToken,
@@ -59,17 +67,21 @@ export const createPool = async (creator: Address, fid: number) => {
     throw new Error(`Invalid pool metadata: ${valid.error.message}`);
   }
 
+  console.log('ADDR.SUPER_TOKEN', ADDR.SUPER_TOKEN);
+  console.log('creator', creator);
+
   const hash = await wallet.writeContract({
     abi: BeamRABI,
     address: ADDR.BEAMR,
     functionName: 'createPool',
+    // gas: 100000000n,
     args: [
       ADDR.SUPER_TOKEN,
       { transferabilityForUnitsOwner: false, distributionFromAnyAddress: true },
       { name: 'Test Pool', symbol: 'TP', decimals: 18 },
       [
         { account: testPubK, units: 6n },
-        { account: creator, units: 1000n },
+        { account: creator, units: 6n },
       ],
       creator,
       {
