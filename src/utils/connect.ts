@@ -4,8 +4,10 @@ import { createPublicClient } from 'viem';
 import { isDev, network, RPC } from './setup';
 import miniAppConnector from '@farcaster/miniapp-wagmi-connector';
 
+export const appChain = isDev ? baseSepolia : base;
+
 export const config = createConfig({
-  chains: isDev ? [baseSepolia] : [base],
+  chains: [appChain],
   transports: {
     [baseSepolia.id]: http(RPC),
     [base.id]: http(),

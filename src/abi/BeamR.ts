@@ -365,4 +365,4 @@ export const BeamRABI = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-];
+] as const;
