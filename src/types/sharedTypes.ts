@@ -30,7 +30,7 @@ export type ServerToClientEvents = {
 };
 
 export type ClientToServerEvents = {
-  [IOEvent.PoolInit]: () => void;
+  [IOEvent.PoolInit]: (data: { address: Address }) => void;
   [IOEvent.PoolComplete]: () => void;
   [IOEvent.WalletConnected]: (data: { address: Address }) => void;
 };

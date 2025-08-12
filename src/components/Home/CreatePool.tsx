@@ -1,5 +1,4 @@
 import { Box, Button, Stack } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
 import { useEffect, useState } from 'react';
 import { useUser } from '../../hooks/useUser';
 import { IOEvent } from '../../types/sharedTypes';
@@ -13,9 +12,11 @@ enum Status {
 }
 
 export const CreatePool = () => {
+  const { address } = useUser();
   const [status, setStatus] = useState<Status>(Status.Idle);
   const { socket } = useUser();
   const [error, setError] = useState<string | null>(null);
+  const [description, setDescription] = useState<string | null>(null);
   const [poolAddress, setPoolAddress] = useState<string | null>(null);
 
   const isLoading =
@@ -41,7 +42,13 @@ export const CreatePool = () => {
       return;
     }
 
-    socket.emit(IOEvent.PoolInit);
+    if (!address) {
+      setError('No wallet address found');
+      setStatus(Status.Error);
+      return;
+    }
+
+    socket.emit(IOEvent.PoolInit, { address });
   };
 
   return (
