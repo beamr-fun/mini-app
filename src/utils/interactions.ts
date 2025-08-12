@@ -101,10 +101,9 @@ export const createPool = async (
 export const distributeFlow = async (
   poolAddress: Address,
   user: Address,
-  monthlyFlowRate: bigint
+  monthlyFlowRate: bigint,
+  walletClient: any
 ) => {
-  const wallet = testWallet();
-
   const flowRate = monthlyFlowRate / BigInt(30 * 24 * 60 * 60); // Convert monthly flow rate to per second
 
   // function distributeFlow(
@@ -115,7 +114,7 @@ export const distributeFlow = async (
   //     bytes memory userData
   // ) external returns (bool)
 
-  const hash = await wallet.writeContract({
+  const hash = await walletClient.writeContract({
     abi: GDAForwarderAbi,
     address: ADDR.GDA_FORWARDER,
     functionName: 'distributeFlow',
@@ -179,8 +178,12 @@ export const updateMetadata = async (
   console.log('Transaction hash:', hash);
 };
 
-export const grantRole = async (roleId: Hash, address: Address) => {
-  const wallet = testWallet();
+export const grantRole = async (
+  roleId: Hash,
+  address: Address,
+  wallet: any
+) => {
+  //   const wallet = testWallet();
 
   // function grantRole(bytes32 role, address account)
 
@@ -198,8 +201,12 @@ export const grantRole = async (roleId: Hash, address: Address) => {
   console.log('Transaction receipt:', receipt);
 };
 
-export const revokeRole = async (roleId: Hash, address: Address) => {
-  const wallet = testWallet();
+export const revokeRole = async (
+  roleId: Hash,
+  address: Address,
+  wallet: any
+) => {
+  //   const wallet = testWallet();
 
   // function revokeRole(bytes32 role, address account)
 
