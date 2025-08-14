@@ -1,7 +1,6 @@
 import { Box, Button, Stack } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useUser } from '../../hooks/useUser';
-import { IOEvent } from '../../types/sharedTypes';
 
 enum Status {
   Idle,
@@ -12,44 +11,12 @@ enum Status {
 }
 
 export const CreatePool = () => {
-  const { address } = useUser();
-  const [status, setStatus] = useState<Status>(Status.Idle);
-  const { socket } = useUser();
-  const [error, setError] = useState<string | null>(null);
-  const [description, setDescription] = useState<string | null>(null);
-  const [poolAddress, setPoolAddress] = useState<string | null>(null);
+  const [status] = useState<Status>(Status.Idle);
 
   const isLoading =
     status === Status.Initializing || status === Status.Creating;
 
-  useEffect(() => {
-    if (!socket) return;
-    socket.on(IOEvent.PoolCreate, (poolResponse) => {});
-
-    return () => {
-      socket.off(IOEvent.PoolCreate);
-    };
-  }, []);
-
-  const handleCreatePool = async () => {
-    if (status !== Status.Idle) return;
-
-    setStatus(Status.Initializing);
-
-    if (!socket) {
-      setError('Socket is not connected');
-      setStatus(Status.Error);
-      return;
-    }
-
-    if (!address) {
-      setError('No wallet address found');
-      setStatus(Status.Error);
-      return;
-    }
-
-    socket.emit(IOEvent.PoolInit, { address });
-  };
+  const handleCreatePool = async () => {};
 
   return (
     <Stack w="100%" h="100%" justify="space-between">

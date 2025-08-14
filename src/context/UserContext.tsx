@@ -1,47 +1,15 @@
-import { createContext, ReactNode, useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { createContext, ReactNode } from 'react';
 import { Address } from 'viem';
 
 import { useAccount } from 'wagmi';
-import { SOCKET_URL } from '../utils/setup';
-import {
-  Beam,
-  ClientToServerEvents,
-  IOEvent,
-  Pool,
-  PoolResponse,
-} from '../types/sharedTypes';
 
-import { ServerToClientEvents } from '../types/sharedTypes';
-import sdk from '@farcaster/miniapp-sdk';
-import { User } from '@neynar/nodejs-sdk/build/api';
-
+//
 type UserContextType = {
-  isSocketConnected: boolean;
-  address?: Address;
-  user: User | null;
-  pool: Pool | null;
-  incomingBeams: Beam[] | null;
-  outgoingBeams: Beam[] | null;
-  hasPool: boolean;
-  isLoading: boolean;
-  userErrors: string[] | null;
-  socket?: Socket;
+  address: Address | undefined;
 };
 
-type IOSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
-
 export const UserContext = createContext<UserContextType>({
-  pool: null,
-  user: null,
-  incomingBeams: null,
-  outgoingBeams: null,
-  isLoading: false,
-  userErrors: null,
-  hasPool: false,
-  isSocketConnected: false,
   address: undefined,
-  socket: undefined,
 });
 
 export const UserProvider = ({
@@ -51,163 +19,132 @@ export const UserProvider = ({
 }) => {
   const { address } = useAccount();
 
-  const [socket, setSocket] = useState<IOSocket | undefined>();
-  const [user, setUser] = useState<User | null>(null);
-  const [isSocketConnected, setIsSocketConnected] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [pool, setPool] = useState<Pool | null>(null);
-  const [incomingBeams, setIncomingBeams] = useState<Beam[] | null>(null);
-  const [outgoingBeams, setOutgoingBeams] = useState<Beam[] | null>(null);
-  const [userErrors, setErrors] = useState<string[] | null>([]);
+  // useEffect(() => {
+  //   let socket: IOSocket;
 
-  const hasPool = !!user && !isLoading && !!pool;
+  //   const handlePoolLoad = (poolResponse: PoolResponse) => {
+  //     setPool(poolResponse.pool || null);
+  //     setIncomingBeams(poolResponse.incomingBeams || null);
+  //     setOutgoingBeams(poolResponse.outgoingBeams || null);
+  //     setErrors(
+  //       poolResponse.errors
+  //         ? (prevErrors) =>
+  //             prevErrors
+  //               ? [...prevErrors, ...(poolResponse.errors || [])]
+  //               : prevErrors
+  //         : null
+  //     );
+  //     setIsLoading(false);
+  //     console.log('Beampool Request Complete ☄️ ☄️ ☄️');
+  //     sdk.actions.ready();
+  //   };
 
-  useEffect(() => {
-    let socket: IOSocket;
+  //   const handleLoadSocket = async () => {
+  //     setIsLoading(true);
 
-    const handlePoolLoad = (poolResponse: PoolResponse) => {
-      setPool(poolResponse.pool || null);
-      setIncomingBeams(poolResponse.incomingBeams || null);
-      setOutgoingBeams(poolResponse.outgoingBeams || null);
-      setErrors(
-        poolResponse.errors
-          ? (prevErrors) =>
-              prevErrors
-                ? [...prevErrors, ...(poolResponse.errors || [])]
-                : prevErrors
-          : null
-      );
-      setIsLoading(false);
-      console.log('Beampool Request Complete ☄️ ☄️ ☄️');
-      sdk.actions.ready();
-    };
+  //     const [isMiniApp, tokenRes, context] = await Promise.all([
+  //       sdk.isInMiniApp(),
+  //       sdk.quickAuth.getToken(),
+  //       sdk.context,
+  //     ]);
 
-    const handleLoadSocket = async () => {
-      setIsLoading(true);
+  //     if (!isMiniApp) {
+  //       console.error('Not running in a mini app context');
+  //       setIsLoading(false);
+  //       // TODO: Handle this case appropriately, maybe redirect or show a message
+  //       return;
+  //     }
 
-      const [isMiniApp, tokenRes, context] = await Promise.all([
-        sdk.isInMiniApp(),
-        sdk.quickAuth.getToken(),
-        sdk.context,
-      ]);
+  //     const token = tokenRes?.token || null;
 
-      if (!isMiniApp) {
-        console.error('Not running in a mini app context');
-        setIsLoading(false);
-        // TODO: Handle this case appropriately, maybe redirect or show a message
-        return;
-      }
+  //     if (!token) {
+  //       // TODO: Handle error
+  //       setIsLoading(false);
+  //       console.error('No token provided for socket connection');
+  //       return;
+  //     }
 
-      const token = tokenRes?.token || null;
+  //     if (!context?.user) {
+  //       // TODO: Handle error
+  //       setIsLoading(false);
+  //       console.error('No user context found for socket connection');
+  //       return;
+  //     }
 
-      if (!token) {
-        // TODO: Handle error
-        setIsLoading(false);
-        console.error('No token provided for socket connection');
-        return;
-      }
+  //     socket = io(SOCKET_URL, {
+  //       reconnection: true,
+  //       auth: {
+  //         token,
+  //       },
+  //       reconnectionAttempts: 7,
+  //       reconnectionDelay: 1000,
+  //       reconnectionDelayMax: 180_000,
+  //       randomizationFactor: 0.5,
+  //       autoConnect: true,
+  //       transports: ['websocket'],
+  //     });
 
-      if (!context?.user) {
-        // TODO: Handle error
-        setIsLoading(false);
-        console.error('No user context found for socket connection');
-        return;
-      }
+  //     /// Socket connection listeners //////
+  //     socket.on('connect', () => {
+  //       console.log('Socket Connected 🛜');
+  //     });
+  //     socket.on('disconnect', (reason) => {
+  //       setIsSocketConnected(false);
+  //       console.log('🛸 Disconnected:', reason);
+  //     });
 
-      socket = io(SOCKET_URL, {
-        reconnection: true,
-        auth: {
-          token,
-        },
-        reconnectionAttempts: 7,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 180_000,
-        randomizationFactor: 0.5,
-        autoConnect: true,
-        transports: ['websocket'],
-      });
+  //     //// User authentication listeners ////
+  //     socket.on(IOEvent.UserAuthSuccess, ({ user }: { user: User }) => {
+  //       console.log('User Authed! 🔒');
+  //       setIsSocketConnected(true);
+  //       sdk.actions.ready();
+  //       setUser(user);
+  //     });
 
-      /// Socket connection listeners //////
-      socket.on('connect', () => {
-        console.log('Socket Connected 🛜');
-      });
-      socket.on('disconnect', (reason) => {
-        setIsSocketConnected(false);
-        console.log('🛸 Disconnected:', reason);
-      });
+  //     socket.on(IOEvent.UserAuthError, (error) => {
+  //       console.error('User auth error:', error);
+  //       setIsLoading(false);
+  //       setErrors((prevErrors) =>
+  //         prevErrors ? [...prevErrors, error.error || 'Auth error'] : prevErrors
+  //       );
+  //     });
 
-      //// User authentication listeners ////
-      socket.on(IOEvent.UserAuthSuccess, ({ user }: { user: User }) => {
-        console.log('User Authed! 🔒');
-        setIsSocketConnected(true);
-        sdk.actions.ready();
-        setUser(user);
-      });
+  //     //// Pool load listeners ////
 
-      socket.on(IOEvent.UserAuthError, (error) => {
-        console.error('User auth error:', error);
-        setIsLoading(false);
-        setErrors((prevErrors) =>
-          prevErrors ? [...prevErrors, error.error || 'Auth error'] : prevErrors
-        );
-      });
+  //     socket.on(IOEvent.PoolLoad, (poolResponse) => {
+  //       handlePoolLoad(poolResponse);
+  //     });
 
-      //// Pool load listeners ////
+  //     socket.on(IOEvent.WalletConnectError, (error) => {
+  //       console.error('Wallet connection error:', error);
+  //       setIsLoading(false);
+  //       setErrors((prevErrors) =>
+  //         prevErrors
+  //           ? [...prevErrors, error.error || 'Wallet connection error']
+  //           : prevErrors
+  //       );
+  //     });
 
-      socket.on(IOEvent.PoolLoad, (poolResponse) => {
-        handlePoolLoad(poolResponse);
-      });
+  //     setSocket(socket);
+  //   };
 
-      socket.on(IOEvent.WalletConnectError, (error) => {
-        console.error('Wallet connection error:', error);
-        setIsLoading(false);
-        setErrors((prevErrors) =>
-          prevErrors
-            ? [...prevErrors, error.error || 'Wallet connection error']
-            : prevErrors
-        );
-      });
+  //   handleLoadSocket();
 
-      setSocket(socket);
-    };
-
-    handleLoadSocket();
-
-    return () => {
-      socket?.disconnect?.();
-      setSocket(undefined);
-      setIsLoading(false);
-      setIsSocketConnected(false);
-      socket?.off?.(IOEvent.PoolLoad); // Remove specific listener
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!address || !socket || !isSocketConnected || !user) return;
-
-    socket.emit(IOEvent.WalletConnected, { address });
-
-    return () => {
-      setPool(null);
-      setIncomingBeams(null);
-      setOutgoingBeams(null);
-      setErrors([]);
-    };
-  }, [address, socket, isSocketConnected, user]);
+  //   return () => {
+  //     socket?.disconnect?.();
+  //     setSocket(undefined);
+  //     setIsLoading(false);
+  //     setIsSocketConnected(false);
+  //     socket?.off?.(IOEvent.PoolLoad); // Remove specific listener
+  //   };
+  // }, []);
 
   return (
     <UserContext.Provider
       value={{
         address,
-        user,
-        socket,
-        isLoading,
-        isSocketConnected,
-        pool,
-        incomingBeams,
-        outgoingBeams,
-        hasPool,
-        userErrors,
+        // user,
+        // isLoading,
       }}
     >
       {children}
