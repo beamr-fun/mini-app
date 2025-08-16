@@ -2,8 +2,6 @@ import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import { Flex, Group } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
-import { useEffect } from 'react';
-import { sdk } from '@farcaster/frame-sdk';
 import { ClientRoutes } from './Routes';
 import { Header } from './components/Header';
 
