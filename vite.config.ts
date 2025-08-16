@@ -7,6 +7,6 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['breaking-hybrid-begun-interpretation.trycloudflare.com'],
+    allowedHosts: ['telephone-consisting-isolated-unto.trycloudflare.com'],
   },
 });

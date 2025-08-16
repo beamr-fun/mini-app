@@ -1,102 +1,14 @@
-import { Address, createWalletClient, Hash, http } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
-import { appChain, publicClient } from './connect';
-import { RPC } from './setup';
+import { Address, Hash } from 'viem';
+import { publicClient } from './connect';
+
 import { BeamRABI } from '../abi/BeamR';
 import { ADDR } from '../const/addresses';
 import {
   ONCHAIN_EVENT,
   PoolMetadata,
   poolMetadataSchema,
-  PoolType,
 } from '../validation/poolMetadata';
 import { GDAForwarderAbi } from '../abi/GDAFowarder';
-
-const testPk = import.meta.env.VITE_TEST_PK;
-const testPubK = import.meta.env.VITE_TEST_PUBK;
-
-const testWallet = () => {
-  if (!testPk) {
-    throw new Error('Test private key is not set in environment variables');
-  }
-
-  const account = privateKeyToAccount(testPk);
-
-  const walletClient = createWalletClient({
-    account,
-    chain: appChain,
-    transport: http(RPC),
-  });
-
-  return walletClient;
-};
-
-export const createPool = async (
-  creator: Address,
-  fid: number
-  //   wallet: any
-) => {
-  if (!testPubK) {
-    throw new Error('Test public key is not set in environment variables');
-  }
-
-  console.log('testPubK', testPubK);
-
-  const wallet = testWallet();
-
-  console.log('wallet.', wallet.account.address);
-
-  // function createPool(
-  //     ISuperToken _poolSuperToken,
-  //     PoolConfig memory _poolConfig,
-  //     PoolERC20Metadata memory _erc20Metadata,
-  //     Member[] memory _members,
-  //     address _creator,
-  //     Metadata memory _metadata
-  // )
-
-  const metadata: PoolMetadata = {
-    creatorFID: fid,
-    poolType: PoolType.Tip,
-    name: 'Test Pool',
-  };
-
-  const valid = poolMetadataSchema.safeParse(metadata);
-
-  if (!valid.success) {
-    throw new Error(`Invalid pool metadata: ${valid.error.message}`);
-  }
-
-  console.log('ADDR.SUPER_TOKEN', ADDR.SUPER_TOKEN);
-  console.log('creator', creator);
-
-  const hash = await wallet.writeContract({
-    abi: BeamRABI,
-    address: ADDR.BEAMR,
-    functionName: 'createPool',
-    // gas: 100000000n,
-    args: [
-      ADDR.SUPER_TOKEN,
-      { transferabilityForUnitsOwner: false, distributionFromAnyAddress: true },
-      { name: 'Test Pool', symbol: 'TP', decimals: 18 },
-      [
-        { account: testPubK, units: 6n },
-        { account: creator, units: 6n },
-      ],
-      creator,
-      {
-        protocol: ONCHAIN_EVENT,
-        pointer: JSON.stringify(valid.data),
-      },
-    ],
-  });
-
-  console.log('Transaction hash:', hash);
-
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
-
-  console.log('receipt', receipt);
-};
 
 export const distributeFlow = async (
   poolAddress: Address,
@@ -105,14 +17,6 @@ export const distributeFlow = async (
   walletClient: any
 ) => {
   const flowRate = monthlyFlowRate / BigInt(30 * 24 * 60 * 60); // Convert monthly flow rate to per second
-
-  // function distributeFlow(
-  //     ISuperfluidToken token,
-  //     address from,
-  //     ISuperfluidPool pool,
-  //     int96 requestedFlowRate,
-  //     bytes memory userData
-  // ) external returns (bool)
 
   const hash = await walletClient.writeContract({
     abi: GDAForwarderAbi,
@@ -128,37 +32,11 @@ export const distributeFlow = async (
   console.log('Transaction receipt:', receipt);
 };
 
-export const updateMemberUnits = async (
-  members: { account: Address; units: bigint }[],
-  poolAddresses: Address[]
-) => {
-  const wallet = testWallet();
-
-  // function updateMemberUnits(
-  // Member[] memory _members,
-  // address[] memory poolAddresses
-  // )
-
-  const hash = await wallet.writeContract({
-    abi: BeamRABI,
-    address: ADDR.BEAMR,
-    functionName: 'updateMemberUnits',
-    args: [members, poolAddresses],
-  });
-
-  console.log('Transaction hash:', hash);
-
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
-
-  console.log('Transaction receipt:', receipt);
-};
-
 export const updateMetadata = async (
   poolAddress: Address,
-  metadata: PoolMetadata
+  metadata: PoolMetadata,
+  wallet: any
 ) => {
-  const wallet = testWallet();
-
   const valid = poolMetadataSchema.safeParse(metadata);
 
   if (!valid.success) {
@@ -183,10 +61,6 @@ export const grantRole = async (
   address: Address,
   wallet: any
 ) => {
-  //   const wallet = testWallet();
-
-  // function grantRole(bytes32 role, address account)
-
   const hash = await wallet.writeContract({
     abi: BeamRABI,
     address: ADDR.BEAMR,
@@ -206,10 +80,6 @@ export const revokeRole = async (
   address: Address,
   wallet: any
 ) => {
-  //   const wallet = testWallet();
-
-  // function revokeRole(bytes32 role, address account)
-
   const hash = await wallet.writeContract({
     abi: BeamRABI,
     address: ADDR.BEAMR,
@@ -224,11 +94,7 @@ export const revokeRole = async (
   console.log('Transaction receipt:', receipt);
 };
 
-export const connectToPool = async (poolAddress: Address) => {
-  const wallet = testWallet();
-
-  // connectPool(ISuperfluidPool pool, bytes memory userData)
-
+export const connectToPool = async (poolAddress: Address, wallet: any) => {
   const hash = await wallet.writeContract({
     abi: GDAForwarderAbi,
     address: ADDR.GDA_FORWARDER,

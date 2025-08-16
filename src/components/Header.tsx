@@ -2,7 +2,7 @@ import { Avatar, Box, Group, Text, Title } from '@mantine/core';
 import { useAccount } from 'wagmi';
 import { truncateAddress } from '../utils/common';
 // import { ConnectionIndicator } from './ConnectionIndicator';
-import { useUser } from '../hooks/useUser';
+// import { useUser } from '../hooks/useUser';
 
 export const Header = () => {
   const { address } = useAccount();

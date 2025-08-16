@@ -1,7 +1,10 @@
+import sdk from '@farcaster/miniapp-sdk';
+import { useQuery } from '@tanstack/react-query';
 import { createContext, ReactNode } from 'react';
 import { Address } from 'viem';
 
 import { useAccount } from 'wagmi';
+import { AuthResponse } from '../types/sharedTypes';
 
 //
 type UserContextType = {
@@ -12,12 +15,61 @@ export const UserContext = createContext<UserContextType>({
   address: undefined,
 });
 
+const login = async (clientAddress: Address) => {
+  const [isMiniApp, tokenRes, context] = await Promise.all([
+    sdk.isInMiniApp(),
+    sdk.quickAuth.getToken(),
+    sdk.context,
+  ]);
+
+  if (!isMiniApp) {
+    console.error('Not running in a mini app context');
+    // TODO: Handle this case appropriately, maybe redirect or show a message
+    return;
+  }
+
+  const token = tokenRes?.token || null;
+
+  if (!token) {
+    console.error('No token provided for socket connection');
+  }
+
+  const res = await fetch('http://localhost:3000/v1/user/auth', {
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
+
+  console.log('res', res);
+
+  if (!res.ok || res.status !== 200) {
+    console.error('Failed to authenticate user');
+    return;
+  }
+
+  const data = (await res.json()) as AuthResponse;
+
+  return data;
+};
+
 export const UserProvider = ({
   children,
 }: {
   children: ReactNode | ReactNode[];
 }) => {
   const { address } = useAccount();
+  const {
+    data: authRes,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['user', address],
+    queryFn: () => login(address as Address),
+    enabled: !!address,
+  });
+
+  // TOMORROW, set up Apollo and subscribe utilities.
+  // Set up typegen from graphql schema
 
   // useEffect(() => {
   //   let socket: IOSocket;
