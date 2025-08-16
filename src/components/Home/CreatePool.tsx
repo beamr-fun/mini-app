@@ -1,6 +1,5 @@
 import { Box, Button, Stack } from '@mantine/core';
 import { useState } from 'react';
-import { useUser } from '../../hooks/useUser';
 
 enum Status {
   Idle,

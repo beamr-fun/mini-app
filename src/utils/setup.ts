@@ -6,18 +6,33 @@ export const isIndexerDev = import.meta.env.VITE_INDEXER_ENV === 'dev';
 
 export const network = isDev ? baseSepolia : base;
 
-export const rpc = isDev
+const rpc = isDev
   ? import.meta.env.VITE_RPC_DEV
   : import.meta.env.VITE_RPC_PROD;
 
-export const apiUrl = isAPIDev
+const apiUrl = isAPIDev
   ? import.meta.env.VITE_API_DEV
   : import.meta.env.VITE_API_PROD;
 
-export const apiKey = isAPIDev
+const apiKey = isAPIDev
   ? import.meta.env.VITE_API_KEY_DEV
   : import.meta.env.VITE_API_KEY_PROD;
 
-export const indexerUrl = isIndexerDev
+const indexerUrl = isIndexerDev
   ? import.meta.env.VITE_INDEXER_DEV
   : import.meta.env.VITE_INDEXER_PROD;
+
+const envKeys = {
+  rpc,
+  apiUrl,
+  apiKey,
+  indexerUrl,
+};
+
+Object.entries(envKeys).forEach(([key, value]) => {
+  if (!value) {
+    throw new Error(`Missing environment variable: ${key}`);
+  }
+});
+
+export const keys = envKeys as Record<keyof typeof envKeys, string>;
