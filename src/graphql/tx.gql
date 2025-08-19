@@ -1,0 +1,5 @@
+subscription TXs {
+  TX {
+    id
+  }
+}
