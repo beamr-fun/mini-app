@@ -49,7 +49,17 @@ const login = async (clientAddress: Address) => {
 
   const data = (await res.json()) as AuthResponse;
 
-  return data;
+  if (!data.success) {
+    console.error('Authentication failed:', data);
+    return;
+  }
+
+  return {
+    user: data.user,
+    jwt: data.jwtPayload,
+    isMiniApp,
+    context,
+  };
 };
 
 export const UserProvider = ({
@@ -59,7 +69,7 @@ export const UserProvider = ({
 }) => {
   const { address } = useAccount();
   const {
-    data: authRes,
+    data: apiData,
     isLoading,
     error,
   } = useQuery({
@@ -67,6 +77,8 @@ export const UserProvider = ({
     queryFn: () => login(address as Address),
     enabled: !!address,
   });
+
+  console.log('apiData', apiData);
 
   // TOMORROW, set up Apollo and subscribe utilities.
   // Set up typegen from graphql schema

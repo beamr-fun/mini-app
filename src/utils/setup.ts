@@ -2,7 +2,6 @@ import { base, baseSepolia } from 'viem/chains';
 
 export const isDev = import.meta.env.VITE_ENV === 'dev';
 export const isAPIDev = import.meta.env.VITE_API_ENV === 'dev';
-export const isIndexerDev = import.meta.env.VITE_INDEXER_ENV === 'dev';
 
 export const network = isDev ? baseSepolia : base;
 
@@ -18,9 +17,7 @@ const apiKey = isAPIDev
   ? import.meta.env.VITE_API_KEY_DEV
   : import.meta.env.VITE_API_KEY_PROD;
 
-const indexerUrl = isIndexerDev
-  ? import.meta.env.VITE_INDEXER_DEV
-  : import.meta.env.VITE_INDEXER_PROD;
+const indexerUrl = import.meta.env.VITE_INDEXER_URL;
 
 const envKeys = {
   rpc,

@@ -7,6 +7,6 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['telephone-consisting-isolated-unto.trycloudflare.com'],
+    allowedHosts: ['uncle-where-priority-expenditures.trycloudflare.com'],
   },
 });
