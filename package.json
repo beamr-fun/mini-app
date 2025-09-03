@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "tunnel": "cloudflared tunnel --url http://localhost:5173",
+    "tunnel": "node scripts/tunnel.js",
     "gen-key": "node scripts/genKey.js",
     "pull-types": "node scripts/pullTypes.js",
     "push-types": "node scripts/pushTypes.js"

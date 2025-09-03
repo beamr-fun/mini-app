@@ -1,5 +1,3 @@
-import '@mantine/core/styles.css';
-import '@mantine/notifications/styles.css';
 import { Flex, Group } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { ClientRoutes } from './Routes';
@@ -27,7 +25,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       px="md"
       py="xs"
       maw="393px"
-      bg="dark.8"
     >
       {children}
     </Flex>

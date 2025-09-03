@@ -40,8 +40,6 @@ const login = async (clientAddress: Address) => {
     },
   });
 
-  console.log('res', res);
-
   if (!res.ok || res.status !== 200) {
     console.error('Failed to authenticate user');
     return;
@@ -53,6 +51,8 @@ const login = async (clientAddress: Address) => {
     console.error('Authentication failed:', data);
     return;
   }
+
+  sdk.actions.ready();
 
   return {
     user: data.user,
@@ -77,8 +77,6 @@ export const UserProvider = ({
     queryFn: () => login(address as Address),
     enabled: !!address,
   });
-
-  console.log('apiData', apiData);
 
   // TOMORROW, set up Apollo and subscribe utilities.
   // Set up typegen from graphql schema
