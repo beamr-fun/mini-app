@@ -22,8 +22,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     <Flex
       direction="column"
       style={{ height: '100vh' }}
-      px="md"
-      py="xs"
+      px="32"
+      py="12"
       maw="393px"
     >
       {children}

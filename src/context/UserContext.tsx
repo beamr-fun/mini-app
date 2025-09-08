@@ -4,15 +4,17 @@ import { createContext, ReactNode } from 'react';
 import { Address } from 'viem';
 
 import { useAccount } from 'wagmi';
-import { AuthResponse } from '../types/sharedTypes';
+import { AuthResponse, FCUser } from '../types/sharedTypes';
 
 //
 type UserContextType = {
+  user?: FCUser;
   address: Address | undefined;
 };
 
 export const UserContext = createContext<UserContextType>({
   address: undefined,
+  user: undefined,
 });
 
 const login = async (clientAddress: Address) => {
@@ -77,6 +79,8 @@ export const UserProvider = ({
     queryFn: () => login(address as Address),
     enabled: !!address,
   });
+
+  console.log('apiData', apiData);
 
   // TOMORROW, set up Apollo and subscribe utilities.
   // Set up typegen from graphql schema
@@ -205,6 +209,7 @@ export const UserProvider = ({
     <UserContext.Provider
       value={{
         address,
+        user: apiData?.user,
         // user,
         // isLoading,
       }}
