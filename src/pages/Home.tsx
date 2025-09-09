@@ -2,12 +2,12 @@ import {
   Box,
   Button,
   NumberInput,
+  SegmentedControl,
   Select,
   Stack,
   Text,
   Textarea,
   TextInput,
-  Title,
 } from '@mantine/core';
 
 export const Home = () => {
@@ -26,10 +26,15 @@ export const Home = () => {
         tristique senectus et netus et malesuada fames ac turpis egestas.
         Praesent sed magna at magna placerat mattis.
       </Text>
+      <Toggle />
       <Inputs />
       <Buttons />
     </Box>
   );
+};
+
+const Toggle = () => {
+  return <SegmentedControl data={['Recent', 'Leaderboard']} />;
 };
 
 const Inputs = () => {

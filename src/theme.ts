@@ -2,10 +2,12 @@ import {
   ConvertCSSVariablesInput,
   createTheme,
   MantineTheme,
+  SegmentedControl,
 } from '@mantine/core';
 import typographyClasses from './styles/typography.module.css';
 import buttonClasses from './styles/button.module.css';
 import inputClasses from './styles/input.module.css';
+import segmentedClasses from './styles/segmentedControl.module.css';
 
 const GRAY = [
   '#F2F2F2',
@@ -114,6 +116,20 @@ export const theme = createTheme({
     green: GREEN,
     purple: PURPLE,
   },
+  fontSizes: {
+    xs: '10px',
+    sm: '12px',
+    md: '14px',
+    lg: '16px',
+    xl: '18px',
+  },
+  spacing: {
+    xs: '4px',
+    sm: '8px',
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+  },
   fontFamily: 'Pretendard, sans-serif',
   components: {
     Text: {
@@ -178,20 +194,17 @@ export const theme = createTheme({
         },
       },
     },
-  },
-  fontSizes: {
-    xs: '10px',
-    sm: '12px',
-    md: '14px',
-    lg: '16px',
-    xl: '18px',
-  },
-  spacing: {
-    xs: '4px',
-    sm: '8px',
-    md: '16px',
-    lg: '24px',
-    xl: '32px',
+    SegmentedControl: {
+      classNames: {
+        root: segmentedClasses.root,
+        indicator: segmentedClasses.indicator,
+        label: segmentedClasses.label,
+      },
+      defaultProps: {
+        size: 'md',
+        fullWidth: true,
+      },
+    },
   },
 });
 export const cssVariablesResolver = (
