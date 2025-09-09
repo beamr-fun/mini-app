@@ -3,6 +3,7 @@ import {
   createTheme,
   MantineTheme,
 } from '@mantine/core';
+import typographyClasses from './styles/typography.module.css';
 
 const GRAY = [
   '#F2F2F2',
@@ -15,7 +16,32 @@ const GRAY = [
   '#363636',
   '#222121',
   '#0F0E0E',
-];
+] as const;
+const DIM = [
+  GRAY[4],
+  GRAY[4],
+  GRAY[4],
+  GRAY[4],
+  GRAY[4],
+  GRAY[4],
+  GRAY[4],
+  GRAY[4],
+  GRAY[4],
+  GRAY[4],
+] as const;
+
+const BRIGHT = [
+  GRAY[0],
+  GRAY[0],
+  GRAY[0],
+  GRAY[0],
+  GRAY[0],
+  GRAY[0],
+  GRAY[0],
+  GRAY[0],
+  GRAY[0],
+  GRAY[0],
+] as const;
 const BLUE = [];
 const RED = [];
 const GREEN = [];
@@ -28,8 +54,17 @@ export const theme = createTheme({
     lg: '16px',
     xl: '20px',
   },
+  colors: {
+    gray: GRAY,
+    dim: DIM,
+    bright: BRIGHT,
+  },
   fontFamily: 'Pretendard, sans-serif',
-
+  components: {
+    Text: {
+      classNames: { root: typographyClasses.text },
+    },
+  },
   fontSizes: {
     xs: '10px',
     sm: '12px',
@@ -50,7 +85,19 @@ export const theme = createTheme({
 export const cssVariablesResolver = (
   theme: MantineTheme
 ): ConvertCSSVariablesInput => ({
-  variables: { '--mantine-color-body': '#0F0E0E' },
-  dark: { '--mantine-color-body': '#0F0E0E' },
-  light: { '--mantine-color-body': 'pink' },
+  variables: {
+    '--mantine-color-body': 'var(--mantine-color-gray-9)',
+    '--mantine-color-text': 'var(--mantine-color-gray-1)',
+    '--mantine-color-dimmed': 'var(--mantine-color-gray-4)',
+  },
+  dark: {
+    '--mantine-color-body': 'var(--mantine-color-gray-9)',
+    '--mantine-color-text': 'var(--mantine-color-gray-1)',
+    '--mantine-color-dimmed': 'var(--mantine-color-gray-4)',
+  },
+  light: {
+    '--mantine-color-body': 'var(--mantine-color-gray-0)',
+    '--mantine-color-text': 'var(--mantine-color-gray-8)',
+    '--mantine-color-dimmed': 'var(--mantine-color-gray-5)',
+  },
 });
