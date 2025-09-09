@@ -3,6 +3,7 @@
   border-radius: 12px;
   border: 1px solid var(--mantine-color-gray-5);
   transition: 0.15s ease all;
+  font-size: var(--mantine-font-size-md);
 }
 
 .baseInput:hover {
@@ -17,11 +18,8 @@
   border-color: var(--mantine-color-gray-1);
 }
 
-.textInput {
-  height: 52px;
-  padding: 16px;
-  font-size: var(--mantine-font-size-md);
-  width: 311px;
+.baseInput[data-error] {
+  border-color: var(--mantine-color-red-6);
 }
 
 .label {
@@ -29,4 +27,28 @@
   font-weight: 400;
   color: var(--mantine-color-gray-3);
   margin-bottom: 8px;
+}
+
+.description {
+  color: var(--mantine-color-gray-3);
+  font-size: var(--mantine-font-size-sm);
+  margin-top: 4px;
+}
+
+.errorText {
+  color: var(--mantine-color-red-6);
+  font-size: var(--mantine-font-size-sm);
+  margin-top: 4px;
+}
+
+.textInput {
+  height: 52px;
+  padding: 16px;
+  width: 311px;
+}
+
+.textarea {
+  padding: 16px;
+
+  width: 311px;
 }

@@ -130,11 +130,24 @@ export const theme = createTheme({
     InputWrapper: {
       classNames: {
         label: inputClasses.label,
+        description: inputClasses.description,
+        error: inputClasses.errorText,
+      },
+      defaultProps: {
+        inputWrapperOrder: ['label', 'input', 'error', 'description'],
       },
     },
     TextInput: {
       classNames: {
         input: inputClasses.textInput,
+      },
+    },
+    Textarea: {
+      classNames: {
+        input: inputClasses.textarea,
+      },
+      defaultProps: {
+        rows: 3,
       },
     },
   },

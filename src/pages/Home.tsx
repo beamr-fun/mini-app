@@ -1,4 +1,12 @@
-import { Box, Button, Stack, Text, TextInput, Title } from '@mantine/core';
+import {
+  Box,
+  Button,
+  Stack,
+  Text,
+  Textarea,
+  TextInput,
+  Title,
+} from '@mantine/core';
 
 export const Home = () => {
   return (
@@ -10,7 +18,7 @@ export const Home = () => {
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur vitae
         felis ac leo elementum ultrices nec ut ex.
       </Text>
-      <Text>
+      <Text mb="xl">
         Duis porta libero et velit imperdiet, vulputate viverra enim feugiat. In
         nec tempor diam. Donec a maximus enim. Pellentesque habitant morbi
         tristique senectus et netus et malesuada fames ac turpis egestas.
@@ -27,14 +35,55 @@ const Inputs = () => {
     <Stack gap="xl">
       <Box>
         <Text fz="xl" variant="highlight" mb="sm">
+          Textarea
+        </Text>
+        <Stack gap="md">
+          <Textarea label="Base Input" placeholder="This is placeholder text" />
+          <Textarea
+            label="Input With Description"
+            placeholder="This is placeholder text"
+            description="This is a description"
+          />
+          <Textarea
+            label="Base Input Error"
+            placeholder="This is placeholder text"
+            error="This is an error message"
+          />
+          <Textarea
+            label="Required Input"
+            placeholder="This is placeholder text"
+            required
+          />
+          <Textarea label="Filled Input" value={'Filled Input'} />
+        </Stack>
+      </Box>
+      <Box>
+        <Text fz="xl" variant="highlight" mb="sm">
           Text Input
         </Text>
-        <TextInput label="Base Input" placeholder="This is placeholder text" />
-        <TextInput
-          label="Base Input Error"
-          placeholder="This is placeholder text"
-          error="This is an error message"
-        />
+        <Stack gap="md">
+          <TextInput
+            label="Base Input"
+            placeholder="This is placeholder text"
+          />
+          <TextInput
+            label="Input With Description"
+            placeholder="This is placeholder text"
+            description="This is a description"
+          />
+
+          <TextInput
+            label="Base Input Error"
+            placeholder="This is placeholder text"
+            error="This is an error message"
+          />
+          <TextInput
+            label="Required Input"
+            placeholder="This is placeholder text"
+            required
+          />
+          <TextInput label="Filled Input" value={'Filled Input'} />
+        </Stack>
       </Box>
     </Stack>
   );
