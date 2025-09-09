@@ -1,10 +1,13 @@
 import {
   ConvertCSSVariablesInput,
   createTheme,
+  InputLabel,
   MantineTheme,
+  TextInput,
 } from '@mantine/core';
 import typographyClasses from './styles/typography.module.css';
 import buttonClasses from './styles/button.module.css';
+import inputClasses from './styles/input.module.css';
 
 const GRAY = [
   '#F2F2F2',
@@ -120,6 +123,21 @@ export const theme = createTheme({
     },
     Button: {
       classNames: { root: buttonClasses.root },
+    },
+    Input: {
+      classNames: {
+        input: inputClasses.baseInput,
+      },
+    },
+    InputLabel: {
+      classNames: {
+        root: inputClasses.label,
+      },
+    },
+    TextInput: {
+      classNames: {
+        input: inputClasses.textInput,
+      },
     },
   },
   fontSizes: {

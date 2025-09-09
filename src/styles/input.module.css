@@ -1,0 +1,21 @@
+.baseInput {
+  background-color: var(--mantine-color-gray-9);
+  border-radius: 12px;
+  border: 1px solid var(--mantine-color-gray-5);
+  transition: 0.15s ease all;
+}
+
+.baseInput:focus {
+  border-color: var(--mantine-color-gray-1);
+}
+
+.textInput {
+  height: 52px;
+  padding: 16px;
+  font-size: var(--mantine-font-size-md);
+  width: 311px;
+}
+
+.label {
+  font-size: var(--mantine-font-size-md);
+}
