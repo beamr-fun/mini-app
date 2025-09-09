@@ -17,6 +17,20 @@ const GRAY = [
   '#222121',
   '#0F0E0E',
 ] as const;
+
+const BLUE = [
+  '#F2FDFF',
+  '#E6FAFF',
+  '#BFF1FF',
+  '#99E7FF',
+  '#4DCCFF',
+  '#00ABFF',
+  '#0091E6',
+  '#005299',
+  '#003773',
+  '#00204A',
+] as const;
+
 const DIM = [
   GRAY[4],
   GRAY[4],
@@ -42,9 +56,44 @@ const BRIGHT = [
   GRAY[0],
   GRAY[0],
 ] as const;
-const BLUE = [];
-const RED = [];
-const GREEN = [];
+
+const RED = [
+  '#F45744',
+  '#F45744',
+  '#F45744',
+  '#F45744',
+  '#F45744',
+  '#F45744',
+  '#F45744',
+  '#F45744',
+  '#F45744',
+  '#F45744',
+] as const;
+const GREEN = [
+  '#63B18A',
+  '#63B18A',
+  '#63B18A',
+  '#63B18A',
+  '#63B18A',
+  '#63B18A',
+  '#63B18A',
+  '#63B18A',
+  '#63B18A',
+  '#63B18A',
+] as const;
+
+const PURPLE = [
+  '6D68C4',
+  '6D68C4',
+  '6D68C4',
+  '6D68C4',
+  '6D68C4',
+  '6D68C4',
+  '6D68C4',
+  '6D68C4',
+  '6D68C4',
+  '6D68C4',
+] as const;
 
 export const theme = createTheme({
   radius: {
@@ -58,6 +107,10 @@ export const theme = createTheme({
     gray: GRAY,
     dim: DIM,
     bright: BRIGHT,
+    blue: BLUE,
+    red: RED,
+    green: GREEN,
+    purple: PURPLE,
   },
   fontFamily: 'Pretendard, sans-serif',
   components: {

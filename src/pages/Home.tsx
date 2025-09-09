@@ -3,10 +3,10 @@ import { Box, Text, Title } from '@mantine/core';
 export const Home = () => {
   return (
     <Box>
-      <Text mb="sm" c="dim">
+      <Text mb="sm" variant="label">
         Welcome!
       </Text>
-      <Text mb={'lg'}>
+      <Text mb={'md'}>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur vitae
         felis ac leo elementum ultrices nec ut ex.
       </Text>
