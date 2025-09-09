@@ -67,3 +67,39 @@
   width: fit-content;
   padding: 0 16px;
 }
+
+.select {
+  width: 311px;
+}
+
+.selectInput {
+  height: 52px;
+}
+
+.selectSection {
+  margin: 0 8px;
+
+  svg {
+    color: var(--mantine-color-gray-1);
+    height: 24px;
+    width: 24px;
+  }
+}
+
+.selectDropdown {
+  background-color: var(--mantine-color-gray-9);
+  border: 1px solid var(--mantine-color-gray-1);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.selectOption {
+  font-size: var(--mantine-font-size-md);
+  height: 40px;
+  margin-bottom: 4px;
+  width: 95%;
+  &:hover {
+    background-color: var(--mantine-color-gray-8);
+    color: var(--mantine-color-gray-0);
+  }
+}

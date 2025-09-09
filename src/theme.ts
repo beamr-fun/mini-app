@@ -162,6 +162,22 @@ export const theme = createTheme({
         valueIsNumericString: true,
       },
     },
+    Select: {
+      classNames: {
+        root: inputClasses.select,
+        input: inputClasses.selectInput,
+        section: inputClasses.selectSection,
+        dropdown: inputClasses.selectDropdown,
+        option: inputClasses.selectOption,
+      },
+      defaultProps: {
+        autoSelectOnBlur: true,
+        allowDeselect: false,
+        comboboxProps: {
+          transitionProps: { transition: 'fade-up', duration: 200 },
+        },
+      },
+    },
   },
   fontSizes: {
     xs: '10px',

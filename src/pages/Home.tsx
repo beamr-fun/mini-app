@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   NumberInput,
+  Select,
   Stack,
   Text,
   Textarea,
@@ -34,6 +35,36 @@ export const Home = () => {
 const Inputs = () => {
   return (
     <Stack gap="xl">
+      <Box>
+        <Text fz="xl" variant="highlight" mb="sm">
+          Select
+        </Text>
+        <Stack gap="md">
+          <Select
+            label="Base Input"
+            placeholder="Pick value"
+            data={['React', 'Angular', 'Vue', 'Svelte']}
+          />
+          <Select
+            label="Error Input"
+            placeholder="Pick value"
+            data={['React', 'Angular', 'Vue', 'Svelte']}
+            error="This is an error"
+          />
+          <Select
+            label="With Description"
+            placeholder="Pick value"
+            data={['React', 'Angular', 'Vue', 'Svelte']}
+            description="This is a description"
+          />
+          <Select
+            label="Filled Input"
+            placeholder="Pick value"
+            data={['React', 'Angular', 'Vue', 'Svelte']}
+            defaultValue={'Vue'}
+          />
+        </Stack>
+      </Box>
       <Box>
         <Text fz="xl" variant="highlight" mb="sm">
           Number Input
