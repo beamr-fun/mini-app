@@ -1,4 +1,5 @@
 .text {
+  line-height: 140%;
   &[data-variant='label'] {
     color: var(--mantine-color-gray-4);
     font-size: var(--mantine-font-size-lg);

@@ -4,6 +4,7 @@ import {
   MantineTheme,
 } from '@mantine/core';
 import typographyClasses from './styles/typography.module.css';
+import buttonClasses from './styles/button.module.css';
 
 const GRAY = [
   '#F2F2F2',
@@ -116,6 +117,9 @@ export const theme = createTheme({
   components: {
     Text: {
       classNames: { root: typographyClasses.text },
+    },
+    Button: {
+      classNames: { root: buttonClasses.root },
     },
   },
   fontSizes: {
