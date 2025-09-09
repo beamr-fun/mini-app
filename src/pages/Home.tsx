@@ -29,7 +29,12 @@ const Inputs = () => {
         <Text fz="xl" variant="highlight" mb="sm">
           Text Input
         </Text>
-        <TextInput label="Base Input" />
+        <TextInput label="Base Input" placeholder="This is placeholder text" />
+        <TextInput
+          label="Base Input Error"
+          placeholder="This is placeholder text"
+          error="This is an error message"
+        />
       </Box>
     </Stack>
   );

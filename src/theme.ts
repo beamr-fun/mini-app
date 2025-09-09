@@ -1,9 +1,7 @@
 import {
   ConvertCSSVariablesInput,
   createTheme,
-  InputLabel,
   MantineTheme,
-  TextInput,
 } from '@mantine/core';
 import typographyClasses from './styles/typography.module.css';
 import buttonClasses from './styles/button.module.css';
@@ -129,9 +127,9 @@ export const theme = createTheme({
         input: inputClasses.baseInput,
       },
     },
-    InputLabel: {
+    InputWrapper: {
       classNames: {
-        root: inputClasses.label,
+        label: inputClasses.label,
       },
     },
     TextInput: {
@@ -154,8 +152,6 @@ export const theme = createTheme({
     lg: '24px',
     xl: '32px',
   },
-  headings: { fontFamily: 'var(--font-sans)' },
-  /* Put your mantine theme override here */
 });
 export const cssVariablesResolver = (
   theme: MantineTheme
