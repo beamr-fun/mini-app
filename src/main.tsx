@@ -9,7 +9,7 @@ import { config } from './utils/connect.ts';
 import { BrowserRouter } from 'react-router-dom';
 import { UserProvider } from './context/UserContext.tsx';
 import { MantineProvider } from '@mantine/core';
-import { cssVariablesResolver } from './theme.ts';
+import { cssVariablesResolver, theme } from './theme.ts';
 
 const queryClient = new QueryClient();
 
@@ -21,6 +21,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
           <BrowserRouter>
             <MantineProvider
               withCssVariables
+              theme={theme}
               defaultColorScheme="dark"
               cssVariablesResolver={cssVariablesResolver}
             >

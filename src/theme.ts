@@ -16,6 +16,17 @@ export const theme = createTheme({
     lg: '16px',
     xl: '20px',
   },
+  fontFamily: 'Pretendard, sans-serif',
+
+  fontSizes: {
+    xs: '12px',
+    sm: '14px',
+    md: '16px',
+    lg: '18px',
+    xl: '20px',
+  },
+  spacing: {},
+  headings: { fontFamily: 'var(--font-sans)' },
   /* Put your mantine theme override here */
 });
 export const cssVariablesResolver = (
