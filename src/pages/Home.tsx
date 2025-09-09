@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  NumberInput,
   Stack,
   Text,
   Textarea,
@@ -33,6 +34,42 @@ export const Home = () => {
 const Inputs = () => {
   return (
     <Stack gap="xl">
+      <Box>
+        <Text fz="xl" variant="highlight" mb="sm">
+          Number Input
+        </Text>
+        <Stack gap="md">
+          <NumberInput
+            label="Base Input"
+            rightSection={'BEAMR'}
+            rightSectionWidth={70}
+          />
+          <NumberInput
+            label="Input With Description"
+            rightSection={'BEAMR'}
+            rightSectionWidth={70}
+            description="This is a description"
+          />
+          <NumberInput
+            label="Input With Error"
+            rightSection={'ETH'}
+            rightSectionWidth={50}
+            error="This is an error"
+          />
+          <NumberInput
+            label="Required Input"
+            rightSection={'ETH'}
+            rightSectionWidth={50}
+            required
+          />
+          <NumberInput
+            label="Filled Input"
+            rightSection={'ETH'}
+            rightSectionWidth={50}
+            value={12345.67}
+          />
+        </Stack>
+      </Box>
       <Box>
         <Text fz="xl" variant="highlight" mb="sm">
           Textarea

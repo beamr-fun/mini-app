@@ -49,6 +49,21 @@
 
 .textarea {
   padding: 16px;
-
   width: 311px;
+}
+
+.numberInputRoot {
+  width: 311px;
+}
+
+.numberInput {
+  height: 52px;
+  text-align: right;
+  padding-block: 16px;
+  padding-inline-start: 16px;
+}
+
+.numberInputSection {
+  width: fit-content;
+  padding: 0 16px;
 }

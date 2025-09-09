@@ -150,6 +150,18 @@ export const theme = createTheme({
         rows: 3,
       },
     },
+    NumberInput: {
+      classNames: {
+        root: inputClasses.numberInputRoot,
+        input: inputClasses.numberInput,
+        section: inputClasses.numberInputSection,
+      },
+      defaultProps: {
+        allowNegative: false,
+        hideControls: true,
+        valueIsNumericString: true,
+      },
+    },
   },
   fontSizes: {
     xs: '10px',
