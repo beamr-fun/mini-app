@@ -1,0 +1,17 @@
+.root {
+  background: var(--mantine-color-gray-9);
+  border: 1px solid var(--mantine-color-gray-8);
+  border-radius: 12px;
+  padding: 6px;
+}
+
+.indicator {
+  background: var(--mantine-color-gray-9);
+  border: 1px solid var(--mantine-color-gray-0);
+  border-radius: 8px;
+}
+
+.label {
+  font-size: var(--mantine-font-size-sm);
+  padding: 5px;
+}

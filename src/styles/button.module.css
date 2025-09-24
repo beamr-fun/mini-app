@@ -1,0 +1,83 @@
+.root {
+  /* keep your existing props… */
+  background:
+    /* inner fill */
+    linear-gradient(var(--mantine-color-gray-9), var(--mantine-color-gray-9))
+      padding-box,
+    /* border gradient */
+      linear-gradient(
+        90deg,
+        var(--mantine-color-gray-3),
+        var(--mantine-color-blue-6)
+      )
+      border-box;
+  border: 1px solid transparent; /* required for the trick */
+  color: var(--mantine-color-gray-0);
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: var(--mantine-font-size-md);
+  min-width: 198px;
+  padding: 11px 24px;
+  height: 40px;
+  transition: all 150ms ease;
+}
+
+.root:hover {
+  background:
+    linear-gradient(var(--mantine-color-gray-9), var(--mantine-color-gray-9))
+      padding-box,
+    linear-gradient(
+        90deg,
+        var(--mantine-color-gray-2),
+        var(--mantine-color-blue-5)
+      )
+      border-box;
+  color: #fff;
+}
+
+/* keep disabled looking disabled */
+.root:disabled {
+  background:
+    linear-gradient(var(--mantine-color-gray-9), var(--mantine-color-gray-9))
+      padding-box,
+    linear-gradient(
+        90deg,
+        var(--mantine-color-gray-8),
+        var(--mantine-color-gray-8)
+      )
+      border-box;
+  border: 1px solid transparent;
+  color: var(--mantine-color-gray-7);
+  cursor: not-allowed;
+}
+
+/* SECONDARY: override back to solid border (no gradient) */
+.root[data-variant='secondary'] {
+  background: var(--mantine-color-gray-9);
+  border: 1px solid var(--mantine-color-gray-0);
+}
+
+.root[data-variant='secondary']:hover {
+  border-color: #fff;
+}
+.root[data-size='lg'] {
+  padding: 15px 32px;
+  min-width: 309px;
+  height: 50px;
+  font-size: var(--mantine-font-size-lg);
+}
+
+.root[data-size='sm'] {
+  padding: 7px 16px;
+  min-width: 148px;
+  height: 32px;
+  font-size: var(--mantine-font-size-sm);
+}
+
+.root[data-size='xs'] {
+  padding: 5px 12px;
+  min-width: 105px;
+  height: 24px;
+  border-radius: 8px;
+  font-size: var(--mantine-font-size-xs);
+}

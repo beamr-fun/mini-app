@@ -1,0 +1,105 @@
+.baseInput {
+  background-color: var(--mantine-color-gray-9);
+  border-radius: 12px;
+  border: 1px solid var(--mantine-color-gray-5);
+  transition: 0.15s ease all;
+  font-size: var(--mantine-font-size-md);
+}
+
+.baseInput:hover {
+  border-color: var(--mantine-color-gray-4);
+}
+
+.baseInput::placeholder {
+  color: var(--mantine-color-gray-6);
+}
+
+.baseInput:focus {
+  border-color: var(--mantine-color-gray-1);
+}
+
+.baseInput[data-error] {
+  border-color: var(--mantine-color-red-6);
+}
+
+.label {
+  font-size: var(--mantine-font-size-lg);
+  font-weight: 400;
+  color: var(--mantine-color-gray-3);
+  margin-bottom: 8px;
+}
+
+.description {
+  color: var(--mantine-color-gray-3);
+  font-size: var(--mantine-font-size-sm);
+  margin-top: 4px;
+}
+
+.errorText {
+  color: var(--mantine-color-red-6);
+  font-size: var(--mantine-font-size-sm);
+  margin-top: 4px;
+}
+
+.textInput {
+  height: 52px;
+  padding: 16px;
+  width: 311px;
+}
+
+.textarea {
+  padding: 16px;
+  width: 311px;
+}
+
+.numberInputRoot {
+  width: 311px;
+}
+
+.numberInput {
+  height: 52px;
+  text-align: right;
+  padding-block: 16px;
+  padding-inline-start: 16px;
+}
+
+.numberInputSection {
+  width: fit-content;
+  padding: 0 16px;
+}
+
+.select {
+  width: 311px;
+}
+
+.selectInput {
+  height: 52px;
+}
+
+.selectSection {
+  margin: 0 8px;
+
+  svg {
+    color: var(--mantine-color-gray-1);
+    height: 24px;
+    width: 24px;
+  }
+}
+
+.selectDropdown {
+  background-color: var(--mantine-color-gray-9);
+  border: 1px solid var(--mantine-color-gray-1);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.selectOption {
+  font-size: var(--mantine-font-size-md);
+  height: 40px;
+  margin-bottom: 4px;
+  width: 95%;
+  &:hover {
+    background-color: var(--mantine-color-gray-8);
+    color: var(--mantine-color-gray-0);
+  }
+}

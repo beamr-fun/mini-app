@@ -1,16 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta
-      name="viewport"
-      content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
-    />
-    <title>Mantine Vite template</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+<style>
+  
+  /* Pretendard (static) — explicit .woff2, 400/500/600/700 */
+  @font-face {
+    font-family: "Pretendard";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard-Regular.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-family: "Pretendard";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard-Medium.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-family: "Pretendard";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard-SemiBold.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-family: "Pretendard";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard-Bold.woff2") format("woff2");
+  }
+  
+
+  /* Force usage so the browser downloads .woff2 immediately */
+  html,
+  body {
+    letter-spacing: -0.025em;
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  }
+</style>
+  
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

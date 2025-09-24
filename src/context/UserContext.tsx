@@ -4,15 +4,17 @@ import { createContext, ReactNode } from 'react';
 import { Address } from 'viem';
 
 import { useAccount } from 'wagmi';
-import { AuthResponse } from '../types/sharedTypes';
+import { AuthResponse, FCUser } from '../types/sharedTypes';
 
 //
 type UserContextType = {
+  user?: FCUser;
   address: Address | undefined;
 };
 
 export const UserContext = createContext<UserContextType>({
   address: undefined,
+  user: undefined,
 });
 
 const login = async (clientAddress: Address) => {
@@ -40,8 +42,6 @@ const login = async (clientAddress: Address) => {
     },
   });
 
-  console.log('res', res);
-
   if (!res.ok || res.status !== 200) {
     console.error('Failed to authenticate user');
     return;
@@ -49,7 +49,19 @@ const login = async (clientAddress: Address) => {
 
   const data = (await res.json()) as AuthResponse;
 
-  return data;
+  if (!data.success) {
+    console.error('Authentication failed:', data);
+    return;
+  }
+
+  sdk.actions.ready();
+
+  return {
+    user: data.user,
+    jwt: data.jwtPayload,
+    isMiniApp,
+    context,
+  };
 };
 
 export const UserProvider = ({
@@ -59,7 +71,7 @@ export const UserProvider = ({
 }) => {
   const { address } = useAccount();
   const {
-    data: authRes,
+    data: apiData,
     isLoading,
     error,
   } = useQuery({
@@ -67,6 +79,8 @@ export const UserProvider = ({
     queryFn: () => login(address as Address),
     enabled: !!address,
   });
+
+  console.log('apiData', apiData);
 
   // TOMORROW, set up Apollo and subscribe utilities.
   // Set up typegen from graphql schema
@@ -195,6 +209,7 @@ export const UserProvider = ({
     <UserContext.Provider
       value={{
         address,
+        user: apiData?.user,
         // user,
         // isLoading,
       }}
