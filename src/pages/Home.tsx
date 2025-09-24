@@ -1,6 +1,9 @@
 import {
+  Avatar,
   Box,
   Button,
+  Flex,
+  Group,
   NumberInput,
   SegmentedControl,
   Select,
@@ -9,6 +12,7 @@ import {
   Textarea,
   TextInput,
 } from '@mantine/core';
+import { Arrow } from '../components/Arrow';
 
 export const Home = () => {
   return (
@@ -26,15 +30,59 @@ export const Home = () => {
         tristique senectus et netus et malesuada fames ac turpis egestas.
         Praesent sed magna at magna placerat mattis.
       </Text>
-      <Toggle />
-      <Inputs />
-      <Buttons />
+      <Stack gap="xl">
+        <OrgChart />
+        <Toggle />
+        <Inputs />
+        <Buttons />
+      </Stack>
+    </Box>
+  );
+};
+
+const OrgChart = () => {
+  return (
+    <Box>
+      <Text fz="xl" variant="highlight" mb="sm">
+        Arrow Chart
+      </Text>
+      {/* 
+      <Box pos="relative" h={300}>
+        <Group>
+          <Box>
+          </Box>
+          </Group> */}
+      <Flex direction="column" align="center" mb="xl" gap={4}>
+        <Avatar size={28} bg="red" />
+        <Arrow />
+        <Avatar size={28} bg="red" />
+      </Flex>
+      <Flex direction="column" align="center">
+        <Avatar size={28} bg="red" />
+        <Box style={{ transform: 'Rotate(-20deg)' }}>
+          <Arrow />
+        </Box>
+
+        <Group>
+          <Avatar size={28} bg="red" />
+          <Avatar size={28} bg="red" />
+        </Group>
+      </Flex>
+      {/* </Box> */}
     </Box>
   );
 };
 
 const Toggle = () => {
-  return <SegmentedControl data={['Recent', 'Leaderboard']} />;
+  return (
+    <Box>
+      <Text fz="xl" variant="highlight" mb="sm">
+        Toggle
+      </Text>
+
+      <SegmentedControl data={['Recent', 'Leaderboard']} />
+    </Box>
+  );
 };
 
 const Inputs = () => {
