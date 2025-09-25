@@ -1,38 +1,46 @@
-import { Box, Button, Stack } from '@mantine/core';
-import { useState } from 'react';
-
-enum Status {
-  Idle,
-  Initializing,
-  Creating,
-  Success,
-  Error,
-}
+import { useEffect } from 'react';
+import {
+  Link,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 
 export const CreatePool = () => {
-  const [status] = useState<Status>(Status.Idle);
+  const navigate = useNavigate();
+  const params = useParams();
 
-  const isLoading =
-    status === Status.Initializing || status === Status.Creating;
+  const subroute = params['*'];
 
-  const handleCreatePool = async () => {};
+  useEffect(() => {
+    console.log('mount top');
+  }, []);
+
+  console.log('render top');
 
   return (
-    <Stack w="100%" h="100%" justify="space-between">
-      <Box h="400px" bg="dark.6">
-        Explainer
-      </Box>
-      <Button
-        mt="lg"
-        size="lg"
-        w="100%"
-        variant="default"
-        loading={isLoading}
-        disabled={isLoading}
-        onClick={handleCreatePool}
-      >
-        Create Pool
-      </Button>
-    </Stack>
+    <div>
+      <h1>Create Pool</h1>
+      <nav>
+        <Link to="/create-pool/1">Step 1</Link> |{' '}
+        <Link to="/create-pool/2">Step 2</Link>
+      </nav>
+
+      <Routes>
+        <Route index element={<Navigate to="1" replace />} />
+        <Route path="1" element={<Step1 />} />
+        <Route path="2" element={<Step2 />} />
+      </Routes>
+    </div>
   );
+};
+
+const Step1 = () => {
+  return <div> Step 1 </div>;
+};
+
+const Step2 = () => {
+  return <div> Step 2 </div>;
 };

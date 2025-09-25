@@ -6,7 +6,7 @@ export const ClientRoutes = () => {
   return (
     <Routes>
       <Route path="/home" element={<Home />} />
-      <Route path="/create-pool" element={<CreatePool />} />
+      <Route path="/create-pool/*" element={<CreatePool />} />
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   );
