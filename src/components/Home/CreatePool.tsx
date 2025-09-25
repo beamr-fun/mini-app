@@ -1,3 +1,4 @@
+import { Box } from '@mantine/core';
 import { useEffect } from 'react';
 import {
   Link,
@@ -7,12 +8,16 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom';
+import { PageTitle } from '../PageTitle';
+
+const titles = ['Unknown', 'How It Works', 'Set Budget', 'Choose Friends'];
 
 export const CreatePool = () => {
   const navigate = useNavigate();
   const params = useParams();
 
   const subroute = params['*'];
+  const routeNumber = subroute ? parseInt(subroute) : 0;
 
   useEffect(() => {
     console.log('mount top');
@@ -21,19 +26,14 @@ export const CreatePool = () => {
   console.log('render top');
 
   return (
-    <div>
-      <h1>Create Pool</h1>
-      <nav>
-        <Link to="/create-pool/1">Step 1</Link> |{' '}
-        <Link to="/create-pool/2">Step 2</Link>
-      </nav>
-
+    <Box>
+      <PageTitle title={titles[routeNumber]} />
       <Routes>
         <Route index element={<Navigate to="1" replace />} />
         <Route path="1" element={<Step1 />} />
         <Route path="2" element={<Step2 />} />
       </Routes>
-    </div>
+    </Box>
   );
 };
 

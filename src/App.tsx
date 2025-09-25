@@ -6,13 +6,7 @@ import { Header } from './components/Header';
 export default function App() {
   return (
     <Layout>
-      <Notifications />
-      <Group justify="center">
-        <Header />
-      </Group>
-      <Flex justify="center" align="center">
-        <ClientRoutes />
-      </Flex>
+      <ClientRoutes />
     </Layout>
   );
 }
@@ -27,6 +21,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         py="12"
         maw="393px"
       >
+        <Notifications />
+        <Group justify="center">
+          <Header />
+        </Group>
         {children}
       </Flex>
     </ScrollArea>
