@@ -3,6 +3,7 @@ import { Notifications } from '@mantine/notifications';
 import { Header } from './components/Header';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './Routes';
+import './styles/transitions.css';
 
 export default function App() {
   return (

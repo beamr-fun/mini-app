@@ -6,3 +6,40 @@
     font-weight: 500;
   }
 }
+
+.bold {
+  font-weight: 700;
+  font-size: inherit;
+  color: inherit;
+}
+
+.italic {
+  font-style: italic;
+  font-weight: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+.boldItalic {
+  font-weight: 700;
+  font-style: italic;
+  font-size: inherit;
+  color: inherit;
+}
+
+.underline {
+  text-decoration: underline;
+  font-weight: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+.textLink {
+  font-size: inherit;
+  text-decoration: underline;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--mantine-color-gray-0);
+  }
+}
