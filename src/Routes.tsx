@@ -1,6 +1,9 @@
-import { createBrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { CreatePool, Step1, Step2 } from './components/Home/CreatePool';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { CreatePool } from './components/Home/CreatePool';
+
 import { Home } from './pages/Home';
+import { Explainer } from './pages/Explainer';
+import { Budget } from './pages/Budget';
 
 export const router = createBrowserRouter([
   { path: '/home', element: <Home /> },
@@ -9,8 +12,8 @@ export const router = createBrowserRouter([
     element: <CreatePool />,
     children: [
       { index: true, element: <Navigate to="1" replace /> },
-      { path: '1', element: <Step1 /> },
-      { path: '2', element: <Step2 /> },
+      { path: '1', element: <Explainer /> },
+      { path: '2', element: <Budget /> },
     ],
   },
   { path: '*', element: <Navigate to="/home" replace /> },

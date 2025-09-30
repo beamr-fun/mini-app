@@ -2,6 +2,7 @@ import {
   ConvertCSSVariablesInput,
   createTheme,
   MantineTheme,
+  Tooltip,
 } from '@mantine/core';
 import typographyClasses from './styles/typography.module.css';
 import buttonClasses from './styles/button.module.css';
@@ -86,16 +87,16 @@ const GREEN = [
 ] as const;
 
 const PURPLE = [
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
 ] as const;
 
 export const theme = createTheme({
@@ -192,6 +193,9 @@ export const theme = createTheme({
           transitionProps: { transition: 'fade-up', duration: 200 },
         },
       },
+    },
+    Tooltip: {
+      classNames: {},
     },
     SegmentedControl: {
       classNames: {
