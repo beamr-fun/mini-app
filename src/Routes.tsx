@@ -14,6 +14,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="1" replace /> },
       { path: '1', element: <Explainer /> },
       { path: '2', element: <Budget /> },
+      { path: '3', element: <div> Step 3 </div> },
     ],
   },
   { path: '*', element: <Navigate to="/home" replace /> },

@@ -2,12 +2,12 @@ import {
   ConvertCSSVariablesInput,
   createTheme,
   MantineTheme,
-  Tooltip,
 } from '@mantine/core';
 import typographyClasses from './styles/typography.module.css';
 import buttonClasses from './styles/button.module.css';
 import inputClasses from './styles/input.module.css';
 import segmentedClasses from './styles/segmentedControl.module.css';
+import popoverStyles from './styles/popover.module.css';
 
 const GRAY = [
   '#F2F2F2',
@@ -195,7 +195,7 @@ export const theme = createTheme({
       },
     },
     Tooltip: {
-      classNames: {},
+      classNames: { tooltip: popoverStyles.tooltip },
     },
     SegmentedControl: {
       classNames: {
