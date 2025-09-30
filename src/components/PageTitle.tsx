@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 export const PageTitle = ({ title }: { title: string }) => {
   const navigate = useNavigate();
   return (
-    <Group gap={12}>
+    <Group gap={12} mb={32}>
       <ArrowLeft
         onClick={() => {
           navigate(-1);

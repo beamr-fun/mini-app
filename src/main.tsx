@@ -18,16 +18,14 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <UserProvider>
-          <BrowserRouter>
-            <MantineProvider
-              withCssVariables
-              theme={theme}
-              defaultColorScheme="dark"
-              cssVariablesResolver={cssVariablesResolver}
-            >
-              <App />
-            </MantineProvider>
-          </BrowserRouter>
+          <MantineProvider
+            withCssVariables
+            theme={theme}
+            defaultColorScheme="dark"
+            cssVariablesResolver={cssVariablesResolver}
+          >
+            <App />
+          </MantineProvider>
         </UserProvider>
       </QueryClientProvider>
     </WagmiProvider>

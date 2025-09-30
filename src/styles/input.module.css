@@ -44,16 +44,16 @@
 .textInput {
   height: 52px;
   padding: 16px;
-  width: 311px;
+  width: 100%;
 }
 
 .textarea {
   padding: 16px;
-  width: 311px;
+  width: 100%;
 }
 
 .numberInputRoot {
-  width: 311px;
+  width: 100%;
 }
 
 .numberInput {
@@ -69,7 +69,7 @@
 }
 
 .select {
-  width: 311px;
+  width: 100%;
 }
 
 .selectInput {

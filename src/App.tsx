@@ -1,12 +1,13 @@
 import { Flex, Group, ScrollArea } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
-import { ClientRoutes } from './Routes';
 import { Header } from './components/Header';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './Routes';
 
 export default function App() {
   return (
     <Layout>
-      <ClientRoutes />
+      <RouterProvider router={router} />
     </Layout>
   );
 }

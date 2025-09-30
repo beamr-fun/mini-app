@@ -2,7 +2,6 @@ import {
   ConvertCSSVariablesInput,
   createTheme,
   MantineTheme,
-  SegmentedControl,
 } from '@mantine/core';
 import typographyClasses from './styles/typography.module.css';
 import buttonClasses from './styles/button.module.css';
@@ -187,7 +186,7 @@ export const theme = createTheme({
         option: inputClasses.selectOption,
       },
       defaultProps: {
-        autoSelectOnBlur: true,
+        // autoSelectOnBlur: true,
         allowDeselect: false,
         comboboxProps: {
           transitionProps: { transition: 'fade-up', duration: 200 },
