@@ -20,24 +20,18 @@ export const ExternalLink = ({
   </Text>
 );
 
-export const Bold = ({
-  children,
-  ...props
-}: { children: ReactNode } & TextProps) => (
-  <Text
-    classNames={{
-      root: typeClasses.bold,
-    }}
-    {...props}
-  >
-    {children}
-  </Text>
+export const Bold = ({ children }: { children: ReactNode }) => (
+  <span className={typeClasses.bold}>{children}</span>
 );
 
 export const Italic = ({ children }: { children: ReactNode }) => (
-  <Text classNames={{ root: typeClasses.italic }}>{children}</Text>
+  <span className={typeClasses.italic}>{children}</span>
+);
+
+export const Underline = ({ children }: { children: ReactNode }) => (
+  <span className={typeClasses.underline}>{children}</span>
 );
 
 export const BoldItalic = ({ children }: { children: ReactNode }) => (
-  <Text classNames={{ root: typeClasses.boldItalic }}>{children}</Text>
+  <span className={typeClasses.boldItalic}>{children}</span>
 );

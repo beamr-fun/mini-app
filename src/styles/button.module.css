@@ -62,7 +62,7 @@
 }
 .root[data-size='lg'] {
   padding: 15px 32px;
-  min-width: 309px;
+  min-width: 100%;
   height: 50px;
   font-size: var(--mantine-font-size-lg);
 }
