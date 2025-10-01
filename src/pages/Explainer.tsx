@@ -19,7 +19,7 @@ export const Explainer = () => {
         favorite content creators
       </Text>
       <Text mb={48}>
-        Every time you interact (Like, Comment, Recast) with a cast, you stream{' '}
+        Every time you interact (Like, Comment, Recast), you stream{' '}
         <Bold>BEAMR</Bold> to that cast's creator. Unlike traditional tipping
         apps, your monthly budget does not change. Instead, your total budget is
         divided among all the creators you interact with.
@@ -58,12 +58,6 @@ export const Explainer = () => {
           </Group>
         </Flex>
       </Group>
-
-      <Text mb={48}>
-        You can think of Beamr as your personalized rewards algorithm for
-        Farcaster. Just set up a beam pool, choose your monthly budget, and
-        start interacting with casts!
-      </Text>
 
       <Button
         size="lg"

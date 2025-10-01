@@ -33,17 +33,13 @@ export const Budget = () => {
   return (
     <Box>
       <Text mb="md">
-        To start, select the wallet address you would like to starting Beaming
-        with
-      </Text>
-      <Text mb="lg">
-        Currently, you can only use one wallet address per Farcaster account.{' '}
+        Select the wallet address you would like to starting Beaming with.{' '}
         <Bold>
           Once this address is set, you will not be able to change it.{' '}
         </Bold>
       </Text>
       <Select
-        description="Address cannot be changed later"
+        description="Address cannot be changed for now"
         label="Wallet Address"
         placeholder="0xb3amr..."
         data={DUMMY_ADDRESSES}

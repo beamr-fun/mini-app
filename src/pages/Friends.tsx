@@ -4,6 +4,8 @@ import {
   Button,
   Checkbox,
   Group,
+  Image,
+  Modal,
   ScrollArea,
   Stack,
   Text,
@@ -12,10 +14,14 @@ import {
 import { useOnboard } from '../hooks/useOnboard';
 import { Search } from 'lucide-react';
 import jordImg from '../assets/jord-avatar.png';
+import cometImg from '../assets/comet.png';
 import gravenImg from '../assets/graven-avatar.png';
 import stefanoImg from '../assets/stefano-avatar.jpeg';
 import { useState } from 'react';
 import checkStyles from '../styles/checkbox.module.css';
+import { useDisclosure } from '@mantine/hooks';
+
+// CHips in address select to see which address is primary, and what addresses are Farcaster wallets
 
 const FRIENDS = [
   {
@@ -107,6 +113,7 @@ const FRIENDS = [
 export const Friends = () => {
   const { budget } = useOnboard();
   const [filteredFriends, setFilteredFriends] = useState(FRIENDS);
+  const [opened, { open, close }] = useDisclosure(false);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();
@@ -142,21 +149,15 @@ export const Friends = () => {
           </Text>
         </Group>
       </Group>
-      <Text mb={'xl'}>
-        Add 3 friends to complete your Beamr setup and unlock your personalized
-        experience. You only need to do this once.
-      </Text>
+      <Text mb={'xl'}>Seed your Beamr with 3 of your favorite Casters</Text>
       <Text variant="label" mb="md">
-        Select 3 friends to start Beamin!
+        Select 3+ Casters to start Beamin!
       </Text>
       <TextInput
-        // style={}
         leftSection={<Search size={20} />}
         mb="sm"
         placeholder="Search by username or display name"
         onChange={handleSearch}
-        // leftSectionWidth={100}
-        // style={}
       />
       <ScrollArea h={290}>
         <Stack gap="sm">
@@ -168,8 +169,6 @@ export const Friends = () => {
                 card: checkStyles.card,
               }}
               bg={friend.checked ? 'var(--mantine-color-gray-8)' : undefined}
-
-              //   style={{ border: 'none' }}
             >
               <Group p={4}>
                 <Checkbox.Indicator checked={friend.checked} />
@@ -187,9 +186,12 @@ export const Friends = () => {
           ))}
         </Stack>
       </ScrollArea>
-      <Button size="lg" mt="xl">
-        Create Pool
+      <Button size="lg" mt="xl" onClick={open}>
+        Create
       </Button>
+      <Modal opened={opened} onClose={close}>
+        <Image src={cometImg} height={80} width={80} mb="md" fit="contain" />
+      </Modal>
     </Box>
   );
 };
