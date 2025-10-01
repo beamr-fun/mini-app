@@ -13,10 +13,8 @@ import {
 import { Bold } from '../components/typography';
 import { generateRandomAddress, truncateAddress } from '../utils/common';
 import { useNavigate } from 'react-router-dom';
+import { useOnboard } from '../hooks/useOnboard';
 
-// TODO: DATA-PIPELINE
-// get user addresses
-// load into pipeline
 const DUMMY_ADDRESSES = Array.from({ length: 5 }).map(() => {
   const address = generateRandomAddress();
   return {
@@ -28,6 +26,10 @@ const DUMMY_ADDRESSES = Array.from({ length: 5 }).map(() => {
 export const Budget = () => {
   const theme = useMantineTheme();
   const navigate = useNavigate();
+  const { form } = useOnboard();
+
+  if (!form) return null;
+
   return (
     <Box>
       <Text mb="md">
@@ -46,6 +48,8 @@ export const Budget = () => {
         placeholder="0xb3amr..."
         data={DUMMY_ADDRESSES}
         mb={40}
+        key={form.key('preferredAddress')}
+        {...form.getInputProps('preferredAddress')}
       />
       <Stack align="center" gap={2} mb={48}>
         <Group gap="sm" align="end">
@@ -72,12 +76,15 @@ export const Budget = () => {
         <NumberInput
           rightSection={'BEAMR'}
           rightSectionWidth={70}
+          key={form.key('budget')}
           description={'Your current balance is 823.12k'}
+          {...form.getInputProps('budget')}
         />
       </Box>
       <Button
         size="lg"
         onClick={() => navigate('/create-pool/3', { viewTransition: true })}
+        disabled={!form.values.budget || !form.values.preferredAddress}
       >
         Next
       </Button>

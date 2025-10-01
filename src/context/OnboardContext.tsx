@@ -21,6 +21,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       budget: 0,
     },
   });
+
   return (
     <OnboardContext.Provider
       value={{

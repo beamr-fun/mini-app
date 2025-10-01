@@ -3,6 +3,10 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { PageTitle } from '../PageTitle';
 
 import { ReactNode } from 'react';
+import {
+  OnboardContext,
+  OnboardDataProvider,
+} from '../../context/OnboardContext';
 
 const titles = ['Unknown', 'About Beamr', 'Set Budget', 'Choose Friends'];
 
@@ -14,15 +18,11 @@ export const CreatePool = () => {
   const routeNumber = subroute ? parseInt(subroute) : 0;
 
   return (
-    <Box>
+    <OnboardDataProvider>
       <PageTitle title={titles[routeNumber]} />
       <Outlet />
-    </Box>
+    </OnboardDataProvider>
   );
-};
-
-export const Step2 = () => {
-  return <div> Step 2 </div>;
 };
 
 export const Tag = (props: BoxComponentProps & { children: ReactNode }) => {
