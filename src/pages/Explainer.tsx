@@ -24,12 +24,12 @@ export const Explainer = () => {
         apps, your monthly budget does not change. Instead, your total budget is
         divided among all the creators you interact with.
       </Text>
-      <Group justify="space-around" gap={0} mb="xl">
+      <Group gap={70} justify="center" mb="xl">
         <Flex direction="column" align="center" gap={4} pos="relative">
           <Avatar size={28} src={jordAvatar} />
           <Arrow />
           <Avatar size={28} src={gravenAvatar} />
-          <Tag pos="absolute" top={'38%'} right="-34px">
+          <Tag pos="absolute" top={'38%'} right="34px">
             100%
           </Tag>
         </Flex>

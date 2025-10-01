@@ -1,4 +1,6 @@
 import {
+  Checkbox,
+  CheckboxIndicator,
   ConvertCSSVariablesInput,
   createTheme,
   MantineTheme,
@@ -8,7 +10,10 @@ import buttonClasses from './styles/button.module.css';
 import inputClasses from './styles/input.module.css';
 import segmentedClasses from './styles/segmentedControl.module.css';
 import popoverStyles from './styles/popover.module.css';
+import checkBoxClasses from './styles/checkbox.module.css';
 import { root } from 'viem/chains';
+
+console.log('checkBoxClasses', checkBoxClasses);
 
 const GRAY = [
   '#F2F2F2',
@@ -209,6 +214,12 @@ export const theme = createTheme({
       defaultProps: {
         size: 'md',
         fullWidth: true,
+      },
+    },
+
+    CheckboxIndicator: {
+      classNames: {
+        indicator: checkBoxClasses.indicator,
       },
     },
   },
