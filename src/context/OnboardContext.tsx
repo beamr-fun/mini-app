@@ -15,7 +15,7 @@ export const OnboardContext = React.createContext<OnboardContextType>({
 
 export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   const form = useForm({
-    mode: 'uncontrolled',
+    mode: 'controlled',
     initialValues: {
       preferredAddress: '',
       budget: 0,

@@ -10,6 +10,7 @@ import inputClasses from './styles/input.module.css';
 import segmentedClasses from './styles/segmentedControl.module.css';
 import popoverStyles from './styles/popover.module.css';
 import checkBoxClasses from './styles/checkbox.module.css';
+import modalClasses from './styles/modal.module.css';
 
 const GRAY = [
   '#F2F2F2',
@@ -222,6 +223,9 @@ export const theme = createTheme({
     Modal: {
       defaultProps: {
         centered: true,
+      },
+      classNames: {
+        header: modalClasses.header,
       },
     },
   },

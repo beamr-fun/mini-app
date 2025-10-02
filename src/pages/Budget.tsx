@@ -6,7 +6,6 @@ import {
   Select,
   Stack,
   Text,
-  TextInput,
   Tooltip,
   useMantineTheme,
 } from '@mantine/core';

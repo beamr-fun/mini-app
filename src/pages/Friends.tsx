@@ -20,6 +20,7 @@ import stefanoImg from '../assets/stefano-avatar.jpeg';
 import { useState } from 'react';
 import checkStyles from '../styles/checkbox.module.css';
 import { useDisclosure } from '@mantine/hooks';
+import { AppModal } from '../components/AppModal';
 
 // CHips in address select to see which address is primary, and what addresses are Farcaster wallets
 
@@ -189,9 +190,14 @@ export const Friends = () => {
       <Button size="lg" mt="xl" onClick={open}>
         Create
       </Button>
-      <Modal opened={opened} onClose={close}>
-        <Image src={cometImg} height={80} width={80} mb="md" fit="contain" />
-      </Modal>
+      <AppModal
+        opened={opened}
+        onClose={close}
+        title="Congrats!"
+        description="You're all set! "
+      >
+        <Image src={cometImg} height={90} width={90} fit="contain" />
+      </AppModal>
     </Box>
   );
 };
