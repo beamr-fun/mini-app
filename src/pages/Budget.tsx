@@ -1,6 +1,9 @@
 import {
   Box,
   Button,
+  ComboboxData,
+  ComboboxItem,
+  ComboboxItemGroup,
   Group,
   NumberInput,
   Select,
@@ -13,12 +16,15 @@ import { Bold } from '../components/typography';
 import { generateRandomAddress, truncateAddress } from '../utils/common';
 import { useNavigate } from 'react-router-dom';
 import { useOnboard } from '../hooks/useOnboard';
+import { Tag } from '../components/Tag';
 
-const DUMMY_ADDRESSES = Array.from({ length: 5 }).map(() => {
+const DUMMY_ADDRESSES = Array.from({ length: 5 }).map((_, index) => {
   const address = generateRandomAddress();
   return {
     value: address,
     label: truncateAddress(address),
+    isPrimaryAddress: index === 2,
+    isCurrentAddress: index === 0,
   };
 });
 
@@ -44,6 +50,23 @@ export const Budget = () => {
         data={DUMMY_ADDRESSES}
         mb={40}
         key={form.key('preferredAddress')}
+        renderOption={(item: any) => {
+          return (
+            <Group>
+              <Text>{item.option.label}</Text>
+              {item.option.isPrimaryAddress && (
+                <Tag c="var(--mantine-color-gray-0)" fw={500}>
+                  Primary Address
+                </Tag>
+              )}
+              {item.option.isCurrentAddress && (
+                <Tag c="var(--mantine-color-gray-0)" fw={500}>
+                  Connected
+                </Tag>
+              )}
+            </Group>
+          );
+        }}
         {...form.getInputProps('preferredAddress')}
       />
       <Stack align="center" gap={2} mb={48}>

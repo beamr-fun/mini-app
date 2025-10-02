@@ -5,10 +5,11 @@ import jordAvatar from '../assets/jord-avatar.png';
 import stefanoAvatar from '../assets/stefano-avatar.jpeg';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, Box, Button, Flex, Group, Text } from '@mantine/core';
-import { Tag } from '../components/Home/CreatePool';
+import { Tag } from '../components/Tag';
 
 export const Explainer = () => {
   const navigate = useNavigate();
+
   return (
     <Box>
       <Text mb="sm" variant="label">
