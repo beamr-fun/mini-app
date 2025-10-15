@@ -13,7 +13,12 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { Bold } from '../components/typography';
-import { generateRandomAddress, truncateAddress } from '../utils/common';
+import {
+  formatBalance,
+  formatUnitBalance,
+  generateRandomAddress,
+  truncateAddress,
+} from '../utils/common';
 import { useNavigate } from 'react-router-dom';
 import { useOnboard } from '../hooks/useOnboard';
 import { Tag } from '../components/Tag';
@@ -34,9 +39,7 @@ export const Budget = () => {
 
   console.log('address', address);
 
-  const formattedBalance = balance
-    ? Number(formatEther(balance)).toFixed(2)
-    : '0';
+  const formattedBalance = balance ? formatUnitBalance(balance) : '0';
 
   return (
     <Box>
