@@ -81,3 +81,15 @@
   border-radius: 8px;
   font-size: var(--mantine-font-size-xs);
 }
+
+.actionIcon {
+  background-color: var(--mantine-color-gray-9);
+
+  &:hover {
+    background-color: var(--mantine-color-gray-8);
+  }
+
+  &:active {
+    background-color: var(--mantine-color-gray-7);
+  }
+}

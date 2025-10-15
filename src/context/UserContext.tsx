@@ -80,7 +80,7 @@ export const UserProvider = ({
     enabled: !!address,
   });
 
-  console.log('apiData', apiData);
+  // console.log('apiData', apiData);
 
   // TOMORROW, set up Apollo and subscribe utilities.
   // Set up typegen from graphql schema

@@ -2,7 +2,6 @@ import {
   ConvertCSSVariablesInput,
   createTheme,
   MantineTheme,
-  Modal,
 } from '@mantine/core';
 import typographyClasses from './styles/typography.module.css';
 import buttonClasses from './styles/button.module.css';
@@ -217,6 +216,12 @@ export const theme = createTheme({
     CheckboxIndicator: {
       classNames: {
         indicator: checkBoxClasses.indicator,
+      },
+    },
+
+    ActionIcon: {
+      classNames: {
+        root: buttonClasses.actionIcon,
       },
     },
 

@@ -13,10 +13,11 @@ import {
   TextInput,
 } from '@mantine/core';
 import { Arrow } from '../components/Arrow';
+import { PageLayout } from '../layouts/PageLayout';
 
 export const Home = () => {
   return (
-    <Box>
+    <PageLayout>
       <Text mb="sm" variant="label">
         Welcome!
       </Text>
@@ -36,7 +37,7 @@ export const Home = () => {
         <Inputs />
         <Buttons />
       </Stack>
-    </Box>
+    </PageLayout>
   );
 };
 
