@@ -212,6 +212,11 @@ export const theme = createTheme({
         fullWidth: true,
       },
     },
+    // Checkbox: {
+    //   classNames: {
+    //     indicator: checkBoxClasses.indicator,
+    //   },
+    // },
 
     CheckboxIndicator: {
       classNames: {

@@ -1,30 +1,21 @@
 import {
   Box,
   Button,
-  ComboboxData,
-  ComboboxItem,
-  ComboboxItemGroup,
   Group,
   NumberInput,
   Select,
   Stack,
   Text,
-  Tooltip,
   useMantineTheme,
 } from '@mantine/core';
 import { Bold } from '../components/typography';
-import {
-  formatBalance,
-  formatUnitBalance,
-  generateRandomAddress,
-  truncateAddress,
-} from '../utils/common';
+import { formatUnitBalance, truncateAddress } from '../utils/common';
 import { useNavigate } from 'react-router-dom';
 import { useOnboard } from '../hooks/useOnboard';
 import { Tag } from '../components/Tag';
 import { useUser } from '../hooks/useUser';
 import { useAccount } from 'wagmi';
-import { formatEther } from 'viem';
+import { parseEther } from 'viem';
 
 export const Budget = () => {
   const { user } = useUser();
@@ -40,6 +31,12 @@ export const Budget = () => {
   console.log('address', address);
 
   const formattedBalance = balance ? formatUnitBalance(balance) : '0';
+
+  const budgetInUnits = form.values.budget
+    ? parseEther(`${form.values.budget}`)
+    : 0n;
+
+  const amountExceedsBalance = balance != null && budgetInUnits > balance;
 
   return (
     <Box>
@@ -107,17 +104,27 @@ export const Budget = () => {
           Total amount beamed across all curated creators
         </Text>
         <NumberInput
+          thousandSeparator=","
           rightSection={'BEAMR'}
           rightSectionWidth={70}
           key={form.key('budget')}
           description={`Your current balance is ${formattedBalance}`}
           {...form.getInputProps('budget')}
+          error={
+            amountExceedsBalance
+              ? `Amount exceeds balance of ${formattedBalance} BEAMR`
+              : undefined
+          }
         />
       </Box>
       <Button
         size="lg"
         onClick={() => navigate('/create-pool/3', { viewTransition: true })}
-        disabled={!form.values.budget || !form.values.preferredAddress}
+        disabled={
+          !form.values.budget ||
+          !form.values.preferredAddress ||
+          amountExceedsBalance
+        }
       >
         Next
       </Button>

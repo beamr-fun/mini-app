@@ -1,4 +1,4 @@
-import { formatEther, formatUnits } from 'viem';
+import { formatUnits } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 export const truncateAddress = (address: string, length = 6): string => {
@@ -39,5 +39,9 @@ export function formatUnitBalance(
   decimals = 18,
   displayDecimals = 2
 ): string {
+  if (typeof units !== 'bigint') return '0';
+
+  if (units === BigInt(0)) return '0';
+
   return formatBalance(formatUnits(units, decimals), displayDecimals);
 }

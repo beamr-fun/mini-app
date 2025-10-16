@@ -17,123 +17,72 @@ import jordImg from '../assets/jord-avatar.png';
 import cometImg from '../assets/comet.png';
 import gravenImg from '../assets/graven-avatar.png';
 import stefanoImg from '../assets/stefano-avatar.jpeg';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import checkStyles from '../styles/checkbox.module.css';
 import { useDisclosure } from '@mantine/hooks';
 import { AppModal } from '../components/AppModal';
+import { CreationStage } from '../utils/api';
 
-// CHips in address select to see which address is primary, and what addresses are Farcaster wallets
-
-const FRIENDS = [
-  {
-    imgUrl: jordImg,
-    username: 'jord',
-    displayName: 'Jord',
-    fid: 2342,
-    checked: false,
-  },
-  {
-    imgUrl: gravenImg,
-    username: 'graven',
-    displayName: 'Graven',
-    fid: 5435,
-    checked: false,
-  },
-  {
-    imgUrl: stefanoImg,
-    username: 'stefano',
-    displayName: 'Stefano',
-    fid: 8754,
-    checked: false,
-  },
-  {
-    imgUrl: jordImg,
-    username: 'derp-jord',
-    displayName: 'Derp Jord',
-    fid: 234223,
-    checked: false,
-  },
-  {
-    imgUrl: gravenImg,
-    username: 'derp-graven',
-    displayName: 'Derp Graven',
-    fid: 54352,
-    checked: false,
-  },
-  {
-    imgUrl: stefanoImg,
-    username: 'derp-stefano',
-    displayName: 'Derp Stefano',
-    fid: 87543,
-    checked: false,
-  },
-  {
-    imgUrl: jordImg,
-    username: 'foo-jord',
-    displayName: 'Foo Jord',
-    fid: 2342235,
-    checked: false,
-  },
-  {
-    imgUrl: gravenImg,
-    username: 'foo-graven',
-    displayName: 'Foo Graven',
-    fid: 543525,
-    checked: false,
-  },
-  {
-    imgUrl: stefanoImg,
-    username: 'foo-stefano',
-    displayName: 'Foo Stefano',
-    fid: 875435,
-    checked: false,
-  },
-  {
-    imgUrl: jordImg,
-    username: 'bar-jord',
-    displayName: 'Bar Jord',
-    fid: 2342238,
-    checked: false,
-  },
-  {
-    imgUrl: gravenImg,
-    username: 'bar-graven',
-    displayName: 'Bar Graven',
-    fid: 543528,
-    checked: false,
-  },
-  {
-    imgUrl: stefanoImg,
-    username: 'bar-stefano',
-    displayName: 'Bar Stefano',
-    fid: 875438,
-    checked: false,
-  },
-];
+const CREATE_COPY = {
+  [CreationStage.Idle]: 'Create Pool',
+  [CreationStage.CreatingPool]: 'Creating Pool...',
+  [CreationStage.RequestingTx]: 'Requesting Transaction...',
+  [CreationStage.ValidatingTx]: 'Validating Transaction...',
+  [CreationStage.Error]: 'Error occurred',
+  [CreationStage.Completed]: 'Pool Created!',
+};
 
 export const Friends = () => {
-  const { budget } = useOnboard();
-  const [filteredFriends, setFilteredFriends] = useState(FRIENDS);
+  const { budget, following, form, handlePoolCreate, selectedFriends } =
+    useOnboard();
+
+  const [filter, setFilter] = useState('');
   const [opened, { open, close }] = useDisclosure(false);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value.toLowerCase();
-    const filtered = FRIENDS.filter(
-      (friend) =>
-        friend.username.toLowerCase().includes(query) ||
-        friend.displayName.toLowerCase().includes(query)
-    );
-    setFilteredFriends(filtered);
+    setFilter(event.target.value);
   };
 
-  const handleCheckboxChange = (fid: number) => {
-    setFilteredFriends((prevFriends) =>
-      prevFriends.map((friend) =>
-        friend.fid === fid ? { ...friend, checked: !friend.checked } : friend
+  const filteredFriends = useMemo(() => {
+    if (!following) return [];
+
+    const query = filter.toLowerCase();
+    return following
+      .filter(
+        (friend) =>
+          friend.user.username.toLowerCase().includes(query) ||
+          friend.user.display_name?.toLowerCase().includes(query)
       )
-    );
-  };
+      .map((friend) => ({ ...friend, checked: false }));
+  }, [following, filter]);
 
+  //   (event: React.ChangeEvent<HTMLInputElement>) => {
+  //     const query = event.target.value.toLowerCase();
+  //     const filtered = FRIENDS.filter(
+  //       (friend) =>
+  //         friend.username.toLowerCase().includes(query) ||
+  //         friend.displayName.toLowerCase().includes(query)
+  //     );
+  //     setFilteredFriends(filtered);
+  //   };
+
+  //   const handleCheckboxChange = (fid: number) => {
+  //     if (!form) return;
+  //     if (!selectedFriends) return;
+  //     const friendIsChecked = selectedFriends?.includes(fid) ?? false;
+
+  //     if (friendIsChecked) {
+  //       form?.setFieldValue(
+  //         'selectedFriends',
+  //         selectedFriends?.filter((id) => id !== fid)
+  //       );
+  //     } else {
+  //       form?.setFieldValue('selectedFriends', [...selectedFriends, fid]);
+  //     }
+  //   };
+
+  const hasSelected3 =
+    (selectedFriends && selectedFriends?.length >= 3) || false;
   return (
     <Box>
       <Group justify="center" mb={24}>
@@ -161,33 +110,54 @@ export const Friends = () => {
         onChange={handleSearch}
       />
       <ScrollArea h={290}>
-        <Stack gap="sm">
-          {filteredFriends.map((friend) => (
-            <Checkbox.Card
-              key={friend.fid}
-              onChange={() => handleCheckboxChange(friend.fid)}
-              classNames={{
-                card: checkStyles.card,
-              }}
-              bg={friend.checked ? 'var(--mantine-color-gray-8)' : undefined}
-            >
-              <Group p={4}>
-                <Checkbox.Indicator checked={friend.checked} />
-                <Group gap={8}>
-                  <Avatar src={friend.imgUrl} size={36} />
-                  <Box>
-                    <Text fz="sm">{friend.displayName}</Text>
-                    <Text fz="sm" c="dim">
-                      @{friend.username}
-                    </Text>
-                  </Box>
-                </Group>
-              </Group>
-            </Checkbox.Card>
-          ))}
-        </Stack>
+        <Checkbox.Group
+          value={selectedFriends}
+          onChange={(value) => {
+            form?.setFieldValue('selectedFriends', value);
+          }}
+        >
+          <Stack gap="sm">
+            {filteredFriends.map((friend) => {
+              const isChecked =
+                selectedFriends?.includes(friend.user.fid.toString()) ?? false;
+
+              if (friend.user.username === 'v') {
+                console.log('render');
+              }
+              return (
+                <Checkbox.Card
+                  key={friend.user.fid}
+                  value={friend.user.fid.toString()}
+                  //   onChange={() => handleCheckboxChange(friend.user.fid)}
+                  classNames={{
+                    card: checkStyles.card,
+                  }}
+                  //   bg={isChecked ? 'var(--mantine-color-gray-8)' : undefined}
+                >
+                  <Group p={4}>
+                    <Checkbox.Indicator />
+                    <Group gap={8}>
+                      <Avatar src={friend.user.pfp_url} size={36} />
+                      <Box>
+                        <Text fz="sm">{friend.user.display_name}</Text>
+                        <Text fz="sm" c="dim">
+                          @{friend.user.username}
+                        </Text>
+                      </Box>
+                    </Group>
+                  </Group>
+                </Checkbox.Card>
+              );
+            })}
+          </Stack>
+        </Checkbox.Group>
       </ScrollArea>
-      <Button size="lg" mt="xl" onClick={open}>
+      <Button
+        size="lg"
+        mt="xl"
+        onClick={handlePoolCreate}
+        disabled={!hasSelected3}
+      >
         Create
       </Button>
       <AppModal
