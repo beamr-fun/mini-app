@@ -50,7 +50,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
 
-  const { user, address, token } = useUser();
+  const { user, address, token, getAuthHeaders } = useUser();
 
   const {
     data: userFollowing,
@@ -118,19 +118,25 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setCreationStage(CreationStage.CreatingPool);
-      console.log('token', token);
+
+      const apiHeaders = await getAuthHeaders();
+
+      if (!apiHeaders) {
+        throw new Error('Failed to get auth headers');
+      }
 
       const res = await fetch('http://localhost:3000/v1/pool/createPool', {
         method: 'POST',
         body: JSON.stringify(validated.data),
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
+        headers: apiHeaders,
       });
 
       console.log('res', res);
 
-      // const t
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.error || 'Failed to create pool');
+      }
     } catch (error) {
       console.error('Error creating pool', error);
       setCreationStage(CreationStage.Error);

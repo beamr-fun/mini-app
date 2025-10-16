@@ -18,5 +18,5 @@ export const router = createBrowserRouter([
       { path: '3', element: <Friends /> },
     ],
   },
-  { path: '*', element: <Navigate to="/create-pool/1" replace /> },
+  { path: '*', element: <Navigate to="/home" replace /> },
 ]);

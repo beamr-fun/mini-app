@@ -14,29 +14,89 @@ import {
 } from '@mantine/core';
 import { Arrow } from '../components/Arrow';
 import { PageLayout } from '../layouts/PageLayout';
+import { useUser } from '../hooks/useUser';
+import z from 'zod';
+import { Address, isAddress, parseEventLogs } from 'viem';
+import { publicClient } from '../utils/connect';
+import { BeamRABI } from '../abi/BeamR';
 
 export const Home = () => {
+  // const { getAuthHeaders } = useUser();
+
+  const test = async () => {
+    //   const schema = z.object({
+    //     creatorAddress: z
+    //       .string()
+    //       .refine(isAddress, { message: 'Invalid creator address' })
+    //       .transform((val) => val as Address),
+    //     tokenAddress: z
+    //       .string()
+    //       .refine(isAddress, { message: 'Invalid token address' })
+    //       .transform((val) => val as Address),
+    //     fid: z.number().int().positive(),
+    //     displayName: z.string().min(1, { message: 'Display name is required' }),
+    //     flowRate: z.string(),
+    //     selectedFriends: z.array(z.number().int().positive()),
+    //   });
+
+    //   const testData = {
+    //     creatorAddress: '0xde6bcde54cf040088607199fc541f013ba53c21e',
+    //     displayName: 'Jord',
+    //     fid: 11650,
+    //     flowRate: '1284722222222222',
+    //     selectedFriends: [784795, 1147178, 1120999],
+    //     tokenAddress: '0x19A30530209342cB2D94aD2693983A5cF7B77b79',
+    //   };
+
+    //   const validated = schema.safeParse(testData);
+
+    //   if (!validated.success) {
+    //     console.error('Validation failed', validated.error);
+    //     return;
+    //   }
+
+    //   const apiHeaders = await getAuthHeaders();
+
+    //   if (!apiHeaders) {
+    //     console.error('No API headers');
+    //     return;
+    //   }
+
+    //   const res = await fetch('http://localhost:3000/v1/pool/createPool', {
+    //     method: 'POST',
+    //     body: JSON.stringify(validated.data),
+    //     headers: apiHeaders,
+    //   });
+
+    //   console.log('res', res);
+
+    //   if (!res.ok) {
+    //     const data = await res.json();
+    //     console.error('Failed to create pool', data?.error || res.statusText);
+    //     return;
+    //   }
+
+    //   const data = await res.json();
+
+    //   console.log('Pool created successfully', data);
+
+    const receipt = await publicClient.waitForTransactionReceipt({
+      hash: '0xa63eba44f8bdeeea5c34fdf0dd14078661d864186892cb8a5264a0c20eeb3ea7',
+    });
+
+    const decoded = parseEventLogs({
+      abi: BeamRABI,
+      logs: receipt.logs,
+    });
+
+    console.log('logs', decoded);
+  };
+
   return (
     <PageLayout>
-      <Text mb="sm" variant="label">
-        Welcome!
-      </Text>
-      <Text mb={'md'}>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur vitae
-        felis ac leo elementum ultrices nec ut ex.
-      </Text>
-      <Text mb="xl">
-        Duis porta libero et velit imperdiet, vulputate viverra enim feugiat. In
-        nec tempor diam. Donec a maximus enim. Pellentesque habitant morbi
-        tristique senectus et netus et malesuada fames ac turpis egestas.
-        Praesent sed magna at magna placerat mattis.
-      </Text>
-      <Stack gap="xl">
-        <OrgChart />
-        <Toggle />
-        <Inputs />
-        <Buttons />
-      </Stack>
+      <Button size="lg" mb="xl" onClick={test}>
+        TEST
+      </Button>
     </PageLayout>
   );
 };

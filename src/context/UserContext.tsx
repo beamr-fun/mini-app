@@ -13,10 +13,12 @@ type UserContextType = {
   address?: Address;
   jwtPayload?: JWTPayload;
   token?: string;
-  getAuthHeaders?: () => Promise<{ authorization: string } | false>;
+  getAuthHeaders: () => Promise<{ authorization: string } | false>;
 };
 
-export const UserContext = createContext<UserContextType>({});
+export const UserContext = createContext<UserContextType>({
+  getAuthHeaders: async () => false,
+});
 
 const login = async (clientAddress: Address) => {
   const [isMiniApp, tokenRes, context] = await Promise.all([
@@ -218,6 +220,7 @@ export const UserProvider = ({
         return false;
       }
       return {
+        'Content-Type': 'application/json',
         authorization: `Bearer ${apiData.token}`,
       };
     }
@@ -229,11 +232,13 @@ export const UserProvider = ({
         return false;
       }
       return {
+        'Content-Type': 'application/json',
         authorization: `Bearer ${apiData.token}`,
       };
     }
 
     return {
+      'Content-Type': 'application/json',
       authorization: `Bearer ${apiData.token}`,
     };
   };
@@ -245,6 +250,7 @@ export const UserProvider = ({
         user: apiData?.user,
         jwtPayload: apiData?.jwt,
         token: apiData?.token,
+        getAuthHeaders,
         // user,
         // isLoading,
       }}
