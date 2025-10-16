@@ -1,4 +1,4 @@
-type JWTPayload = {
+export type JWTPayload = {
   sub: number;
   iss: string;
   aud: string;

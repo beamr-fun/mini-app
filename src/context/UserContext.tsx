@@ -1,4 +1,5 @@
 import sdk from '@farcaster/miniapp-sdk';
+import { JWTPayload } from '../types/sharedTypes';
 import { useQuery } from '@tanstack/react-query';
 import { createContext, ReactNode } from 'react';
 import { Address } from 'viem';
@@ -9,13 +10,13 @@ import { AuthResponse, FCUser } from '../types/sharedTypes';
 //
 type UserContextType = {
   user?: FCUser;
-  address: Address | undefined;
+  address?: Address;
+  jwtPayload?: JWTPayload;
+  token?: string;
+  getAuthHeaders?: () => Promise<{ authorization: string } | false>;
 };
 
-export const UserContext = createContext<UserContextType>({
-  address: undefined,
-  user: undefined,
-});
+export const UserContext = createContext<UserContextType>({});
 
 const login = async (clientAddress: Address) => {
   const [isMiniApp, tokenRes, context] = await Promise.all([
@@ -61,6 +62,7 @@ const login = async (clientAddress: Address) => {
     jwt: data.jwtPayload,
     isMiniApp,
     context,
+    token: token || undefined,
   };
 };
 
@@ -74,6 +76,7 @@ export const UserProvider = ({
     data: apiData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ['user', address],
     queryFn: () => login(address as Address),
@@ -205,11 +208,43 @@ export const UserProvider = ({
   //   };
   // }, []);
 
+  const getAuthHeaders = async () => {
+    if (!apiData || !apiData?.user || !apiData?.jwt || !apiData?.token) {
+      // try to re-login
+      // return login(address as Address);
+      await refetch();
+
+      if (!apiData || !apiData?.jwt || !apiData?.user || !apiData?.token) {
+        return false;
+      }
+      return {
+        authorization: `Bearer ${apiData.token}`,
+      };
+    }
+
+    if (apiData.jwt.exp * 1000 < Date.now()) {
+      await refetch();
+
+      if (!apiData || !apiData?.jwt || !apiData?.user || !apiData?.token) {
+        return false;
+      }
+      return {
+        authorization: `Bearer ${apiData.token}`,
+      };
+    }
+
+    return {
+      authorization: `Bearer ${apiData.token}`,
+    };
+  };
+
   return (
     <UserContext.Provider
       value={{
         address,
         user: apiData?.user,
+        jwtPayload: apiData?.jwt,
+        token: apiData?.token,
         // user,
         // isLoading,
       }}

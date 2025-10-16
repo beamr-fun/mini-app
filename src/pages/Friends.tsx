@@ -118,21 +118,13 @@ export const Friends = () => {
         >
           <Stack gap="sm">
             {filteredFriends.map((friend) => {
-              const isChecked =
-                selectedFriends?.includes(friend.user.fid.toString()) ?? false;
-
-              if (friend.user.username === 'v') {
-                console.log('render');
-              }
               return (
                 <Checkbox.Card
                   key={friend.user.fid}
                   value={friend.user.fid.toString()}
-                  //   onChange={() => handleCheckboxChange(friend.user.fid)}
                   classNames={{
                     card: checkStyles.card,
                   }}
-                  //   bg={isChecked ? 'var(--mantine-color-gray-8)' : undefined}
                 >
                   <Group p={4}>
                     <Checkbox.Indicator />

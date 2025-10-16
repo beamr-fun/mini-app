@@ -50,8 +50,8 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
 
-  const { user } = useUser();
-  const { address } = useUser();
+  const { user, address, token } = useUser();
+
   const {
     data: userFollowing,
     error,
@@ -100,12 +100,8 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       selectedFriends: z.array(z.number().int().positive()),
     });
 
-    console.log('form values', form.values);
-
     const flowRate =
       parseEther(form.values.budget.toString()) / 30n / 24n / 60n / 60n; // budget per month to flow rate per second
-
-    console.log('flowRate', flowRate.toString());
 
     const validated = schema.safeParse({
       creatorAddress: form.values.preferredAddress,
@@ -113,7 +109,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       fid: user.fid,
       displayName: user.display_name || user.username,
       flowRate: flowRate.toString(),
-      selectedFriends: form.values.selectedFriends,
+      selectedFriends: form.values.selectedFriends.map(Number),
     });
 
     if (!validated.success) {
@@ -122,23 +118,21 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       setCreationStage(CreationStage.CreatingPool);
+      console.log('token', token);
 
-      //   const res = await fetch('http://localhost:3000/v1/pool/createPool', {
-      //     method: 'POST',
-      //     body: JSON.stringify(validated.data),
-      //   });
+      const res = await fetch('http://localhost:3000/v1/pool/createPool', {
+        method: 'POST',
+        body: JSON.stringify(validated.data),
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      });
 
-      //   if (!walletClient) throw new Error('No wallet client');
-
-      //   setCreationStage(CreationStage.RequestingTx);
-
-      //   // const receipt =  walletClient.writeContract({})
-      //   setCreationStage(CreationStage.ValidatingTx);
-      //   // await publicClient.waitForTransactionReceipt({ hash });
-      //   setCreationStage(CreationStage.Completed);
+      console.log('res', res);
 
       // const t
     } catch (error) {
+      console.error('Error creating pool', error);
       setCreationStage(CreationStage.Error);
       if (error instanceof Error) {
         setCreateError(error.message);
