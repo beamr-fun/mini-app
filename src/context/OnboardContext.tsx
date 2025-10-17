@@ -4,14 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Follower } from '@neynar/nodejs-sdk/build/api';
 import { ADDR } from '../const/addresses';
 import { usePublicClient, useReadContract, useWalletClient } from 'wagmi';
-import {
-  Address,
-  erc20Abi,
-  formatUnits,
-  isAddress,
-  parseEther,
-  parseEventLogs,
-} from 'viem';
+import { Address, erc20Abi, isAddress, parseEther, parseEventLogs } from 'viem';
 import { useUser } from '../hooks/useUser';
 import { CreationStage } from '../utils/api';
 import z from 'zod';
@@ -43,10 +36,10 @@ export const OnboardContext = React.createContext<OnboardContextType>({
 });
 
 const fetchUserFollowing = async (fid: number) => {
-  // check if user following is in session storage
   const cached = sessionStorage.getItem(`userFollowing_${fid}`);
-  console.log('cached', cached);
+
   if (cached) {
+    console.log('cached', JSON.parse(cached));
     return JSON.parse(cached) as Follower[];
   }
 
@@ -58,11 +51,16 @@ const fetchUserFollowing = async (fid: number) => {
 
   const following = data.following.flat() as Follower[];
 
-  // cache in session storage
+  const withPrimaryAddresses = following.filter(
+    (f) => f.user.verified_addresses.primary.eth_address
+  );
 
-  sessionStorage.setItem(`userFollowing_${fid}`, JSON.stringify(following));
+  sessionStorage.setItem(
+    `userFollowing_${fid}`,
+    JSON.stringify(withPrimaryAddresses)
+  );
 
-  return following;
+  return withPrimaryAddresses;
 };
 
 export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
@@ -72,7 +70,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
 
-  const { user, address, token, getAuthHeaders } = useUser();
+  const { user, address, getAuthHeaders } = useUser();
 
   const {
     data: userFollowing,
@@ -110,16 +108,16 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     const schema = z.object({
       creatorAddress: z
         .string()
-        .refine(isAddress, { message: 'Invalid creator address' })
-        .transform((val) => val as Address),
+        .refine(isAddress, { message: 'Invalid creator address' }),
       tokenAddress: z
         .string()
-        .refine(isAddress, { message: 'Invalid token address' })
-        .transform((val) => val as Address),
+        .refine(isAddress, { message: 'Invalid token address' }),
       fid: z.number().int().positive(),
       displayName: z.string().min(1, { message: 'Display name is required' }),
       flowRate: z.string(),
-      selectedFriends: z.array(z.number().int().positive()),
+      seedAddresses: z.array(
+        z.string().refine(isAddress, { message: 'Invalid creator address' })
+      ),
     });
 
     const flowRate =
@@ -131,7 +129,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       fid: user.fid,
       displayName: user.display_name || user.username,
       flowRate: flowRate.toString(),
-      selectedFriends: form.values.selectedFriends.map(Number),
+      seedAddresses: form.values.selectedFriends,
     });
 
     if (!validated.success) {

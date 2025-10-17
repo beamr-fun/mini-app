@@ -13,10 +13,7 @@ import {
 } from '@mantine/core';
 import { useOnboard } from '../hooks/useOnboard';
 import { Search } from 'lucide-react';
-import jordImg from '../assets/jord-avatar.png';
 import cometImg from '../assets/comet.png';
-import gravenImg from '../assets/graven-avatar.png';
-import stefanoImg from '../assets/stefano-avatar.jpeg';
 import { useMemo, useState } from 'react';
 import checkStyles from '../styles/checkbox.module.css';
 import { useDisclosure } from '@mantine/hooks';
@@ -56,33 +53,9 @@ export const Friends = () => {
       .map((friend) => ({ ...friend, checked: false }));
   }, [following, filter]);
 
-  //   (event: React.ChangeEvent<HTMLInputElement>) => {
-  //     const query = event.target.value.toLowerCase();
-  //     const filtered = FRIENDS.filter(
-  //       (friend) =>
-  //         friend.username.toLowerCase().includes(query) ||
-  //         friend.displayName.toLowerCase().includes(query)
-  //     );
-  //     setFilteredFriends(filtered);
-  //   };
-
-  //   const handleCheckboxChange = (fid: number) => {
-  //     if (!form) return;
-  //     if (!selectedFriends) return;
-  //     const friendIsChecked = selectedFriends?.includes(fid) ?? false;
-
-  //     if (friendIsChecked) {
-  //       form?.setFieldValue(
-  //         'selectedFriends',
-  //         selectedFriends?.filter((id) => id !== fid)
-  //       );
-  //     } else {
-  //       form?.setFieldValue('selectedFriends', [...selectedFriends, fid]);
-  //     }
-  //   };
-
   const hasSelected3 =
     (selectedFriends && selectedFriends?.length >= 3) || false;
+
   return (
     <Box>
       <Group justify="center" mb={24}>
@@ -121,7 +94,9 @@ export const Friends = () => {
               return (
                 <Checkbox.Card
                   key={friend.user.fid}
-                  value={friend.user.fid.toString()}
+                  value={
+                    friend.user.verified_addresses.primary.eth_address as string
+                  }
                   classNames={{
                     card: checkStyles.card,
                   }}
