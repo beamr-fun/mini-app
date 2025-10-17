@@ -104,39 +104,38 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     if (!user || !form || !address) return;
 
     // call API to create pool
-
-    const schema = z.object({
-      creatorAddress: z
-        .string()
-        .refine(isAddress, { message: 'Invalid creator address' }),
-      tokenAddress: z
-        .string()
-        .refine(isAddress, { message: 'Invalid token address' }),
-      fid: z.number().int().positive(),
-      displayName: z.string().min(1, { message: 'Display name is required' }),
-      flowRate: z.string(),
-      seedAddresses: z.array(
-        z.string().refine(isAddress, { message: 'Invalid creator address' })
-      ),
-    });
-
-    const flowRate =
-      parseEther(form.values.budget.toString()) / 30n / 24n / 60n / 60n; // budget per month to flow rate per second
-
-    const validated = schema.safeParse({
-      creatorAddress: form.values.preferredAddress,
-      tokenAddress: ADDR.SUPER_TOKEN,
-      fid: user.fid,
-      displayName: user.display_name || user.username,
-      flowRate: flowRate.toString(),
-      seedAddresses: form.values.selectedFriends,
-    });
-
-    if (!validated.success) {
-      throw new Error(`Invalid form data: ${validated.error.message}`);
-    }
-
     try {
+      const schema = z.object({
+        creatorAddress: z
+          .string()
+          .refine(isAddress, { message: 'Invalid creator address' }),
+        tokenAddress: z
+          .string()
+          .refine(isAddress, { message: 'Invalid token address' }),
+        fid: z.number().int().positive(),
+        displayName: z.string().min(1, { message: 'Display name is required' }),
+        flowRate: z.string(),
+        seedAddresses: z.array(
+          z.string().refine(isAddress, { message: 'Invalid creator address' })
+        ),
+      });
+
+      const flowRate =
+        parseEther(form.values.budget.toString()) / 30n / 24n / 60n / 60n; // budget per month to flow rate per second
+
+      const validated = schema.safeParse({
+        creatorAddress: form.values.preferredAddress,
+        tokenAddress: ADDR.SUPER_TOKEN,
+        fid: user.fid,
+        displayName: user.display_name || user.username,
+        flowRate: flowRate.toString(),
+        seedAddresses: form.values.selectedFriends,
+      });
+
+      if (!validated.success) {
+        throw new Error(`Invalid form data: ${validated.error.message}`);
+      }
+
       setCreationStage(CreationStage.CreatingPool);
 
       const apiHeaders = await getAuthHeaders();
@@ -187,8 +186,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('PoolCreated event not found in transaction logs');
       }
 
-      console.log('poolAddress', poolAddress);
-
       const hash = await walletClient.writeContract({
         abi: GDAForwarderAbi,
         address: ADDR.GDA_FORWARDER,
@@ -206,6 +203,51 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       }
 
       console.log('Distribution transaction successful', distReceipt);
+
+      const completePoolData = {
+        poolAddress: poolAddress,
+        creatorAddress: validated.data.creatorAddress,
+        fid: validated.data.fid,
+      };
+
+      const completePoolSchema = z.object({
+        poolAddress: z
+          .string()
+          .refine(isAddress, {
+            message: 'Invalid pool address',
+          })
+          .transform((val) => val as Address),
+        creatorAddress: z
+          .string()
+          .refine(isAddress, {
+            message: 'Invalid creator address',
+          })
+          .transform((val) => val as Address),
+
+        fid: z.number().int().positive(),
+      });
+
+      const validated2 = completePoolSchema.safeParse(completePoolData);
+
+      if (!validated2.success) {
+        throw new Error(`Invalid pool data: ${validated2.error.message}`);
+      }
+
+      const newApiHeaders = await getAuthHeaders();
+
+      const finalRes = await fetch(
+        'http://localhost:3000/v1/pool/completePool',
+        {
+          method: 'POST',
+          body: JSON.stringify(validated2.data),
+          headers: newApiHeaders || {},
+        }
+      );
+
+      if (!finalRes.ok) {
+        const data = await finalRes.json();
+        throw new Error(data?.error || 'Failed to complete pool creation');
+      }
     } catch (error) {
       console.error('Error creating pool', error);
       setCreationStage(CreationStage.Error);
