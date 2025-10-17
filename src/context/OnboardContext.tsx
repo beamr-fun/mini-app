@@ -4,10 +4,19 @@ import { useQuery } from '@tanstack/react-query';
 import { Follower } from '@neynar/nodejs-sdk/build/api';
 import { ADDR } from '../const/addresses';
 import { usePublicClient, useReadContract, useWalletClient } from 'wagmi';
-import { Address, erc20Abi, formatUnits, isAddress, parseEther } from 'viem';
+import {
+  Address,
+  erc20Abi,
+  formatUnits,
+  isAddress,
+  parseEther,
+  parseEventLogs,
+} from 'viem';
 import { useUser } from '../hooks/useUser';
 import { CreationStage } from '../utils/api';
 import z from 'zod';
+import { BeamRABI } from '../abi/BeamR';
+import { GDAForwarderAbi } from '../abi/GDAFowarder';
 
 type OnboardFormValues = {
   budget: number;
@@ -34,13 +43,26 @@ export const OnboardContext = React.createContext<OnboardContextType>({
 });
 
 const fetchUserFollowing = async (fid: number) => {
+  // check if user following is in session storage
+  const cached = sessionStorage.getItem(`userFollowing_${fid}`);
+  console.log('cached', cached);
+  if (cached) {
+    return JSON.parse(cached) as Follower[];
+  }
+
   const res = await fetch(`http://localhost:3000/v1/user/following/${fid}/all`);
   const data = await res.json();
   if (!res.ok) {
     throw new Error(data?.error || 'Failed to fetch user following');
   }
 
-  return data.following.flat() as Follower[];
+  const following = data.following.flat() as Follower[];
+
+  // cache in session storage
+
+  sessionStorage.setItem(`userFollowing_${fid}`, JSON.stringify(following));
+
+  return following;
 };
 
 export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
@@ -131,12 +153,61 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         headers: apiHeaders,
       });
 
-      console.log('res', res);
-
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data?.error || 'Failed to create pool');
       }
+
+      const json = await res.json();
+
+      if (!json.hash) {
+        console.error('No transaction hash in response', json);
+        return;
+      }
+
+      if (!walletClient || !publicClient) {
+        throw new Error('Wallet client or public client not available');
+      }
+
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: json.hash,
+      });
+      if (receipt.status !== 'success') {
+        console.error('Transaction failed', receipt);
+        return;
+      }
+
+      const decoded = parseEventLogs({
+        abi: BeamRABI,
+        logs: receipt.logs,
+      });
+
+      const poolAddress = decoded.find((log) => log.eventName === 'PoolCreated')
+        ?.args.pool;
+
+      if (!poolAddress) {
+        throw new Error('PoolCreated event not found in transaction logs');
+      }
+
+      console.log('poolAddress', poolAddress);
+
+      const hash = await walletClient.writeContract({
+        abi: GDAForwarderAbi,
+        address: ADDR.GDA_FORWARDER,
+        functionName: 'distributeFlow',
+        args: [ADDR.SUPER_TOKEN, address, poolAddress, flowRate, '0x'],
+      });
+
+      const distReceipt = await publicClient.waitForTransactionReceipt({
+        hash,
+      });
+
+      if (distReceipt.status !== 'success') {
+        console.error('Distribute flow transaction failed', distReceipt);
+        return;
+      }
+
+      console.log('Distribution transaction successful', distReceipt);
     } catch (error) {
       console.error('Error creating pool', error);
       setCreationStage(CreationStage.Error);
