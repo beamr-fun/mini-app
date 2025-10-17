@@ -6,6 +6,7 @@ import { Address } from 'viem';
 
 import { useAccount } from 'wagmi';
 import { AuthResponse, FCUser } from '../types/sharedTypes';
+import { APIHeaders } from '../utils/api';
 
 //
 type UserContextType = {
@@ -13,7 +14,7 @@ type UserContextType = {
   address?: Address;
   jwtPayload?: JWTPayload;
   token?: string;
-  getAuthHeaders: () => Promise<{ authorization: string } | false>;
+  getAuthHeaders: () => Promise<APIHeaders | false>;
 };
 
 export const UserContext = createContext<UserContextType>({
