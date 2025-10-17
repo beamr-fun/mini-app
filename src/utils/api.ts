@@ -2,15 +2,7 @@ import { Follower } from '@neynar/nodejs-sdk/build/api';
 import { isAddress, parseEventLogs } from 'viem';
 import z from 'zod';
 import { BeamRABI } from '../abi/BeamR';
-
-export enum CreationStage {
-  Idle,
-  CreatingPool,
-  RequestingTx,
-  ValidatingTx,
-  Error,
-  Completed,
-}
+import { distributeFlow } from './interactions';
 
 export type APIHeaders = {
   'Content-Type': string;
@@ -68,7 +60,7 @@ export const createPool = async ({
 }: {
   args: z.infer<typeof createPoolSchema>;
   onSuccess: (poolAddress: string) => void;
-  onError: (error: Error) => void;
+  onError: (errMsg: string) => void;
   apiHeaders: APIHeaders | false;
   publicClient: any;
 }) => {
@@ -130,8 +122,8 @@ export const createPool = async ({
 
     return poolAddress;
   } catch (error) {
+    onError((error as Error).message);
     console.error('Error creating pool', error);
-    onError(error as Error);
   }
 };
 
@@ -183,6 +175,6 @@ export const completePool = async ({
     return true;
   } catch (error) {
     console.error('Error completing pool', error);
-    onError(error as Error);
+    onError((error as Error).message);
   }
 };

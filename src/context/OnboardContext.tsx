@@ -4,13 +4,17 @@ import { useQuery } from '@tanstack/react-query';
 import { Follower } from '@neynar/nodejs-sdk/build/api';
 import { ADDR } from '../const/addresses';
 import { usePublicClient, useReadContract, useWalletClient } from 'wagmi';
-import { Address, erc20Abi, isAddress, parseEther, parseEventLogs } from 'viem';
+import { Address, erc20Abi, parseEther } from 'viem';
 import { useUser } from '../hooks/useUser';
-import { createPool, CreationStage, fetchUserFollowing } from '../utils/api';
-import z from 'zod';
-import { BeamRABI } from '../abi/BeamR';
-import { GDAForwarderAbi } from '../abi/GDAFowarder';
+import { completePool, createPool, fetchUserFollowing } from '../utils/api';
 import { distributeFlow } from '../utils/interactions';
+
+type CreationSteps = {
+  createPool: boolean;
+  distributeFlow: boolean;
+  completePool: boolean;
+  indexTransaction: boolean;
+};
 
 type OnboardFormValues = {
   budget: number;
@@ -22,24 +26,36 @@ type OnboardContextType = {
   budget: number;
   preferredAddress: string;
   selectedFriends?: string[];
-  creationStage?: CreationStage;
   form?: UseFormReturnType<OnboardFormValues>;
   balance?: bigint;
   following?: Follower[];
+  creationSteps: CreationSteps;
   poolId?: Address;
-  error?: string;
+  errMsg?: string;
   handlePoolCreate?: () => Promise<void>;
 };
 
 export const OnboardContext = React.createContext<OnboardContextType>({
   budget: 0,
   preferredAddress: '',
+  errMsg: undefined,
+  creationSteps: {
+    createPool: false,
+    distributeFlow: false,
+    completePool: false,
+    indexTransaction: false,
+  },
 });
 
 export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
-  const [creationStage, setCreationStage] = React.useState<CreationStage>();
-  const [createError, setCreateError] = React.useState<string | undefined>();
-  const [poolId, setPoolId] = React.useState<Address | undefined>();
+  const [creationSteps, setCreationSteps] = React.useState<CreationSteps>({
+    createPool: false,
+    distributeFlow: false,
+    completePool: false,
+    indexTransaction: false,
+  });
+  const [errorMsg, setErrorMsg] = React.useState<string | undefined>();
+  const [poolAddress, setPoolAddress] = React.useState<Address | undefined>();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
 
@@ -85,10 +101,11 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
 
       const poolAddress = await createPool({
         onSuccess(_poolAddress) {
-          // updateStage
+          setPoolAddress(_poolAddress as Address);
+          setCreationSteps((prev) => ({ ...prev, createPool: true }));
         },
         onError(errorMsg) {
-          console.error('Error in createPool:', errorMsg);
+          throw new Error(errorMsg);
         },
         apiHeaders,
         publicClient,
@@ -102,12 +119,16 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         },
       });
 
+      if (!poolAddress) {
+        throw new Error('Pool address not returned from createPool');
+      }
+
       await distributeFlow({
         onError(errMsg) {
           throw new Error(errMsg);
         },
         onSuccess() {
-          // nothing
+          setCreationSteps((prev) => ({ ...prev, distributeFlow: true }));
         },
         args: {
           poolAddress: poolAddress as Address,
@@ -118,60 +139,25 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         publicClient,
       });
 
-      console.log('Distribution transaction successful', distReceipt);
+      const freshApiHeaders = await getAuthHeaders();
 
-      const completePoolData = {
-        poolAddress: poolAddress,
-        creatorAddress: validated.data.creatorAddress,
-        fid: validated.data.fid,
-      };
-
-      const completePoolSchema = z.object({
-        poolAddress: z
-          .string()
-          .refine(isAddress, {
-            message: 'Invalid pool address',
-          })
-          .transform((val) => val as Address),
-        creatorAddress: z
-          .string()
-          .refine(isAddress, {
-            message: 'Invalid creator address',
-          })
-          .transform((val) => val as Address),
-
-        fid: z.number().int().positive(),
+      completePool({
+        args: {
+          poolAddress,
+          creatorAddress: address,
+          fid: user.fid,
+        },
+        apiHeaders: freshApiHeaders,
+        onSuccess() {
+          setCreationSteps((prev) => ({ ...prev, completePool: true }));
+        },
+        onError(errorMsg) {
+          throw new Error(errorMsg);
+        },
       });
-
-      const validated2 = completePoolSchema.safeParse(completePoolData);
-
-      if (!validated2.success) {
-        throw new Error(`Invalid pool data: ${validated2.error.message}`);
-      }
-
-      const newApiHeaders = await getAuthHeaders();
-
-      const finalRes = await fetch(
-        'http://localhost:3000/v1/pool/completePool',
-        {
-          method: 'POST',
-          body: JSON.stringify(validated2.data),
-          headers: newApiHeaders || {},
-        }
-      );
-
-      if (!finalRes.ok) {
-        const data = await finalRes.json();
-        throw new Error(data?.error || 'Failed to complete pool creation');
-      }
     } catch (error) {
-      console.error('Error creating pool', error);
-      setCreationStage(CreationStage.Error);
-      if (error instanceof Error) {
-        setCreateError(error.message);
-      } else {
-        setCreateError('Unknown error');
-      }
+      console.error('Error in pool creation process:', error);
+      setErrorMsg((error as Error).message);
     }
   };
 
@@ -184,8 +170,9 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         balance: userBalance,
         following: userFollowing,
         selectedFriends: form.values.selectedFriends,
-        creationStage,
+        creationSteps: creationSteps,
         handlePoolCreate: handlePoolCreate,
+        errMsg: errorMsg,
       }}
     >
       {children}
