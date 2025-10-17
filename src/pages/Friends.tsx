@@ -18,20 +18,12 @@ import { useMemo, useState } from 'react';
 import checkStyles from '../styles/checkbox.module.css';
 import { useDisclosure } from '@mantine/hooks';
 import { AppModal } from '../components/AppModal';
-import { CreationStage } from '../utils/api';
-
-const CREATE_COPY = {
-  [CreationStage.Idle]: 'Create Pool',
-  [CreationStage.CreatingPool]: 'Creating Pool...',
-  [CreationStage.RequestingTx]: 'Requesting Transaction...',
-  [CreationStage.ValidatingTx]: 'Validating Transaction...',
-  [CreationStage.Error]: 'Error occurred',
-  [CreationStage.Completed]: 'Pool Created!',
-};
+import { useNavigate } from 'react-router-dom';
 
 export const Friends = () => {
   const { budget, following, form, handlePoolCreate, selectedFriends } =
     useOnboard();
+  const navigate = useNavigate();
 
   const [filter, setFilter] = useState('');
   const [opened, { open, close }] = useDisclosure(false);
@@ -122,7 +114,10 @@ export const Friends = () => {
       <Button
         size="lg"
         mt="xl"
-        onClick={handlePoolCreate}
+        onClick={() => {
+          handlePoolCreate?.();
+          navigate('/create-pool/4', { viewTransition: true });
+        }}
         disabled={!hasSelected3}
       >
         Create

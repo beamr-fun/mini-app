@@ -170,6 +170,10 @@ export const completePool = async ({
       throw new Error(data?.error || 'Failed to complete pool creation');
     }
 
+    const data = await finalRes.json();
+
+    console.log('DATA FROM COMPLETE', data);
+
     onSuccess();
 
     return true;

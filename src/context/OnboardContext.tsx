@@ -8,6 +8,7 @@ import { Address, erc20Abi, parseEther } from 'viem';
 import { useUser } from '../hooks/useUser';
 import { completePool, createPool, fetchUserFollowing } from '../utils/api';
 import { distributeFlow } from '../utils/interactions';
+import { startTxPoll } from '../utils/urql';
 
 type CreationSteps = {
   createPool: boolean;
@@ -127,8 +128,17 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         onError(errMsg) {
           throw new Error(errMsg);
         },
-        onSuccess() {
+        onSuccess(txHash) {
           setCreationSteps((prev) => ({ ...prev, distributeFlow: true }));
+          startTxPoll({
+            id: txHash,
+            onError() {
+              throw new Error('Transaction indexing failed');
+            },
+            onSuccess() {
+              setCreationSteps((prev) => ({ ...prev, indexTransaction: true }));
+            },
+          });
         },
         args: {
           poolAddress: poolAddress as Address,
@@ -141,12 +151,16 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
 
       const freshApiHeaders = await getAuthHeaders();
 
+      const completeArgs = {
+        poolAddress,
+        creatorAddress: address,
+        fid: user.fid,
+      };
+
+      console.log('completeArgs', completeArgs);
+
       completePool({
-        args: {
-          poolAddress,
-          creatorAddress: address,
-          fid: user.fid,
-        },
+        args: completeArgs,
         apiHeaders: freshApiHeaders,
         onSuccess() {
           setCreationSteps((prev) => ({ ...prev, completePool: true }));

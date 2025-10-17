@@ -20,15 +20,12 @@ import { parseEther } from 'viem';
 export const Budget = () => {
   const { user } = useUser();
   const { balance } = useOnboard();
-  console.log('balance', balance);
   const theme = useMantineTheme();
   const navigate = useNavigate();
   const { form } = useOnboard();
   const { address } = useAccount();
 
   if (!form) return null;
-
-  console.log('address', address);
 
   const formattedBalance = balance ? formatUnitBalance(balance) : '0';
 

@@ -21,7 +21,7 @@ export const distributeFlow = async ({
   onSuccess,
   onError,
 }: {
-  onSuccess: () => void;
+  onSuccess: (txHash: string) => void;
   onError: (errMsg: string) => void;
   args: {
     poolAddress: Address;
@@ -62,7 +62,7 @@ export const distributeFlow = async ({
     }
     console.log('Distribution transaction successful', receipt);
 
-    onSuccess();
+    onSuccess(hash);
     return true;
   } catch (error) {
     console.error('Error in distributeFlow:', error);

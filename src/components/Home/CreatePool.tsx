@@ -3,7 +3,13 @@ import { PageTitle } from '../PageTitle';
 
 import { OnboardDataProvider } from '../../context/OnboardContext';
 
-const titles = ['Unknown', 'About Beamr', 'Set Budget', 'Choose Friends'];
+const titles = [
+  'Unknown',
+  'About Beamr',
+  'Set Budget',
+  'Choose Friends',
+  'Confirm',
+];
 
 export const CreatePool = () => {
   const location = useLocation();

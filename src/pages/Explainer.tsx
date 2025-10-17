@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { Avatar, Box, Button, Flex, Group, Text } from '@mantine/core';
 import { Tag } from '../components/Tag';
 
+// fetchTx('0xa3b4296ceba4d6b658f11fd1b6592399cea0eef5c2c767e5bf8d9f6cf2345bc3');
+
 export const Explainer = () => {
   const navigate = useNavigate();
 
