@@ -46,8 +46,10 @@ const createPoolSchema = z.object({
   fid: z.number().int().positive(),
   displayName: z.string().min(1, { message: 'Display name is required' }),
   flowRate: z.string(),
-  seedAddresses: z.array(
-    z.string().refine(isAddress, { message: 'Invalid creator address' })
+  selectedFriends: z.array(
+    z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+      message: 'FID string must be a positive number',
+    })
   ),
 });
 
@@ -106,13 +108,18 @@ export const createPool = async ({
       return;
     }
 
+    // Why does the new ABI cause type issues here?
+
     const decoded = parseEventLogs({
       abi: BeamRABI,
       logs: receipt.logs,
-    });
+    }) as any;
 
-    const poolAddress = decoded.find((log) => log.eventName === 'PoolCreated')
-      ?.args.pool;
+    console.log('decoded', decoded);
+
+    const poolAddress = decoded.find(
+      (log: any) => log.eventName === 'PoolCreated'
+    )?.args.pool;
 
     if (!poolAddress) {
       throw new Error('PoolCreated event not found in transaction logs');
@@ -156,7 +163,7 @@ export const completePool = async ({
     }
 
     if (!validated.success) {
-      throw new Error(`Invalid pool data: ${validated.error.message}`);
+      throw new Error(`Invalid pool data: ${validated.error.cause}`);
     }
 
     const finalRes = await fetch('http://localhost:3000/v1/pool/completePool', {

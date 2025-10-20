@@ -26,7 +26,6 @@ export const Friends = () => {
   const navigate = useNavigate();
 
   const [filter, setFilter] = useState('');
-  const [opened, { open, close }] = useDisclosure(false);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(event.target.value);
@@ -86,9 +85,7 @@ export const Friends = () => {
               return (
                 <Checkbox.Card
                   key={friend.user.fid}
-                  value={
-                    friend.user.verified_addresses.primary.eth_address as string
-                  }
+                  value={friend.user.fid.toString()}
                   classNames={{
                     card: checkStyles.card,
                   }}
@@ -122,14 +119,6 @@ export const Friends = () => {
       >
         Create
       </Button>
-      <AppModal
-        opened={opened}
-        onClose={close}
-        title="Congrats!"
-        description="You're all set! "
-      >
-        <Image src={cometImg} height={90} width={90} fit="contain" />
-      </AppModal>
     </Box>
   );
 };

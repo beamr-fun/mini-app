@@ -79,6 +79,8 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       selectedFriends: [] as string[],
     },
   });
+
+  console.log('form.values.selectedFriends', form.values.selectedFriends);
   const { data: userBalance } = useReadContract({
     address: ADDR.SUPER_TOKEN,
     abi: erc20Abi,
@@ -116,7 +118,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
           fid: user.fid,
           displayName: user.display_name || 'Unnamed',
           flowRate: flowRate.toString(),
-          seedAddresses: form.values.selectedFriends,
+          selectedFriends: form.values.selectedFriends,
         },
       });
 
