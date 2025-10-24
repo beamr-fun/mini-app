@@ -10,3 +10,5 @@ export default defineConfig({
     allowedHosts: ['actors-right-lynn-duration.trycloudflare.com'],
   },
 });
+
+// 0xFDa7981E3d5a0f338a8AD40dA2f7E563BFa420e8

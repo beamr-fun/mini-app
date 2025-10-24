@@ -45,3 +45,10 @@ export function formatUnitBalance(
 
   return formatBalance(formatUnits(units, decimals), displayDecimals);
 }
+
+export const flowratePerSecondToMonth = (flowrate: bigint): string => {
+  const secondsInMonth = BigInt(60 * 60 * 24 * 30);
+  const units = flowrate * secondsInMonth;
+
+  return `${formatUnitBalance(units, 18, 2)}/mo`;
+};

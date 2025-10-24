@@ -54,7 +54,7 @@ const login = async (clientAddress: Address) => {
     console.error('No token provided for socket connection');
   }
 
-  const res = await fetch('http://localhost:6969/v1/user/auth', {
+  const res = await fetch('https://beamr.ngrok.app/v1/user/auth', {
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -204,6 +204,7 @@ export const UserProvider = ({
         token: apiData?.token,
         getAuthHeaders,
         startingRoute,
+        userSubscription,
 
         // user,
         // isLoading,

@@ -15,86 +15,84 @@ import {
 import { Arrow } from '../components/Arrow';
 import { PageLayout } from '../layouts/PageLayout';
 import { useUser } from '../hooks/useUser';
-import { Address, erc20Abi, isAddress, parseEther, parseEventLogs } from 'viem';
-import { publicClient } from '../utils/connect';
-import { BeamRABI } from '../abi/BeamR';
+import beamrLogo from '../assets/beamrLogo.png';
 import { useConnect, useWalletClient } from 'wagmi';
 import { ADDR } from '../const/addresses';
+import { useState } from 'react';
+import { flowratePerSecondToMonth } from '../utils/common';
 
 export const Home = () => {
   const { getAuthHeaders } = useUser();
   const { data: walletClient } = useWalletClient();
   const { connect, connectors } = useConnect();
 
-  const test = async () => {
-    // const schema = z.object({
-    //   creatorAddress: z
-    //     .string()
-    //     .refine(isAddress, { message: 'Invalid creator address' })
-    //     .transform((val) => val as Address),
-    //   tokenAddress: z
-    //     .string()
-    //     .refine(isAddress, { message: 'Invalid token address' })
-    //     .transform((val) => val as Address),
-    //   fid: z.number().int().positive(),
-    //   displayName: z.string().min(1, { message: 'Display name is required' }),
-    //   flowRate: z.string(),
-    //   selectedFriends: z.array(z.number().int().positive()),
-    // });
-    // const testData = {
-    //   creatorAddress: '0xde6bcde54cf040088607199fc541f013ba53c21e',
-    //   displayName: 'Jord',
-    //   fid: 11650,
-    //   flowRate: '1284722222222222',
-    //   selectedFriends: [784795, 1147178, 1120999],
-    //   tokenAddress: '0x19A30530209342cB2D94aD2693983A5cF7B77b79',
-    // };
-    // const validated = schema.safeParse(testData);
-    // if (!validated.success) {
-    //   console.error('Validation failed', validated.error);
-    //   return;
-    // }
-    // const apiHeaders = await getAuthHeaders();
-    // if (!apiHeaders) {
-    //   console.error('No API headers');
-    //   return;
-    // }
-    // const res = await fetch('http://localhost:6969/v1/pool/createPool', {
-    //   method: 'POST',
-    //   body: JSON.stringify(validated.data),
-    //   headers: apiHeaders,
-    // });
-    // if (!res.ok) {
-    //   const data = await res.json();
-    //   console.error('Failed to create pool', data?.error || res.statusText);
-    //   return;
-    // }
-    // const json = await res.json();
-    // if (!json.hash) {
-    //   console.error('No transaction hash in response', json);
-    //   return;
-    // }
-    // const receipt = await publicClient.waitForTransactionReceipt({
-    //   hash: json.hash,
-    // });
-    // const decoded = parseEventLogs({
-    //   abi: BeamRABI,
-    //   logs: receipt.logs,
-    // });
-    // if (receipt.status !== 'success') {
-    //   console.error('Transaction failed', receipt);
-    //   return;
-    // }
-    // console.log("SUCCESS! Here's the receipt:", receipt);
-    // console.log('decoded', decoded);
-  };
+  const [tab, setTab] = useState('Sending');
 
   return (
     <PageLayout>
-      <Button size="lg" mb="xl" onClick={test}>
-        TEST
-      </Button>
+      <Group justify="center" mt="md" mb="lg">
+        <Avatar src={beamrLogo} size={128} />
+      </Group>
+      <SegmentedControl
+        value={tab}
+        data={['Sending', 'Receiving']}
+        onChange={setTab}
+        mb="lg"
+      />
+      {tab === 'Sending' && <Sending />}
+      {tab === 'Receiving' && <Text>Receiving</Text>}
     </PageLayout>
+  );
+};
+
+const Sending = () => {
+  const { userSubscription } = useUser();
+
+  if (!userSubscription) {
+    return <Text>No Subscription</Text>;
+  }
+
+  return (
+    <Stack gap="lg" px="xs">
+      {/* Header */}
+      <Group gap="md" justify="space-between">
+        <Text w={32}>From</Text>
+        <Text w={75} ta="right">
+          Amount/mo
+        </Text>
+        <Text w={32} ta="center">
+          Token
+        </Text>
+        <Text w={48} ta="right">
+          Pool %
+        </Text>
+      </Group>
+
+      {userSubscription.outgoing.map((item) => {
+        const perUnitFlowRate =
+          BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
+        const beamFlowRate = perUnitFlowRate * BigInt(item.units);
+        const percentage =
+          (Number(item.units) / Number(item.beamPool?.totalUnits)) * 100;
+        return (
+          <Group key={item.id} gap="md" justify="space-between">
+            <Group gap="sm">
+              <Avatar size={32} radius="xl" src={item.to?.profile?.pfp_url} />
+            </Group>
+
+            <Text w={75} ta="center">
+              {flowratePerSecondToMonth(beamFlowRate)}
+            </Text>
+            <Box w={32} ta="center">
+              <Avatar size={32} radius="xl" src={beamrLogo} />
+            </Box>
+            <Text w={48} ta="center">
+              {percentage}%
+            </Text>
+          </Group>
+        );
+      })}
+    </Stack>
   );
 };
 

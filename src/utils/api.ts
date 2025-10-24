@@ -16,7 +16,9 @@ export const fetchUserFollowing = async (fid: number) => {
     return JSON.parse(cached) as Follower[];
   }
 
-  const res = await fetch(`http://localhost:6969/v1/user/following/${fid}/all`);
+  const res = await fetch(
+    `https://beamr.ngrok.app/v1/user/following/${fid}/all`
+  );
   const data = await res.json();
   if (!res.ok) {
     throw new Error(data?.error || 'Failed to fetch user following');
@@ -77,7 +79,7 @@ export const createPool = async ({
       throw new Error('Failed to get auth headers');
     }
 
-    const res = await fetch('http://localhost:6969/v1/pool/createPool', {
+    const res = await fetch('https://beamr.ngrok.app/v1/pool/createPool', {
       method: 'POST',
       body: JSON.stringify(validated.data),
       headers: apiHeaders,
@@ -166,11 +168,14 @@ export const completePool = async ({
       throw new Error(`Invalid pool data: ${validated.error.cause}`);
     }
 
-    const finalRes = await fetch('http://localhost:6969/v1/pool/completePool', {
-      method: 'POST',
-      body: JSON.stringify(validated.data),
-      headers: apiHeaders || {},
-    });
+    const finalRes = await fetch(
+      'https://beamr.ngrok.app/v1/pool/completePool',
+      {
+        method: 'POST',
+        body: JSON.stringify(validated.data),
+        headers: apiHeaders || {},
+      }
+    );
 
     if (!finalRes.ok) {
       const data = await finalRes.json();

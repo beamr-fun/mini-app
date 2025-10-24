@@ -21,7 +21,7 @@ export const Header = () => {
         </Text>
         <Box pos={'relative'}>
           <Avatar src={pfp} size="32" />
-          <ConnectionIndicator />
+          {/* <ConnectionIndicator /> */}
         </Box>
       </Group>
     </Box>

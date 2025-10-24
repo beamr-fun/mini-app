@@ -8,9 +8,11 @@ import {
   Text,
 } from '@mantine/core';
 import { useOnboard } from '../hooks/useOnboard';
+import { useNavigate } from 'react-router-dom';
 
 export const CreateConfirm = () => {
   const { creationSteps } = useOnboard();
+  const navigate = useNavigate();
 
   return (
     <Box>
@@ -45,12 +47,9 @@ export const CreateConfirm = () => {
       </Stack>
       <Group justify="center">
         {Object.values(creationSteps).every((step) => step) ? (
-          <Stack gap="md" w="100%">
-            <Button size="lg">Share</Button>
-            <Button size="lg" variant="secondary">
-              See Pool
-            </Button>
-          </Stack>
+          <Button size="lg" onClick={() => navigate('/home')}>
+            See Pool
+          </Button>
         ) : (
           <Loader />
         )}
