@@ -10,7 +10,12 @@ import { useAccount } from 'wagmi';
 import { AuthResponse, FCUser } from '../types/sharedTypes';
 import { APIHeaders } from '../utils/api';
 import { gql } from '../generated';
-import { GetTxByIdDocument, GetTxByIdSubscription } from '../generated/graphql';
+import {
+  GetTxByIdDocument,
+  GetTxByIdSubscription,
+  LoggedInUserDocument,
+  LoggedInUserSubscription,
+} from '../generated/graphql';
 
 //
 type UserContextType = {
@@ -28,14 +33,6 @@ export const UserContext = createContext<UserContextType>({
 const wsClient = createClient({
   url: 'ws://localhost:8080/v1/graphql',
 });
-
-const txs = gql(/* GraphQL */ `
-  subscription Test($id: String!) {
-    TX_by_pk(id: $id) {
-      id
-    }
-  }
-`);
 
 const login = async (clientAddress: Address) => {
   const [isMiniApp, tokenRes, context] = await Promise.all([
@@ -104,16 +101,34 @@ export const UserProvider = ({
   });
 
   useEffect(() => {
-    const dispose = wsClient.subscribe<GetTxByIdSubscription>(
-      { query: print(GetTxByIdDocument), variables: { id: '' } },
-      {
-        next: (data) => {
-          console.log('Subscription data:', data.data?.TX_by_pk?.id);
+    let dispose: () => void = () => {};
+
+    const getUserSubscription = async () => {
+      const context = await sdk.context;
+
+      // const fid = context?.user?.fid;
+
+      // if (!fid) {
+      //   return;
+      // }
+
+      dispose = wsClient.subscribe<LoggedInUserSubscription>(
+        {
+          query: print(LoggedInUserDocument),
+          variables: { id: '11650' },
         },
-        error: console.error,
-        complete: () => {},
-      }
-    );
+        {
+          next: (data) => {
+            console.log('Subscription data:', data);
+          },
+          error: console.error,
+          complete: () => {},
+        }
+      );
+    };
+
+    getUserSubscription();
+
     return () => dispose();
   }, []);
 

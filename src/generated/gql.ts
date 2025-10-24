@@ -13,6 +13,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
+    "subscription LoggedInUser($id: String!) {\n  User_by_pk(id: $id) {\n    id\n    pools {\n      id\n    }\n    incoming {\n      id\n      units\n      beamPool {\n        flowRate\n        totalUnits\n      }\n      from {\n        fid\n        id\n        profile {\n          id\n          pfp_url\n          display_name\n          username\n          id\n        }\n      }\n    }\n    outgoing {\n      units\n      id\n      beamPool {\n        flowRate\n        totalUnits\n      }\n      to {\n        id\n        fid\n        profile {\n          id\n          display_name\n          username\n          pfp_url\n          id\n        }\n      }\n    }\n  }\n}": types.LoggedInUserDocument,
     "subscription GetTxById($id: String!) {\n  TX_by_pk(id: $id) {\n    id\n  }\n}": types.GetTxByIdDocument,
 };
 
@@ -30,6 +31,10 @@ const documents = {
  */
 export function gql(source: string): unknown;
 
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "subscription LoggedInUser($id: String!) {\n  User_by_pk(id: $id) {\n    id\n    pools {\n      id\n    }\n    incoming {\n      id\n      units\n      beamPool {\n        flowRate\n        totalUnits\n      }\n      from {\n        fid\n        id\n        profile {\n          id\n          pfp_url\n          display_name\n          username\n          id\n        }\n      }\n    }\n    outgoing {\n      units\n      id\n      beamPool {\n        flowRate\n        totalUnits\n      }\n      to {\n        id\n        fid\n        profile {\n          id\n          display_name\n          username\n          pfp_url\n          id\n        }\n      }\n    }\n  }\n}"): (typeof documents)["subscription LoggedInUser($id: String!) {\n  User_by_pk(id: $id) {\n    id\n    pools {\n      id\n    }\n    incoming {\n      id\n      units\n      beamPool {\n        flowRate\n        totalUnits\n      }\n      from {\n        fid\n        id\n        profile {\n          id\n          pfp_url\n          display_name\n          username\n          id\n        }\n      }\n    }\n    outgoing {\n      units\n      id\n      beamPool {\n        flowRate\n        totalUnits\n      }\n      to {\n        id\n        fid\n        profile {\n          id\n          display_name\n          username\n          pfp_url\n          id\n        }\n      }\n    }\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

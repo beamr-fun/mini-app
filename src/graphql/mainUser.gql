@@ -1,0 +1,46 @@
+subscription LoggedInUser($id: String!) {
+  User_by_pk(id: $id) {
+    id
+    pools {
+      id
+    }
+    incoming {
+      id
+      units
+      beamPool {
+        flowRate
+        totalUnits
+      }
+      from {
+        fid
+        id
+        profile {
+          id
+          pfp_url
+          display_name
+          username
+          id
+        }
+      }
+    }
+    outgoing {
+      units
+      id
+      beamPool {
+        flowRate
+        totalUnits
+      }
+      to {
+        id
+        fid
+        profile {
+          id
+          display_name
+          username
+          pfp_url
+          id
+        }
+      }
+    }
+  }
+}
