@@ -1,7 +1,7 @@
 subscription LoggedInUser($id: String!) {
   User_by_pk(id: $id) {
     id
-    pools {
+    pools(where: { isActive: { _eq: true } }) {
       id
     }
     incoming {

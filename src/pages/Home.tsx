@@ -59,7 +59,7 @@ export const Home = () => {
     //   console.error('No API headers');
     //   return;
     // }
-    // const res = await fetch('http://localhost:3000/v1/pool/createPool', {
+    // const res = await fetch('http://localhost:6969/v1/pool/createPool', {
     //   method: 'POST',
     //   body: JSON.stringify(validated.data),
     //   headers: apiHeaders,

@@ -1,7 +1,7 @@
 import sdk from '@farcaster/miniapp-sdk';
 import { JWTPayload } from '../types/sharedTypes';
 import { useQuery } from '@tanstack/react-query';
-import { createContext, ReactNode, useEffect } from 'react';
+import { createContext, ReactNode, useEffect, useState } from 'react';
 import { Address } from 'viem';
 import { createClient } from 'graphql-ws';
 import { print } from 'graphql';
@@ -9,21 +9,22 @@ import { print } from 'graphql';
 import { useAccount } from 'wagmi';
 import { AuthResponse, FCUser } from '../types/sharedTypes';
 import { APIHeaders } from '../utils/api';
-import { gql } from '../generated';
 import {
-  GetTxByIdDocument,
-  GetTxByIdSubscription,
   LoggedInUserDocument,
   LoggedInUserSubscription,
 } from '../generated/graphql';
+import { useNavigate } from 'react-router-dom';
 
+type UserSub = LoggedInUserSubscription['User_by_pk'];
 //
 type UserContextType = {
   user?: FCUser;
   address?: Address;
   jwtPayload?: JWTPayload;
+  userSubscription?: UserSub;
   token?: string;
   getAuthHeaders: () => Promise<APIHeaders | false>;
+  startingRoute?: string;
 };
 
 export const UserContext = createContext<UserContextType>({
@@ -53,7 +54,7 @@ const login = async (clientAddress: Address) => {
     console.error('No token provided for socket connection');
   }
 
-  const res = await fetch('http://localhost:3000/v1/user/auth', {
+  const res = await fetch('http://localhost:6969/v1/user/auth', {
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -71,8 +72,6 @@ const login = async (clientAddress: Address) => {
     return;
   }
 
-  sdk.actions.ready();
-
   return {
     user: data.user,
     jwt: data.jwtPayload,
@@ -88,6 +87,12 @@ export const UserProvider = ({
   children: ReactNode | ReactNode[];
 }) => {
   const { address } = useAccount();
+
+  const [hasLoadedSubscription, setHasLoadedSubscription] = useState(false);
+  const [userSubscription, setUserSubscription] = useState<
+    LoggedInUserSubscription['User_by_pk'] | undefined
+  >(undefined);
+  const [startingRoute, setStartingRoute] = useState<string | undefined>();
 
   const {
     data: apiData,
@@ -106,20 +111,26 @@ export const UserProvider = ({
     const getUserSubscription = async () => {
       const context = await sdk.context;
 
-      // const fid = context?.user?.fid;
+      const fid = context?.user?.fid;
 
-      // if (!fid) {
-      //   return;
-      // }
+      if (!fid) {
+        return;
+      }
 
       dispose = wsClient.subscribe<LoggedInUserSubscription>(
         {
           query: print(LoggedInUserDocument),
-          variables: { id: '11650' },
+          variables: { id: fid.toString() },
         },
         {
           next: (data) => {
-            console.log('Subscription data:', data);
+            console.log('data', data);
+            const userSub = data?.data?.User_by_pk;
+            setHasLoadedSubscription(true);
+
+            if (userSub) {
+              setUserSubscription(userSub);
+            }
           },
           error: console.error,
           complete: () => {},
@@ -131,6 +142,25 @@ export const UserProvider = ({
 
     return () => dispose();
   }, []);
+
+  useEffect(() => {
+    if (startingRoute) return;
+
+    console.log('apiData', apiData);
+    console.log('hasLoadedSubscription', hasLoadedSubscription);
+
+    if (hasLoadedSubscription && apiData) {
+      if (!userSubscription || !userSubscription?.pools?.length) {
+        console.log('No pools found for user in subscription data');
+        setStartingRoute('/create-pool/1');
+      } else {
+        setStartingRoute('/home');
+        console.log('User subscription pools:', userSubscription.pools);
+      }
+
+      sdk.actions.ready();
+    }
+  }, [hasLoadedSubscription, userSubscription, apiData]);
 
   const getAuthHeaders = async () => {
     if (!apiData || !apiData?.user || !apiData?.jwt || !apiData?.token) {
@@ -173,6 +203,8 @@ export const UserProvider = ({
         jwtPayload: apiData?.jwt,
         token: apiData?.token,
         getAuthHeaders,
+        startingRoute,
+
         // user,
         // isLoading,
       }}
