@@ -4,6 +4,7 @@ module.exports = {
   generates: {
     './src/generated/': {
       preset: 'gql-tag-operations-preset',
+      plugins: [],
     },
   },
 };

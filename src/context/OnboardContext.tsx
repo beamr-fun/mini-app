@@ -80,7 +80,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     },
   });
 
-  console.log('form.values.selectedFriends', form.values.selectedFriends);
   const { data: userBalance } = useReadContract({
     address: ADDR.SUPER_TOKEN,
     abi: erc20Abi,

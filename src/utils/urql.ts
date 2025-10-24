@@ -1,7 +1,6 @@
 const HASURA_URL = 'http://localhost:8080/v1/graphql';
 
 export async function fetchTx(id: string) {
-  console.log('id', id);
   const res = await fetch(HASURA_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

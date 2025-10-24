@@ -1,4 +1,4 @@
-query TX($id: String!) {
+subscription GetTxById($id: String!) {
   TX_by_pk(id: $id) {
     id
   }
