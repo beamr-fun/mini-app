@@ -33,7 +33,7 @@ export const Budget = () => {
     ? parseEther(`${form.values.budget}`)
     : 0n;
 
-  const amountExceedsBalance = balance != null && budgetInUnits > balance;
+  // const amountExceedsBalance = balance != null && budgetInUnits > balance;
 
   return (
     <Box>
@@ -107,20 +107,21 @@ export const Budget = () => {
           key={form.key('budget')}
           description={`Your current balance is ${formattedBalance}`}
           {...form.getInputProps('budget')}
-          error={
-            amountExceedsBalance
-              ? `Amount exceeds balance of ${formattedBalance} BEAMR`
-              : undefined
-          }
+          // error={
+          //   amountExceedsBalance
+          //     ? `Amount exceeds balance of ${formattedBalance} BEAMR`
+          //     : undefined
+          // }
         />
       </Box>
       <Button
         size="lg"
         onClick={() => navigate('/create-pool/3', { viewTransition: true })}
         disabled={
-          !form.values.budget ||
-          !form.values.preferredAddress ||
-          amountExceedsBalance
+          !form.values.budget || !form.values.preferredAddress
+
+          // ||
+          // amountExceedsBalance
         }
       >
         Next

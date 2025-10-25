@@ -13,7 +13,6 @@ import {
   LoggedInUserDocument,
   LoggedInUserSubscription,
 } from '../generated/graphql';
-import { useNavigate } from 'react-router-dom';
 
 type UserSub = LoggedInUserSubscription['User_by_pk'];
 //
@@ -32,7 +31,7 @@ export const UserContext = createContext<UserContextType>({
 });
 
 const wsClient = createClient({
-  url: 'ws://localhost:8080/v1/graphql',
+  url: 'wss://indexer.hyperindex.xyz/b9414c9/v1/graphql',
 });
 
 const login = async (clientAddress: Address) => {

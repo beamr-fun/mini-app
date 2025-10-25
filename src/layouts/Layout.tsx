@@ -1,7 +1,6 @@
 import { Flex, Group, ScrollArea } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { Header } from '../components/Header';
-import { Nav } from './Nav';
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
   return (

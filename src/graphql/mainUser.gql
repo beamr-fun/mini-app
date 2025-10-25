@@ -1,12 +1,16 @@
 subscription LoggedInUser($id: String!) {
   User_by_pk(id: $id) {
     id
-    pools(where: { isActive: { _eq: true } }) {
+    pools {
       id
     }
-    incoming {
+    incoming(
+      order_by: { lastUpdated: desc }
+      where: { beamPool: { active: { _eq: true } } }
+    ) {
       id
       units
+      lastUpdated
       beamPool {
         flowRate
         totalUnits
@@ -23,7 +27,10 @@ subscription LoggedInUser($id: String!) {
         }
       }
     }
-    outgoing {
+    outgoing(
+      order_by: { lastUpdated: desc }
+      where: { beamPool: { active: { _eq: true } } }
+    ) {
       units
       id
       beamPool {

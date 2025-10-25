@@ -1,6 +1,7 @@
 import {
   Avatar,
   Box,
+  Button,
   Flex,
   Group,
   SegmentedControl,
@@ -8,14 +9,14 @@ import {
   Text,
   useMantineTheme,
 } from '@mantine/core';
-import { Arrow } from '../components/Arrow';
 import { PageLayout } from '../layouts/PageLayout';
 import { useUser } from '../hooks/useUser';
 import beamrLogo from '../assets/beamrLogo.png';
-import { useConnect, useWalletClient } from 'wagmi';
-import { ADDR } from '../const/addresses';
 import { useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
+import { useWalletClient } from 'wagmi';
+import { ADDR } from '../const/addresses';
+import { erc20Abi, parseEther } from 'viem';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
