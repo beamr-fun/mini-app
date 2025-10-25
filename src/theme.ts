@@ -2,12 +2,14 @@ import {
   ConvertCSSVariablesInput,
   createTheme,
   MantineTheme,
-  SegmentedControl,
 } from '@mantine/core';
 import typographyClasses from './styles/typography.module.css';
 import buttonClasses from './styles/button.module.css';
 import inputClasses from './styles/input.module.css';
 import segmentedClasses from './styles/segmentedControl.module.css';
+import popoverStyles from './styles/popover.module.css';
+import checkBoxClasses from './styles/checkbox.module.css';
+import modalClasses from './styles/modal.module.css';
 
 const GRAY = [
   '#F2F2F2',
@@ -87,16 +89,16 @@ const GREEN = [
 ] as const;
 
 const PURPLE = [
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
-  '6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
+  '#6D68C4',
 ] as const;
 
 export const theme = createTheme({
@@ -155,11 +157,13 @@ export const theme = createTheme({
     },
     TextInput: {
       classNames: {
+        wrapper: inputClasses.wrapper,
         input: inputClasses.textInput,
       },
     },
     Textarea: {
       classNames: {
+        root: inputClasses.baseInput,
         input: inputClasses.textarea,
       },
       defaultProps: {
@@ -187,12 +191,15 @@ export const theme = createTheme({
         option: inputClasses.selectOption,
       },
       defaultProps: {
-        autoSelectOnBlur: true,
+        // autoSelectOnBlur: true,
         allowDeselect: false,
         comboboxProps: {
           transitionProps: { transition: 'fade-up', duration: 200 },
         },
       },
+    },
+    Tooltip: {
+      classNames: { tooltip: popoverStyles.tooltip },
     },
     SegmentedControl: {
       classNames: {
@@ -203,6 +210,32 @@ export const theme = createTheme({
       defaultProps: {
         size: 'md',
         fullWidth: true,
+      },
+    },
+    // Checkbox: {
+    //   classNames: {
+    //     indicator: checkBoxClasses.indicator,
+    //   },
+    // },
+
+    CheckboxIndicator: {
+      classNames: {
+        indicator: checkBoxClasses.indicator,
+      },
+    },
+
+    ActionIcon: {
+      classNames: {
+        root: buttonClasses.actionIcon,
+      },
+    },
+
+    Modal: {
+      defaultProps: {
+        centered: true,
+      },
+      classNames: {
+        header: modalClasses.header,
       },
     },
   },

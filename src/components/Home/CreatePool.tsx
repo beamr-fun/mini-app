@@ -1,38 +1,27 @@
-import { Box, Button, Stack } from '@mantine/core';
-import { useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { PageTitle } from '../PageTitle';
 
-enum Status {
-  Idle,
-  Initializing,
-  Creating,
-  Success,
-  Error,
-}
+import { OnboardDataProvider } from '../../context/OnboardContext';
+
+const titles = [
+  'Unknown',
+  'About Beamr',
+  'Set Budget',
+  'Choose Friends',
+  'Confirm',
+];
 
 export const CreatePool = () => {
-  const [status] = useState<Status>(Status.Idle);
+  const location = useLocation();
 
-  const isLoading =
-    status === Status.Initializing || status === Status.Creating;
+  const subroute = location.pathname.split('/')[2];
 
-  const handleCreatePool = async () => {};
+  const routeNumber = subroute ? parseInt(subroute) : 0;
 
   return (
-    <Stack w="100%" h="100%" justify="space-between">
-      <Box h="400px" bg="dark.6">
-        Explainer
-      </Box>
-      <Button
-        mt="lg"
-        size="lg"
-        w="100%"
-        variant="default"
-        loading={isLoading}
-        disabled={isLoading}
-        onClick={handleCreatePool}
-      >
-        Create Pool
-      </Button>
-    </Stack>
+    <OnboardDataProvider>
+      <PageTitle title={titles[routeNumber]} />
+      <Outlet />
+    </OnboardDataProvider>
   );
 };

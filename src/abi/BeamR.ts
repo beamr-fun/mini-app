@@ -8,6 +8,7 @@ export const BeamRABI = [
     type: 'constructor',
   },
   { inputs: [], name: 'Unauthorized', type: 'error' },
+  { inputs: [], name: 'Underflow', type: 'error' },
   {
     anonymous: false,
     inputs: [
@@ -25,6 +26,45 @@ export const BeamRABI = [
       },
     ],
     name: 'Initialized',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          { internalType: 'address', name: 'account', type: 'address' },
+          { internalType: 'uint128', name: 'units', type: 'uint128' },
+        ],
+        indexed: false,
+        internalType: 'struct IBeamR.Member[]',
+        name: 'members',
+        type: 'tuple[]',
+      },
+      {
+        indexed: false,
+        internalType: 'address[]',
+        name: 'poolAddresses',
+        type: 'address[]',
+      },
+      {
+        indexed: false,
+        internalType: 'enum IBeamR.Action',
+        name: 'action',
+        type: 'uint8',
+      },
+      {
+        components: [
+          { internalType: 'uint256', name: 'protocol', type: 'uint256' },
+          { internalType: 'string', name: 'pointer', type: 'string' },
+        ],
+        indexed: false,
+        internalType: 'struct IBeamR.Metadata',
+        name: 'metadata',
+        type: 'tuple',
+      },
+    ],
+    name: 'MemberUnitsUpdated',
     type: 'event',
   },
   {
@@ -59,6 +99,16 @@ export const BeamRABI = [
         internalType: 'struct PoolConfig',
         name: 'config',
         type: 'tuple',
+      },
+      {
+        components: [
+          { internalType: 'address', name: 'account', type: 'address' },
+          { internalType: 'uint128', name: 'units', type: 'uint128' },
+        ],
+        indexed: false,
+        internalType: 'struct IBeamR.Member[]',
+        name: 'members',
+        type: 'tuple[]',
       },
       {
         indexed: false,
@@ -256,6 +306,33 @@ export const BeamRABI = [
     type: 'function',
   },
   {
+    inputs: [
+      {
+        components: [
+          { internalType: 'address', name: 'account', type: 'address' },
+          { internalType: 'uint128', name: 'units', type: 'uint128' },
+        ],
+        internalType: 'struct IBeamR.Member[]',
+        name: '_memberAdjustments',
+        type: 'tuple[]',
+      },
+      { internalType: 'address[]', name: '_poolAddresses', type: 'address[]' },
+      {
+        components: [
+          { internalType: 'uint256', name: 'protocol', type: 'uint256' },
+          { internalType: 'string', name: 'pointer', type: 'string' },
+        ],
+        internalType: 'struct IBeamR.Metadata',
+        name: '_metadata',
+        type: 'tuple',
+      },
+    ],
+    name: 'decreaseMemberUnits',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     inputs: [{ internalType: 'bytes32', name: 'role', type: 'bytes32' }],
     name: 'getRoleAdmin',
     outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
@@ -280,6 +357,33 @@ export const BeamRABI = [
     name: 'hasRole',
     outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        components: [
+          { internalType: 'address', name: 'account', type: 'address' },
+          { internalType: 'uint128', name: 'units', type: 'uint128' },
+        ],
+        internalType: 'struct IBeamR.Member[]',
+        name: '_memberAdjustments',
+        type: 'tuple[]',
+      },
+      { internalType: 'address[]', name: '_poolAddresses', type: 'address[]' },
+      {
+        components: [
+          { internalType: 'uint256', name: 'protocol', type: 'uint256' },
+          { internalType: 'string', name: 'pointer', type: 'string' },
+        ],
+        internalType: 'struct IBeamR.Metadata',
+        name: '_metadata',
+        type: 'tuple',
+      },
+    ],
+    name: 'increaseMemberUnits',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -340,7 +444,16 @@ export const BeamRABI = [
         name: '_members',
         type: 'tuple[]',
       },
-      { internalType: 'address[]', name: 'poolAddresses', type: 'address[]' },
+      { internalType: 'address[]', name: '_poolAddresses', type: 'address[]' },
+      {
+        components: [
+          { internalType: 'uint256', name: 'protocol', type: 'uint256' },
+          { internalType: 'string', name: 'pointer', type: 'string' },
+        ],
+        internalType: 'struct IBeamR.Metadata',
+        name: '_metadata',
+        type: 'tuple',
+      },
     ],
     name: 'updateMemberUnits',
     outputs: [],
@@ -365,4 +478,4 @@ export const BeamRABI = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-] as const;
+];

@@ -1,5 +1,5 @@
-subscription TXs {
-  TX {
+subscription GetTxById($id: String!) {
+  TX_by_pk(id: $id) {
     id
   }
 }

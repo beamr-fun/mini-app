@@ -1,0 +1,12 @@
+.card {
+  border: none !important;
+
+  &:hover {
+    background: var(--mantine-color-gray-8);
+  }
+}
+.indicator {
+  background-color: var(--mantine-color-gray-9) !important;
+  border: 1px solid var(--mantine-color-gray-5) !important;
+  border-radius: 4px !important;
+}

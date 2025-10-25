@@ -6,6 +6,12 @@
   font-size: var(--mantine-font-size-md);
 }
 
+.section {
+  /* padding: 0 !important;
+  margin: 0 !important; */
+  width: auto;
+}
+
 .baseInput:hover {
   border-color: var(--mantine-color-gray-4);
 }
@@ -35,25 +41,33 @@
   margin-top: 4px;
 }
 
+.withSection {
+  padding-inline: unset;
+}
+
 .errorText {
   color: var(--mantine-color-red-6);
   font-size: var(--mantine-font-size-sm);
   margin-top: 4px;
 }
 
+.wrapper {
+  --input-padding-x: 100px !important;
+}
+
 .textInput {
   height: 52px;
-  padding: 16px;
-  width: 311px;
+  width: 100%;
+  /* --input-padding-x: 40px; */
 }
 
 .textarea {
   padding: 16px;
-  width: 311px;
+  width: 100%;
 }
 
 .numberInputRoot {
-  width: 311px;
+  width: 100%;
 }
 
 .numberInput {
@@ -69,7 +83,7 @@
 }
 
 .select {
-  width: 311px;
+  width: 100%;
 }
 
 .selectInput {

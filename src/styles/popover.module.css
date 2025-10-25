@@ -1,0 +1,6 @@
+.tooltip {
+  background-color: var(--mantine-color-gray-8);
+  color: var(--mantine-color-gray-1);
+  padding: 8px 12px;
+  font-size: var(--mantine-font-size-md);
+}

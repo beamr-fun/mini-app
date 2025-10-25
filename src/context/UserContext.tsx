@@ -1,20 +1,37 @@
 import sdk from '@farcaster/miniapp-sdk';
+import { JWTPayload } from '../types/sharedTypes';
 import { useQuery } from '@tanstack/react-query';
-import { createContext, ReactNode } from 'react';
+import { createContext, ReactNode, useEffect, useState } from 'react';
 import { Address } from 'viem';
+import { createClient } from 'graphql-ws';
+import { print } from 'graphql';
 
 import { useAccount } from 'wagmi';
 import { AuthResponse, FCUser } from '../types/sharedTypes';
+import { APIHeaders } from '../utils/api';
+import {
+  LoggedInUserDocument,
+  LoggedInUserSubscription,
+} from '../generated/graphql';
 
+type UserSub = LoggedInUserSubscription['User_by_pk'];
 //
 type UserContextType = {
   user?: FCUser;
-  address: Address | undefined;
+  address?: Address;
+  jwtPayload?: JWTPayload;
+  userSubscription?: UserSub;
+  token?: string;
+  getAuthHeaders: () => Promise<APIHeaders | false>;
+  startingRoute?: string;
 };
 
 export const UserContext = createContext<UserContextType>({
-  address: undefined,
-  user: undefined,
+  getAuthHeaders: async () => false,
+});
+
+const wsClient = createClient({
+  url: 'wss://indexer.hyperindex.xyz/b9414c9/v1/graphql',
 });
 
 const login = async (clientAddress: Address) => {
@@ -36,7 +53,7 @@ const login = async (clientAddress: Address) => {
     console.error('No token provided for socket connection');
   }
 
-  const res = await fetch('http://localhost:3000/v1/user/auth', {
+  const res = await fetch('https://beamr.ngrok.app/v1/user/auth', {
     headers: {
       authorization: `Bearer ${token}`,
     },
@@ -54,13 +71,12 @@ const login = async (clientAddress: Address) => {
     return;
   }
 
-  sdk.actions.ready();
-
   return {
     user: data.user,
     jwt: data.jwtPayload,
     isMiniApp,
     context,
+    token: token || undefined,
   };
 };
 
@@ -70,146 +86,125 @@ export const UserProvider = ({
   children: ReactNode | ReactNode[];
 }) => {
   const { address } = useAccount();
+
+  const [hasLoadedSubscription, setHasLoadedSubscription] = useState(false);
+  const [userSubscription, setUserSubscription] = useState<
+    LoggedInUserSubscription['User_by_pk'] | undefined
+  >(undefined);
+  const [startingRoute, setStartingRoute] = useState<string | undefined>();
+
   const {
     data: apiData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ['user', address],
     queryFn: () => login(address as Address),
     enabled: !!address,
   });
 
-  console.log('apiData', apiData);
+  useEffect(() => {
+    let dispose: () => void = () => {};
 
-  // TOMORROW, set up Apollo and subscribe utilities.
-  // Set up typegen from graphql schema
+    const getUserSubscription = async () => {
+      const context = await sdk.context;
 
-  // useEffect(() => {
-  //   let socket: IOSocket;
+      const fid = context?.user?.fid;
 
-  //   const handlePoolLoad = (poolResponse: PoolResponse) => {
-  //     setPool(poolResponse.pool || null);
-  //     setIncomingBeams(poolResponse.incomingBeams || null);
-  //     setOutgoingBeams(poolResponse.outgoingBeams || null);
-  //     setErrors(
-  //       poolResponse.errors
-  //         ? (prevErrors) =>
-  //             prevErrors
-  //               ? [...prevErrors, ...(poolResponse.errors || [])]
-  //               : prevErrors
-  //         : null
-  //     );
-  //     setIsLoading(false);
-  //     console.log('Beampool Request Complete ☄️ ☄️ ☄️');
-  //     sdk.actions.ready();
-  //   };
+      if (!fid) {
+        return;
+      }
 
-  //   const handleLoadSocket = async () => {
-  //     setIsLoading(true);
+      dispose = wsClient.subscribe<LoggedInUserSubscription>(
+        {
+          query: print(LoggedInUserDocument),
+          variables: { id: fid.toString() },
+        },
+        {
+          next: (data) => {
+            console.log('data', data);
+            const userSub = data?.data?.User_by_pk;
+            setHasLoadedSubscription(true);
 
-  //     const [isMiniApp, tokenRes, context] = await Promise.all([
-  //       sdk.isInMiniApp(),
-  //       sdk.quickAuth.getToken(),
-  //       sdk.context,
-  //     ]);
+            if (userSub) {
+              setUserSubscription(userSub);
+            }
+          },
+          error: console.error,
+          complete: () => {},
+        }
+      );
+    };
 
-  //     if (!isMiniApp) {
-  //       console.error('Not running in a mini app context');
-  //       setIsLoading(false);
-  //       // TODO: Handle this case appropriately, maybe redirect or show a message
-  //       return;
-  //     }
+    getUserSubscription();
 
-  //     const token = tokenRes?.token || null;
+    return () => dispose();
+  }, []);
 
-  //     if (!token) {
-  //       // TODO: Handle error
-  //       setIsLoading(false);
-  //       console.error('No token provided for socket connection');
-  //       return;
-  //     }
+  useEffect(() => {
+    if (startingRoute) return;
 
-  //     if (!context?.user) {
-  //       // TODO: Handle error
-  //       setIsLoading(false);
-  //       console.error('No user context found for socket connection');
-  //       return;
-  //     }
+    console.log('apiData', apiData);
+    console.log('hasLoadedSubscription', hasLoadedSubscription);
 
-  //     socket = io(SOCKET_URL, {
-  //       reconnection: true,
-  //       auth: {
-  //         token,
-  //       },
-  //       reconnectionAttempts: 7,
-  //       reconnectionDelay: 1000,
-  //       reconnectionDelayMax: 180_000,
-  //       randomizationFactor: 0.5,
-  //       autoConnect: true,
-  //       transports: ['websocket'],
-  //     });
+    if (hasLoadedSubscription && apiData) {
+      if (!userSubscription || !userSubscription?.pools?.length) {
+        console.log('No pools found for user in subscription data');
+        setStartingRoute('/create-pool/1');
+      } else {
+        setStartingRoute('/home');
+        console.log('User subscription pools:', userSubscription.pools);
+      }
 
-  //     /// Socket connection listeners //////
-  //     socket.on('connect', () => {
-  //       console.log('Socket Connected 🛜');
-  //     });
-  //     socket.on('disconnect', (reason) => {
-  //       setIsSocketConnected(false);
-  //       console.log('🛸 Disconnected:', reason);
-  //     });
+      sdk.actions.ready();
+    }
+  }, [hasLoadedSubscription, userSubscription, apiData]);
 
-  //     //// User authentication listeners ////
-  //     socket.on(IOEvent.UserAuthSuccess, ({ user }: { user: User }) => {
-  //       console.log('User Authed! 🔒');
-  //       setIsSocketConnected(true);
-  //       sdk.actions.ready();
-  //       setUser(user);
-  //     });
+  const getAuthHeaders = async () => {
+    if (!apiData || !apiData?.user || !apiData?.jwt || !apiData?.token) {
+      // try to re-login
+      // return login(address as Address);
+      await refetch();
 
-  //     socket.on(IOEvent.UserAuthError, (error) => {
-  //       console.error('User auth error:', error);
-  //       setIsLoading(false);
-  //       setErrors((prevErrors) =>
-  //         prevErrors ? [...prevErrors, error.error || 'Auth error'] : prevErrors
-  //       );
-  //     });
+      if (!apiData || !apiData?.jwt || !apiData?.user || !apiData?.token) {
+        return false;
+      }
+      return {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${apiData.token}`,
+      };
+    }
 
-  //     //// Pool load listeners ////
+    if (apiData.jwt.exp * 1000 < Date.now()) {
+      await refetch();
 
-  //     socket.on(IOEvent.PoolLoad, (poolResponse) => {
-  //       handlePoolLoad(poolResponse);
-  //     });
+      if (!apiData || !apiData?.jwt || !apiData?.user || !apiData?.token) {
+        return false;
+      }
+      return {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${apiData.token}`,
+      };
+    }
 
-  //     socket.on(IOEvent.WalletConnectError, (error) => {
-  //       console.error('Wallet connection error:', error);
-  //       setIsLoading(false);
-  //       setErrors((prevErrors) =>
-  //         prevErrors
-  //           ? [...prevErrors, error.error || 'Wallet connection error']
-  //           : prevErrors
-  //       );
-  //     });
-
-  //     setSocket(socket);
-  //   };
-
-  //   handleLoadSocket();
-
-  //   return () => {
-  //     socket?.disconnect?.();
-  //     setSocket(undefined);
-  //     setIsLoading(false);
-  //     setIsSocketConnected(false);
-  //     socket?.off?.(IOEvent.PoolLoad); // Remove specific listener
-  //   };
-  // }, []);
+    return {
+      'Content-Type': 'application/json',
+      authorization: `Bearer ${apiData.token}`,
+    };
+  };
 
   return (
     <UserContext.Provider
       value={{
         address,
         user: apiData?.user,
+        jwtPayload: apiData?.jwt,
+        token: apiData?.token,
+        getAuthHeaders,
+        startingRoute,
+        userSubscription,
+
         // user,
         // isLoading,
       }}

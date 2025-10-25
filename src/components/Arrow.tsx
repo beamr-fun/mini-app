@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const Arrow = () => {
   return (
     <svg
@@ -22,8 +20,8 @@ export const Arrow = () => {
           y2="-2"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#00ABFF" />
-          <stop offset="1" stop-color="#222121" stop-opacity="0.5" />
+          <stop stopColor="#00ABFF" />
+          <stop offset="1" stopColor="#222121" stopOpacity="0.5" />
         </linearGradient>
       </defs>
     </svg>

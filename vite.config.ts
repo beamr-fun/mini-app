@@ -6,7 +6,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
-    port: 6969,
-    allowedHosts: ['beamr.ngrok.app'],
+    port: 5173,
+    allowedHosts: ['actors-right-lynn-duration.trycloudflare.com'],
   },
 });
+
+// 0xFDa7981E3d5a0f338a8AD40dA2f7E563BFa420e8
