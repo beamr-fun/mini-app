@@ -12,4 +12,9 @@ export default defineConfig({
       'https://mini-app-production-96b0.up.railway.app',
     ],
   },
+  preview: {
+    host: true,
+    port: 4173,
+    allowedHosts: ['https://mini-app-production-96b0.up.railway.app'],
+  },
 });
