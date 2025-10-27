@@ -13,19 +13,65 @@ import { PageLayout } from '../layouts/PageLayout';
 import { useUser } from '../hooks/useUser';
 import beamrLogo from '../assets/beamrLogo.png';
 import { useState } from 'react';
-import { flowratePerSecondToMonth } from '../utils/common';
-import { useWalletClient } from 'wagmi';
+import {
+  flowratePerMonthToSecond,
+  flowratePerSecondToMonth,
+} from '../utils/common';
+import { usePublicClient, useWalletClient } from 'wagmi';
 import { ADDR } from '../const/addresses';
-import { erc20Abi, parseEther } from 'viem';
+import { Address, erc20Abi, parseEther } from 'viem';
+import { distributeFlow } from '../utils/interactions';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
+  const { address, userSubscription } = useUser();
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
+
+  const testDistributeFlow = async () => {
+    if (!userSubscription) {
+      console.log('No outgoing subscriptions to test distribute flow');
+      return;
+    }
+
+    if (userSubscription.pools.length === 0) {
+      console.log('No pools found in user subscription');
+      return;
+    }
+
+    distributeFlow({
+      onError(errMsg) {
+        throw new Error(errMsg);
+      },
+      onSuccess(txHash) {
+        console.log('Success!: Distribute flow tx hash:', txHash);
+        // setCreationSteps((prev) => ({ ...prev, distributeFlow: true }));
+        // startTxPoll({
+        //   id: txHash,
+        //   onError() {
+        //     throw new Error('Transaction indexing failed');
+        //   },
+        //   onSuccess() {
+        //     setCreationSteps((prev) => ({ ...prev, indexTransaction: true }));
+        //   },
+        // });
+      },
+      args: {
+        poolAddress: userSubscription.pools[0].id as Address,
+        user: address as Address,
+        flowRate: flowratePerMonthToSecond(parseEther('5')),
+      },
+      walletClient,
+      publicClient,
+    });
+  };
 
   return (
     <PageLayout>
       <Group justify="center" mt="md" mb="lg">
         <Avatar src={beamrLogo} size={128} />
       </Group>
+      <Button onClick={testDistributeFlow}>Test Distribute Flow</Button>
       <SegmentedControl
         value={tab}
         data={['Sending', 'Receiving']}
