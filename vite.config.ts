@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['actors-right-lynn-duration.trycloudflare.com'],
+    allowedHosts: ['therapy-sufficient-reform-sat.trycloudflare.com'],
   },
 });
 

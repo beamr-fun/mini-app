@@ -13,16 +13,11 @@ const apiUrl = isAPIDev
   ? import.meta.env.VITE_API_DEV
   : import.meta.env.VITE_API_PROD;
 
-const apiKey = isAPIDev
-  ? import.meta.env.VITE_API_KEY_DEV
-  : import.meta.env.VITE_API_KEY_PROD;
-
 const indexerUrl = import.meta.env.VITE_INDEXER_URL;
 
 const envKeys = {
   rpc,
   apiUrl,
-  apiKey,
   indexerUrl,
 };
 
