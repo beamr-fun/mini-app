@@ -13,6 +13,7 @@ import {
   LoggedInUserDocument,
   LoggedInUserSubscription,
 } from '../generated/graphql';
+import { keys } from '../utils/setup';
 
 type UserSub = LoggedInUserSubscription['User_by_pk'];
 //
@@ -31,7 +32,7 @@ export const UserContext = createContext<UserContextType>({
 });
 
 const wsClient = createClient({
-  url: 'wss://indexer.hyperindex.xyz/b9414c9/v1/graphql',
+  url: `wss://${keys.indexerUrl}`,
 });
 
 const login = async (clientAddress: Address) => {
@@ -53,7 +54,7 @@ const login = async (clientAddress: Address) => {
     console.error('No token provided for socket connection');
   }
 
-  const res = await fetch('https://beamr.ngrok.app/v1/user/auth', {
+  const res = await fetch(`${keys.apiUrl}/v1/user/auth`, {
     headers: {
       authorization: `Bearer ${token}`,
     },
