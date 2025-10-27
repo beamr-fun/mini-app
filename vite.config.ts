@@ -7,8 +7,9 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['therapy-sufficient-reform-sat.trycloudflare.com'],
+    allowedHosts: [
+      'therapy-sufficient-reform-sat.trycloudflare.com',
+      'https://mini-app-production-96b0.up.railway.app',
+    ],
   },
 });
-
-// 0xFDa7981E3d5a0f338a8AD40dA2f7E563BFa420e8
