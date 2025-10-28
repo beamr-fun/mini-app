@@ -18,60 +18,18 @@ import {
   flowratePerSecondToMonth,
 } from '../utils/common';
 import { usePublicClient, useWalletClient } from 'wagmi';
-import { ADDR } from '../const/addresses';
-import { Address, erc20Abi, parseEther } from 'viem';
+import { Address, parseEther } from 'viem';
 import { distributeFlow } from '../utils/interactions';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
-  const { address, userSubscription } = useUser();
-  const publicClient = usePublicClient();
-  const { data: walletClient } = useWalletClient();
-
-  const testDistributeFlow = async () => {
-    if (!userSubscription) {
-      console.log('No outgoing subscriptions to test distribute flow');
-      return;
-    }
-
-    if (userSubscription.pools.length === 0) {
-      console.log('No pools found in user subscription');
-      return;
-    }
-
-    distributeFlow({
-      onError(errMsg) {
-        throw new Error(errMsg);
-      },
-      onSuccess(txHash) {
-        console.log('Success!: Distribute flow tx hash:', txHash);
-        // setCreationSteps((prev) => ({ ...prev, distributeFlow: true }));
-        // startTxPoll({
-        //   id: txHash,
-        //   onError() {
-        //     throw new Error('Transaction indexing failed');
-        //   },
-        //   onSuccess() {
-        //     setCreationSteps((prev) => ({ ...prev, indexTransaction: true }));
-        //   },
-        // });
-      },
-      args: {
-        poolAddress: userSubscription.pools[0].id as Address,
-        user: address as Address,
-        flowRate: flowratePerMonthToSecond(parseEther('5')),
-      },
-      walletClient,
-      publicClient,
-    });
-  };
 
   return (
     <PageLayout>
-      <Group justify="center" mt="md" mb="lg">
+      <Buttons />
+      {/* <Group justify="center" mt="md" mb="lg">
         <Avatar src={beamrLogo} size={128} />
       </Group>
-      <Button onClick={testDistributeFlow}>Test Distribute Flow</Button>
       <SegmentedControl
         value={tab}
         data={['Sending', 'Receiving']}
@@ -79,7 +37,7 @@ export const Home = () => {
         mb="lg"
       />
       {tab === 'Sending' && <Sending />}
-      {tab === 'Receiving' && <Receiving />}
+      {tab === 'Receiving' && <Receiving />} */}
     </PageLayout>
   );
 };
@@ -413,114 +371,114 @@ const Receiving = () => {
 //   );
 // };
 
-// const Buttons = () => {
-//   return (
-//     <Stack>
-//       <Box mt="lg">
-//         <Text fz={'xl'} variant="highlight" mb="sm">
-//           Primary Button
-//         </Text>
-//         <Stack>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               L
-//             </Text>
-//             <Button size="lg">Primary</Button>
-//           </Box>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               M
-//             </Text>
-//             <Button>Primary</Button>
-//           </Box>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               S
-//             </Text>
-//             <Button size="sm">Primary</Button>
-//           </Box>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               XS
-//             </Text>
-//             <Button size="xs">Primary</Button>
-//           </Box>
-//         </Stack>
-//       </Box>
-//       <Box mt="lg">
-//         <Text fz={'xl'} variant="highlight" mb="sm">
-//           Secondary Button
-//         </Text>
-//         <Stack>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               L
-//             </Text>
-//             <Button variant="secondary" size="lg">
-//               Secondary
-//             </Button>
-//           </Box>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               M
-//             </Text>
-//             <Button variant="secondary">Secondary</Button>
-//           </Box>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               S
-//             </Text>
-//             <Button variant="secondary" size="sm">
-//               Secondary
-//             </Button>
-//           </Box>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               XS
-//             </Text>
-//             <Button variant="secondary" size="xs">
-//               Secondary
-//             </Button>
-//           </Box>
-//         </Stack>
-//       </Box>
-//       <Box mt="lg">
-//         <Text fz={'xl'} variant="highlight" mb="sm">
-//           Disabled Button
-//         </Text>
-//         <Stack>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               L
-//             </Text>
-//             <Button size="lg" disabled>
-//               Disabled
-//             </Button>
-//           </Box>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               M
-//             </Text>
-//             <Button disabled>Disabled</Button>
-//           </Box>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               S
-//             </Text>
-//             <Button disabled size="sm">
-//               Disabled
-//             </Button>
-//           </Box>
-//           <Box>
-//             <Text fz={30} variant="label" mb="sm">
-//               XS
-//             </Text>
-//             <Button disabled size="xs">
-//               Disabled
-//             </Button>
-//           </Box>
-//         </Stack>
-//       </Box>
-//     </Stack>
-//   );
-// };
+const Buttons = () => {
+  return (
+    <Stack>
+      <Box mt="lg">
+        <Text fz={'xl'} variant="highlight" mb="sm">
+          Primary Button
+        </Text>
+        <Stack>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              L
+            </Text>
+            <Button size="lg">Primary</Button>
+          </Box>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              M
+            </Text>
+            <Button>Primary</Button>
+          </Box>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              S
+            </Text>
+            <Button size="sm">Primary</Button>
+          </Box>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              XS
+            </Text>
+            <Button size="xs">Primary</Button>
+          </Box>
+        </Stack>
+      </Box>
+      <Box mt="lg">
+        <Text fz={'xl'} variant="highlight" mb="sm">
+          Secondary Button
+        </Text>
+        <Stack>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              L
+            </Text>
+            <Button variant="secondary" size="lg">
+              Secondary
+            </Button>
+          </Box>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              M
+            </Text>
+            <Button variant="secondary">Secondary</Button>
+          </Box>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              S
+            </Text>
+            <Button variant="secondary" size="sm">
+              Secondary
+            </Button>
+          </Box>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              XS
+            </Text>
+            <Button variant="secondary" size="xs">
+              Secondary
+            </Button>
+          </Box>
+        </Stack>
+      </Box>
+      <Box mt="lg">
+        <Text fz={'xl'} variant="highlight" mb="sm">
+          Disabled Button
+        </Text>
+        <Stack>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              L
+            </Text>
+            <Button size="lg" disabled>
+              Disabled
+            </Button>
+          </Box>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              M
+            </Text>
+            <Button disabled>Disabled</Button>
+          </Box>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              S
+            </Text>
+            <Button disabled size="sm">
+              Disabled
+            </Button>
+          </Box>
+          <Box>
+            <Text fz={30} variant="label" mb="sm">
+              XS
+            </Text>
+            <Button disabled size="xs">
+              Disabled
+            </Button>
+          </Box>
+        </Stack>
+      </Box>
+    </Stack>
+  );
+};
