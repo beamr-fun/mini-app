@@ -39,10 +39,19 @@
 }
 
 .root[data-variant='secondary'] {
+  background: transparent;
+  border: rem(1px) solid var(--mantine-color-blue-7);
+  transition: border-color 150ms ease-in;
 }
 
 .root[data-variant='secondary']:hover {
+  border: rem(1px) solid var(--mantine-color-blue-6);
 }
+
+.root[data-variant='secondary']:hover::after {
+  opacity: 0;
+}
+
 .root[data-size='lg'] {
   width: rem(295px);
   min-height: rem(52px);
