@@ -36,6 +36,14 @@
 }
 
 .root:disabled {
+  background: rgba(100, 100, 100, 0.1);
+
+  color: var(--mantine-color-gray-0);
+  cursor: not-allowed;
+}
+
+.root:disabled::after {
+  display: none;
 }
 
 .root[data-variant='secondary'] {
@@ -49,7 +57,7 @@
 }
 
 .root[data-variant='secondary']:hover::after {
-  opacity: 0;
+  display: none;
 }
 
 .root[data-size='lg'] {

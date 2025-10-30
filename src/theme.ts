@@ -11,6 +11,8 @@ import popoverStyles from './styles/popover.module.css';
 import checkBoxClasses from './styles/checkbox.module.css';
 import modalClasses from './styles/modal.module.css';
 
+console.log('inputClasses', inputClasses);
+
 const GRAY = [
   '#F2F2F2',
   '#E3E3E3',
@@ -142,6 +144,7 @@ export const theme = createTheme({
     },
     Input: {
       classNames: {
+        wrapper: inputClasses.wrapper,
         input: inputClasses.baseInput,
       },
     },
@@ -152,7 +155,7 @@ export const theme = createTheme({
         error: inputClasses.errorText,
       },
       defaultProps: {
-        inputWrapperOrder: ['label', 'input', 'error', 'description'],
+        // inputWrapperOrder: ['label', 'input', 'error', 'description'],
       },
     },
     TextInput: {

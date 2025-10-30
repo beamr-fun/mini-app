@@ -4,9 +4,13 @@ import {
   Button,
   Flex,
   Group,
+  NumberInput,
   SegmentedControl,
+  Select,
   Stack,
   Text,
+  Textarea,
+  TextInput,
   useMantineTheme,
 } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
@@ -26,7 +30,10 @@ export const Home = () => {
 
   return (
     <PageLayout>
-      <Buttons />
+      <Stack mb="xl" gap="lg">
+        <Inputs />
+        <Buttons />
+      </Stack>
       {/* <Group justify="center" mt="md" mb="lg">
         <Avatar src={beamrLogo} size={128} />
       </Group>
@@ -246,130 +253,130 @@ const Receiving = () => {
 //   );
 // };
 
-// const Inputs = () => {
-//   return (
-//     <Stack gap="xl">
-//       <Box>
-//         <Text fz="xl" variant="highlight" mb="sm">
-//           Select
-//         </Text>
-//         <Stack gap="md">
-//           <Select
-//             label="Base Input"
-//             placeholder="Pick value"
-//             data={['React', 'Angular', 'Vue', 'Svelte']}
-//           />
-//           <Select
-//             label="Error Input"
-//             placeholder="Pick value"
-//             data={['React', 'Angular', 'Vue', 'Svelte']}
-//             error="This is an error"
-//           />
-//           <Select
-//             label="With Description"
-//             placeholder="Pick value"
-//             data={['React', 'Angular', 'Vue', 'Svelte']}
-//             description="This is a description"
-//           />
-//           <Select
-//             label="Filled Input"
-//             placeholder="Pick value"
-//             data={['React', 'Angular', 'Vue', 'Svelte']}
-//             defaultValue={'Vue'}
-//           />
-//         </Stack>
-//       </Box>
-//       <Box>
-//         <Text fz="xl" variant="highlight" mb="sm">
-//           Number Input
-//         </Text>
-//         <Stack gap="md">
-//           <NumberInput
-//             label="Base Input"
-//             rightSection={'BEAMR'}
-//             rightSectionWidth={70}
-//           />
-//           <NumberInput
-//             label="Input With Description"
-//             rightSection={'BEAMR'}
-//             rightSectionWidth={70}
-//             description="This is a description"
-//           />
-//           <NumberInput
-//             label="Input With Error"
-//             rightSection={'ETH'}
-//             rightSectionWidth={50}
-//             error="This is an error"
-//           />
-//           <NumberInput
-//             label="Required Input"
-//             rightSection={'ETH'}
-//             rightSectionWidth={50}
-//             required
-//           />
-//           <NumberInput
-//             label="Filled Input"
-//             rightSection={'ETH'}
-//             rightSectionWidth={50}
-//             value={12345.67}
-//           />
-//         </Stack>
-//       </Box>
-//       <Box>
-//         <Text fz="xl" variant="highlight" mb="sm">
-//           Textarea
-//         </Text>
-//         <Stack gap="md">
-//           <Textarea label="Base Input" placeholder="This is placeholder text" />
-//           <Textarea
-//             label="Input With Description"
-//             placeholder="This is placeholder text"
-//             description="This is a description"
-//           />
-//           <Textarea
-//             label="Base Input Error"
-//             placeholder="This is placeholder text"
-//             error="This is an error message"
-//           />
-//           <Textarea
-//             label="Required Input"
-//             placeholder="This is placeholder text"
-//             required
-//           />
-//           <Textarea label="Filled Input" value={'Filled Input'} />
-//         </Stack>
-//       </Box>
-//       <Box>
-//         <Text fz="xl" variant="highlight" mb="sm">
-//           Text Input
-//         </Text>
-//         <Stack gap="md">
-//           <TextInput
-//             label="Base Input"
-//             placeholder="This is placeholder text"
-//           />
-//           <TextInput
-//             label="Input With Description"
-//             placeholder="This is placeholder text"
-//             description="This is a description"
-//           />
+const Inputs = () => {
+  return (
+    <Stack gap="xl">
+      <Box>
+        <Text fz="xl" variant="highlight" mb="sm">
+          Select
+        </Text>
+        <Stack gap="md">
+          <Select
+            label="Base Input"
+            placeholder="Pick value"
+            data={['React', 'Angular', 'Vue', 'Svelte']}
+          />
+          <Select
+            label="Error Input"
+            placeholder="Pick value"
+            data={['React', 'Angular', 'Vue', 'Svelte']}
+            error="This is an error"
+          />
+          <Select
+            label="With Description"
+            placeholder="Pick value"
+            data={['React', 'Angular', 'Vue', 'Svelte']}
+            description="This is a description"
+          />
+          <Select
+            label="Filled Input"
+            placeholder="Pick value"
+            data={['React', 'Angular', 'Vue', 'Svelte']}
+            defaultValue={'Vue'}
+          />
+        </Stack>
+      </Box>
+      <Box>
+        <Text fz="xl" variant="highlight" mb="sm">
+          Number Input
+        </Text>
+        <Stack gap="md">
+          <NumberInput
+            label="Base Input"
+            rightSection={'BEAMR'}
+            rightSectionWidth={70}
+          />
+          <NumberInput
+            label="Input With Description"
+            rightSection={'BEAMR'}
+            rightSectionWidth={70}
+            description="This is a description"
+          />
+          <NumberInput
+            label="Input With Error"
+            rightSection={'ETH'}
+            rightSectionWidth={50}
+            error="This is an error"
+          />
+          <NumberInput
+            label="Required Input"
+            rightSection={'ETH'}
+            rightSectionWidth={50}
+            required
+          />
+          <NumberInput
+            label="Filled Input"
+            rightSection={'ETH'}
+            rightSectionWidth={50}
+            value={12345.67}
+          />
+        </Stack>
+      </Box>
+      <Box>
+        <Text fz="xl" variant="highlight" mb="sm">
+          Textarea
+        </Text>
+        <Stack gap="md">
+          <Textarea label="Base Input" placeholder="This is placeholder text" />
+          <Textarea
+            label="Input With Description"
+            placeholder="This is placeholder text"
+            description="This is a description"
+          />
+          <Textarea
+            label="Base Input Error"
+            placeholder="This is placeholder text"
+            error="This is an error message"
+          />
+          <Textarea
+            label="Required Input"
+            placeholder="This is placeholder text"
+            required
+          />
+          <Textarea label="Filled Input" value={'Filled Input'} />
+        </Stack>
+      </Box>
+      <Box>
+        <Text fz="xl" variant="highlight" mb="sm">
+          Text Input
+        </Text>
+        <Stack gap="md">
+          <TextInput
+            label="Base Input"
+            placeholder="This is placeholder text"
+          />
+          <TextInput
+            label="Input With Description"
+            placeholder="This is placeholder text"
+            description="This is a description"
+          />
 
-//           <TextInput
-//             label="Base Input Error"
-//             placeholder="This is placeholder text"
-//             error="This is an error message"
-//           />
-//           <TextInput
-//             label="Required Input"
-//             placeholder="This is placeholder text"
-//             required
-//           />
-//           <TextInput label="Filled Input" value={'Filled Input'} />
-//         </Stack>
-//       </Box>
-//     </Stack>
-//   );
-// };
+          <TextInput
+            label="Base Input Error"
+            placeholder="This is placeholder text"
+            error="This is an error message"
+          />
+          <TextInput
+            label="Required Input"
+            placeholder="This is placeholder text"
+            required
+          />
+          <TextInput label="Filled Input" value={'Filled Input'} />
+        </Stack>
+      </Box>
+    </Stack>
+  );
+};
 
 const Buttons = () => {
   return (

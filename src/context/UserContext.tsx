@@ -86,6 +86,7 @@ export const UserProvider = ({
 }: {
   children: ReactNode | ReactNode[];
 }) => {
+  const IS_TESTING = true;
   const { address } = useAccount();
 
   const [hasLoadedSubscription, setHasLoadedSubscription] = useState(false);
@@ -102,10 +103,14 @@ export const UserProvider = ({
   } = useQuery({
     queryKey: ['user', address],
     queryFn: () => login(address as Address),
-    enabled: !!address,
+    enabled: !!address && !IS_TESTING,
   });
 
   useEffect(() => {
+    if (IS_TESTING) {
+      return;
+    }
+
     let dispose: () => void = () => {};
 
     const getUserSubscription = async () => {
@@ -144,6 +149,11 @@ export const UserProvider = ({
   }, []);
 
   useEffect(() => {
+    if (IS_TESTING) {
+      setStartingRoute('/home');
+      sdk.actions.ready();
+      return;
+    }
     if (startingRoute) return;
 
     console.log('apiData', apiData);

@@ -1,9 +1,53 @@
 .baseInput {
-  background-color: var(--mantine-color-gray-9);
+  background-color: rgba(242, 242, 242, 0.04);
   border-radius: 12px;
-  border: 1px solid var(--mantine-color-gray-5);
-  transition: 0.15s ease all;
+
+  border: none;
   font-size: var(--mantine-font-size-md);
+  padding-inline: 16px;
+  background: transparent;
+  color: var(--mantine-color-gray-0);
+  border-radius: 18px;
+  max-width: rem(299px);
+  height: 52px;
+}
+
+.baseInput::active {
+  background-color: transparent !important;
+}
+
+.wrapper {
+  position: relative;
+  margin-top: rem(8px);
+  max-width: rem(299px);
+  border-radius: 18px;
+  transition: 0.15s ease all;
+  background-color: rgba(242, 242, 242, 0.04);
+  overflow: hidden;
+}
+
+.wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    rgba(0, 82, 153, 0.15) 10%,
+    rgba(0, 171, 255, 0.15) 110%
+  );
+  opacity: 0;
+  transition: opacity 250ms ease-in;
+}
+
+.wrapper[data-error]::after {
+  background: rgba(244, 87, 68, 0.1) !important;
+  opacity: 1 !important;
+}
+
+.wrapper:focus-within::after {
+  opacity: 1;
 }
 
 .section {
@@ -13,15 +57,10 @@
 }
 
 .baseInput:hover {
-  border-color: var(--mantine-color-gray-4);
 }
 
 .baseInput::placeholder {
   color: var(--mantine-color-gray-6);
-}
-
-.baseInput:focus {
-  border-color: var(--mantine-color-gray-1);
 }
 
 .baseInput[data-error] {
@@ -32,13 +71,13 @@
   font-size: var(--mantine-font-size-lg);
   font-weight: 400;
   color: var(--mantine-color-gray-3);
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .description {
   color: var(--mantine-color-gray-3);
   font-size: var(--mantine-font-size-sm);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .withSection {
@@ -49,10 +88,6 @@
   color: var(--mantine-color-red-6);
   font-size: var(--mantine-font-size-sm);
   margin-top: 4px;
-}
-
-.wrapper {
-  --input-padding-x: 100px !important;
 }
 
 .textInput {
@@ -72,9 +107,9 @@
 
 .numberInput {
   height: 52px;
-  text-align: right;
+  /* text-align: right;
   padding-block: 16px;
-  padding-inline-start: 16px;
+  padding-inline-start: 16px; */
 }
 
 .numberInputSection {
