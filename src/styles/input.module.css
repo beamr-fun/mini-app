@@ -136,8 +136,8 @@
 }
 
 .selectDropdown {
-  background-color: var(--mantine-color-gray-9);
-  border: 1px solid var(--mantine-color-gray-1);
+  background-color: var(--mantine-color-gray-8);
+  border: none;
   border-radius: 12px;
   padding: 16px;
 }
@@ -147,8 +147,17 @@
   height: 40px;
   margin-bottom: 4px;
   width: 95%;
+  color: var(--mantine-color-gray-3);
   &:hover {
     background-color: var(--mantine-color-gray-8);
     color: var(--mantine-color-gray-0);
+  }
+}
+
+.selectOption[data-checked] {
+  color: var(--mantine-color-gray-0);
+  svg {
+    color: var(--mantine-color-gray-0);
+    opacity: 1;
   }
 }
