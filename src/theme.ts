@@ -166,7 +166,7 @@ export const theme = createTheme({
     },
     Textarea: {
       classNames: {
-        root: inputClasses.baseInput,
+        // root: inputClasses.baseInput,
         input: inputClasses.textarea,
       },
       defaultProps: {
