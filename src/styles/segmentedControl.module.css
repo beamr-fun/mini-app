@@ -1,17 +1,17 @@
 .root {
-  background: var(--mantine-color-gray-9);
-  border: 1px solid var(--mantine-color-gray-8);
-  border-radius: 12px;
-  padding: 6px;
+  background-color: rgba(242, 242, 242, 0.028);
+  border: 1px solid rgba(255, 255, 255, 0.032);
+  border-radius: rem(18px);
 }
 
 .indicator {
-  background: var(--mantine-color-gray-9);
-  border: 1px solid var(--mantine-color-gray-0);
-  border-radius: 8px;
+  background-color: rgba(242, 242, 242, 0.028);
+  border: 1px solid rgba(255, 255, 255, 0.032);
+  border-radius: rem(18px);
+  padding-bottom: 2px;
 }
 
 .label {
   font-size: var(--mantine-font-size-sm);
-  padding: 5px;
+  /* padding: 5px; */
 }

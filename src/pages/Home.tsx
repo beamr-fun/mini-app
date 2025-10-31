@@ -18,13 +18,7 @@ import { PageLayout } from '../layouts/PageLayout';
 import { useUser } from '../hooks/useUser';
 import beamrLogo from '../assets/beamrLogo.png';
 import { useState } from 'react';
-import {
-  flowratePerMonthToSecond,
-  flowratePerSecondToMonth,
-} from '../utils/common';
-import { usePublicClient, useWalletClient } from 'wagmi';
-import { Address, parseEther } from 'viem';
-import { distributeFlow } from '../utils/interactions';
+import { flowratePerSecondToMonth } from '../utils/common';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
@@ -32,21 +26,17 @@ export const Home = () => {
   return (
     <PageLayout>
       <Stack mb="xl" gap="lg">
+        <SegmentedControl
+          value={tab}
+          data={['Sending', 'Receiving']}
+          onChange={setTab}
+        />
         <Cards />
         <Inputs />
         <Buttons />
       </Stack>
-      {/* <Group justify="center" mt="md" mb="lg">
-        <Avatar src={beamrLogo} size={128} />
-      </Group>
-      <SegmentedControl
-        value={tab}
-        data={['Sending', 'Receiving']}
-        onChange={setTab}
-        mb="lg"
-      />
       {tab === 'Sending' && <Sending />}
-      {tab === 'Receiving' && <Receiving />} */}
+      {tab === 'Receiving' && <Receiving />}
     </PageLayout>
   );
 };
