@@ -5,6 +5,7 @@ import {
   Flex,
   Group,
   NumberInput,
+  Paper,
   SegmentedControl,
   Select,
   Stack,
@@ -31,6 +32,7 @@ export const Home = () => {
   return (
     <PageLayout>
       <Stack mb="xl" gap="lg">
+        <Cards />
         <Inputs />
         <Buttons />
       </Stack>
@@ -46,6 +48,30 @@ export const Home = () => {
       {tab === 'Sending' && <Sending />}
       {tab === 'Receiving' && <Receiving />} */}
     </PageLayout>
+  );
+};
+
+const Cards = () => {
+  return (
+    <Paper>
+      <Text fz="xl" c="var(--mantine-color-gray-0)" mb="md">
+        Card
+      </Text>
+      <Stack gap="md">
+        <Select
+          label="Base Input"
+          placeholder="Pick value"
+          data={['React', 'Angular', 'Vue', 'Svelte']}
+        />
+        <NumberInput
+          label="Required Input"
+          rightSection={'ETH'}
+          rightSectionWidth={50}
+          required
+        />
+        <TextInput label="Base Input" placeholder="This is placeholder text" />
+      </Stack>
+    </Paper>
   );
 };
 

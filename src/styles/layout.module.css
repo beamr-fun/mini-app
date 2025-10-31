@@ -27,3 +27,14 @@
   padding: rem(12px) rem(32px);
   height: 100%;
 }
+
+.paper {
+  padding: rem(18px) rem(18px) rem(24px) rem(18px);
+  background-color: rgba(242, 242, 242, 0.028) !important;
+  backdrop-filter: blur(24px);
+
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.032);
+  /* -webkit-backdrop-filter: blur(70px); */
+  border-radius: rem(24px) !important;
+}

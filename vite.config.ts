@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: [
-      'product-boc-navy-reverse.trycloudflare.com',
+      'seal-wilson-affairs-arguments.trycloudflare.com',
       'https://mini-app-production-96b0.up.railway.app',
     ],
   },

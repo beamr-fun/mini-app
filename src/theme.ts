@@ -10,6 +10,8 @@ import segmentedClasses from './styles/segmentedControl.module.css';
 import popoverStyles from './styles/popover.module.css';
 import checkBoxClasses from './styles/checkbox.module.css';
 import modalClasses from './styles/modal.module.css';
+import layoutClasses from './styles/layout.module.css';
+import { root } from 'viem/chains';
 
 console.log('inputClasses', inputClasses);
 
@@ -199,6 +201,11 @@ export const theme = createTheme({
         comboboxProps: {
           transitionProps: { transition: 'fade-up', duration: 200 },
         },
+      },
+    },
+    Paper: {
+      classNames: {
+        root: layoutClasses.paper,
       },
     },
     Tooltip: {

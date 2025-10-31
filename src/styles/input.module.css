@@ -1,15 +1,14 @@
 .baseInput {
-  background-color: rgba(242, 242, 242, 0.04);
-  border-radius: 12px;
+  border-radius: rem(12px);
 
   border: none;
   font-size: var(--mantine-font-size-md);
-  padding-inline: 16px;
+  padding-inline: rem(16px);
   background: transparent;
   color: var(--mantine-color-gray-0);
-  border-radius: 18px;
+  border-radius: rem(18px);
   max-width: rem(299px);
-  height: 52px;
+  height: rem(52px);
 }
 
 .baseInput::active {
@@ -20,9 +19,16 @@
   position: relative;
   margin-top: rem(8px);
   max-width: rem(299px);
-  border-radius: 18px;
+  border-radius: rem(18px);
   transition: 0.15s ease all;
-  background-color: rgba(242, 242, 242, 0.04);
+  backdrop-filter: blur(32px);
+  /* contain: paint layout; */
+  /* will-change: transform; */
+  /* transform: translateZ(0); */
+  border: 1px solid rgba(255, 255, 255, 0.032);
+
+  background-color: rgba(242, 242, 242, 0.01);
+  /* border; */
   overflow: hidden;
 }
 
@@ -37,6 +43,7 @@
     rgba(0, 82, 153, 0.15) 10%,
     rgba(0, 171, 255, 0.15) 110%
   );
+
   opacity: 0;
   transition: opacity 250ms ease-in;
 }
@@ -77,7 +84,7 @@
 .description {
   color: var(--mantine-color-gray-3);
   font-size: var(--mantine-font-size-sm);
-  margin-top: 2px;
+  margin-top: rem(2px);
 }
 
 .withSection {
@@ -87,11 +94,11 @@
 .errorText {
   color: var(--mantine-color-red-6);
   font-size: var(--mantine-font-size-sm);
-  margin-top: 4px;
+  margin-top: rem(4px);
 }
 
 .textarea {
-  padding: 16px;
+  padding: rem(16px);
   width: 100%;
   rows: 4;
   height: auto;
@@ -102,15 +109,12 @@
 }
 
 .numberInput {
-  height: 52px;
-  /* text-align: right;
-  padding-block: 16px;
-  padding-inline-start: 16px; */
+  height: rem(52px);
 }
 
 .numberInputSection {
   width: fit-content;
-  padding: 0 16px;
+  padding: 0 rem(16px);
 }
 
 .select {
@@ -118,30 +122,30 @@
 }
 
 .selectInput {
-  height: 52px;
+  height: rem(52px);
 }
 
 .selectSection {
-  margin: 0 8px;
+  margin: 0rem (8px);
 
   svg {
     color: var(--mantine-color-gray-1);
-    height: 24px;
-    width: 24px;
+    height: rem(24px);
+    width: rem(24px);
   }
 }
 
 .selectDropdown {
   background-color: var(--mantine-color-gray-8);
   border: none;
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: rem(12px);
+  padding: rem(16px);
 }
 
 .selectOption {
   font-size: var(--mantine-font-size-md);
-  height: 40px;
-  margin-bottom: 4px;
+  height: rem(40px);
+  margin-bottom: rem(4px);
   width: 95%;
   color: var(--mantine-color-gray-3);
   &:hover {
