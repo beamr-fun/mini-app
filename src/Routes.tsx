@@ -1,9 +1,4 @@
-import {
-  BrowserRouter,
-  createBrowserRouter,
-  Navigate,
-  RouterProvider,
-} from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { CreatePool } from './components/Home/CreatePool';
 
 import { Home } from './pages/Home';
@@ -17,7 +12,7 @@ import { useUser } from './hooks/useUser';
 const ConditionalRedirect = () => {
   const { startingRoute } = useUser();
 
-  if (startingRoute == '/' || !startingRoute) {
+  if (startingRoute === '/' || !startingRoute) {
     return <Text>Loading...</Text>;
   }
 
@@ -25,22 +20,17 @@ const ConditionalRedirect = () => {
 };
 
 export const ClientRoutes = () => {
-  const router = createBrowserRouter([
-    { path: '/', element: <ConditionalRedirect /> },
-
-    { path: '/home', element: <Home /> },
-    {
-      path: '/create-pool',
-      element: <CreatePool />,
-      children: [
-        { index: true, element: <Navigate to="1" replace /> },
-        { path: '1', element: <Explainer /> },
-        { path: '2', element: <Budget /> },
-        { path: '3', element: <Friends /> },
-        { path: '4', element: <CreateConfirm /> },
-      ],
-    },
-  ]);
-
-  return <RouterProvider router={router} />;
+  return (
+    <Routes>
+      <Route path="/" element={<ConditionalRedirect />} />
+      <Route path="/home" element={<Home />} />
+      <Route path="/create-pool" element={<CreatePool />}>
+        <Route index element={<Navigate to="1" replace />} />
+        <Route path="1" element={<Explainer />} />
+        <Route path="2" element={<Budget />} />
+        <Route path="3" element={<Friends />} />
+        <Route path="4" element={<CreateConfirm />} />
+      </Route>
+    </Routes>
+  );
 };

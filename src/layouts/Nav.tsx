@@ -1,7 +1,8 @@
 import { ActionIcon, Box, Group } from '@mantine/core';
 import { Globe, Network, Settings, User } from 'lucide-react';
 import classes from '../styles/layout.module.css';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { BeamrNav } from '../components/svg/BeamrNav';
 
 const DEFAULT_NAV_LINKS = [
   {
@@ -9,33 +10,44 @@ const DEFAULT_NAV_LINKS = [
     Icon: Globe,
   },
   {
-    link: '/my',
-    Icon: Network,
+    link: '/strategy',
+    Icon: BeamrNav,
   },
   {
-    link: 'user',
+    link: '/home',
     Icon: User,
   },
   {
-    link: 'settings',
+    link: '/settings',
     Icon: Settings,
   },
 ];
 
 export const Nav = () => {
+  const location = useLocation();
+
+  const currentPath = location.pathname;
+
+  const navigate = useNavigate();
+
   return (
     <Box className={classes.navBox}>
       <Group className={classes.innerNavBox}>
-        {DEFAULT_NAV_LINKS.map(({ link, Icon }, index) => (
-          <ActionIcon
-            // to=""
-            // component={Link}
-            key={link}
-            className={classes.navLink}
-          >
-            <Icon size={28} />
-          </ActionIcon>
-        ))}
+        {DEFAULT_NAV_LINKS.map(({ link, Icon }, index) => {
+          const isSelected = currentPath === link;
+
+          return (
+            <ActionIcon
+              key={link}
+              className={isSelected ? classes.navLinkSelected : classes.navLink}
+              onClick={() => {
+                navigate(link, { viewTransition: true });
+              }}
+            >
+              <Icon size={28} />
+            </ActionIcon>
+          );
+        })}
       </Group>
     </Box>
   );

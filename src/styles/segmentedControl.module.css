@@ -1,14 +1,15 @@
 .root {
-  background-color: rgba(242, 242, 242, 0.028);
+  background-color: rgba(242, 242, 242, 0.01);
   border: 1px solid rgba(255, 255, 255, 0.032);
   border-radius: rem(18px);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(18px);
+  padding: rem(4px);
 }
 
 .indicator {
-  background-color: rgba(242, 242, 242, 0.028);
+  background-color: rgba(242, 242, 242, 0.01);
   border: 1px solid rgba(255, 255, 255, 0.032);
-  border-radius: rem(18px);
+  border-radius: rem(24px);
   padding-bottom: 2px;
 }
 
