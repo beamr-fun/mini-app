@@ -26,15 +26,51 @@
 .contentBox {
   padding: rem(12px) rem(32px);
   height: 100%;
+  position: relative;
 }
 
 .paper {
   padding: rem(18px) rem(18px) rem(24px) rem(18px);
   background-color: rgba(242, 242, 242, 0.028) !important;
-  backdrop-filter: blur(24px);
+  backdrop-filter: blur(12px);
 
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.032);
   /* -webkit-backdrop-filter: blur(70px); */
   border-radius: rem(24px) !important;
+}
+
+.navBox {
+  background-color: rgba(242, 242, 242, 0.028);
+  border-radius: rem(18px);
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+  position: fixed;
+  bottom: rem(-4px);
+  width: 100%;
+  height: rem(64px);
+  display: flex;
+  align-items: center;
+}
+
+.navBox > * {
+  pointer-events: auto;
+}
+
+div.innerNavBox {
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 rem(40px);
+  width: 100%;
+}
+
+button.navLink {
+  background: transparent;
+  svg {
+    color: var(--mantine-color-gray-4);
+  }
+}
+
+.navLinkSelected {
+  background: var(--mantine-color-gray-8);
 }

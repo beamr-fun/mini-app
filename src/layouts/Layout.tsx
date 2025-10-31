@@ -2,6 +2,7 @@ import { Box, Flex, Group, ScrollArea } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { Header } from '../components/Header';
 import classes from '../styles/layout.module.css';
+import { Nav } from './Nav';
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -16,9 +17,9 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           <Notifications />
           <Header />
           {children}
-          {/* <Nav /> */}
         </Box>
       </ScrollArea>
+      <Nav />
     </Flex>
   );
 };

@@ -2,6 +2,7 @@
   background-color: rgba(242, 242, 242, 0.028);
   border: 1px solid rgba(255, 255, 255, 0.032);
   border-radius: rem(18px);
+  backdrop-filter: blur(12px);
 }
 
 .indicator {
@@ -13,5 +14,4 @@
 
 .label {
   font-size: var(--mantine-font-size-sm);
-  /* padding: 5px; */
 }

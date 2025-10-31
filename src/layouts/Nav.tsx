@@ -1,6 +1,7 @@
 import { ActionIcon, Box, Group } from '@mantine/core';
-import { Globe, Network, Settings, Share, User } from 'lucide-react';
-import React from 'react';
+import { Globe, Network, Settings, User } from 'lucide-react';
+import classes from '../styles/layout.module.css';
+import { Link } from 'react-router-dom';
 
 const DEFAULT_NAV_LINKS = [
   {
@@ -23,11 +24,16 @@ const DEFAULT_NAV_LINKS = [
 
 export const Nav = () => {
   return (
-    <Box bg={'var(--mantine-color-9)'}>
-      <Group gap={50} justify="space-around" py={14}>
+    <Box className={classes.navBox}>
+      <Group className={classes.innerNavBox}>
         {DEFAULT_NAV_LINKS.map(({ link, Icon }, index) => (
-          <ActionIcon key={link} h={32} w={32}>
-            <Icon size={32} />
+          <ActionIcon
+            // to=""
+            // component={Link}
+            key={link}
+            className={classes.navLink}
+          >
+            <Icon size={28} />
           </ActionIcon>
         ))}
       </Group>
