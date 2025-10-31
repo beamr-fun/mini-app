@@ -8,7 +8,7 @@
       rgba(0, 80, 120, 1),
       transparent 32%
     ),
-    radial-gradient(circle at 140% 75%, rgba(0, 80, 120, 0.3), transparent 40%),
+    radial-gradient(circle at 135% 75%, rgba(0, 80, 120, 0.3), transparent 40%),
     radial-gradient(circle at -10% 110%, rgba(0, 80, 120, 0.3), transparent 30%),
     #0a0a0a;
   background-attachment: fixed;
