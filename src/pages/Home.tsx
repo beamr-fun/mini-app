@@ -4,6 +4,7 @@ import {
   Button,
   Flex,
   Group,
+  Image,
   NumberInput,
   Paper,
   SegmentedControl,
@@ -26,6 +27,14 @@ export const Home = () => {
   return (
     <PageLayout>
       <Stack mb="xl" gap="lg">
+        <Image
+          src={beamrLogo}
+          alt="Beamr Logo"
+          width={88}
+          height={88}
+          mb="lg"
+          fit="contain"
+        />
         <SegmentedControl
           value={tab}
           data={['Sending', 'Receiving']}

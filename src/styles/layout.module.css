@@ -69,7 +69,7 @@ button.navLink {
   padding: rem(8px) rem(13px);
   width: rem(54px);
   height: rem(40px);
-  border-radius: rem(12px);
+  border-radius: rem(100px);
   svg {
     color: var(--mantine-color-gray-4);
   }
@@ -87,7 +87,7 @@ button.navLink {
 button.navLinkSelected {
   background: var(--mantine-color-gray-8);
   padding: rem(8px) rem(13px);
-  border-radius: rem(12px);
+  border-radius: rem(100px);
   height: rem(40px);
   width: rem(54px);
   svg {
