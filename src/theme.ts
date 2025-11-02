@@ -254,6 +254,11 @@ export const cssVariablesResolver = (
   theme: MantineTheme
 ): ConvertCSSVariablesInput => ({
   variables: {
+    '--glass-pane': 'rgba(242, 242, 242, 0.01)',
+    '--glass-edge': 'rgba(255, 255, 255, 0.032)',
+    '--glass-blur': 'blur(32px)',
+    '--glass-pronounced': 'rgba(242, 242, 242, 0.028)',
+    '--glass-thick': 'rgba(242, 242, 242, 0.05)',
     '--mantine-color-body': 'var(--mantine-color-gray-9)',
     '--mantine-color-text': 'var(--mantine-color-gray-1)',
     '--mantine-color-dimmed': 'var(--mantine-color-gray-4)',

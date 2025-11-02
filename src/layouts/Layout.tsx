@@ -12,7 +12,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
       maw="393px"
       className={classes.appBackground}
     >
-      <ScrollArea className={classes.scrollArea}>
+      <ScrollArea className={classes.scrollArea} id="main-scroll">
         <Box className={classes.contentBox}>
           <Notifications />
           <Header />

@@ -1,14 +1,14 @@
 .root {
-  background-color: rgba(242, 242, 242, 0.01);
-  border: 1px solid rgba(255, 255, 255, 0.032);
+  background-color: var(--glass-pane);
+  border: 1px solid var(--glass-edge);
   border-radius: rem(18px);
-  backdrop-filter: blur(18px);
+  backdrop-filter: var(--glass-blur);
   padding: rem(4px);
 }
 
 .indicator {
-  background-color: rgba(242, 242, 242, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.032);
+  background-color: var(--glass-thick);
+  border: 1px solid var(--glass-edge);
   border-radius: rem(24px);
   padding: rem(7px);
 }

@@ -21,9 +21,9 @@
   max-width: rem(299px);
   border-radius: rem(18px);
   transition: 0.15s ease all;
-  backdrop-filter: blur(32px);
-  border: 1px solid rgba(255, 255, 255, 0.032);
-  background-color: rgba(242, 242, 242, 0.01);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  background-color: var(--glass-pane);
   overflow: hidden;
 }
 

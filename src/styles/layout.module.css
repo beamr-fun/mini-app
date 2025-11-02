@@ -8,12 +8,16 @@
       rgba(0, 80, 120, 1),
       transparent 32%
     ),
-    radial-gradient(circle at 135% 75%, rgba(0, 80, 120, 0.3), transparent 40%),
-    radial-gradient(circle at -10% 110%, rgba(0, 80, 120, 0.3), transparent 30%),
+    radial-gradient(circle at 135% 75%, rgba(0, 80, 120, 0.35), transparent 40%),
+    radial-gradient(
+      circle at -10% 110%,
+      rgba(0, 80, 120, 0.35),
+      transparent 30%
+    ),
     #0a0a0a;
   background-attachment: fixed;
   background-repeat: no-repeat;
-  backdrop-filter: blur(10px);
+  /* backdrop-filter: blur(10px); */
   background-size: cover;
   overflow: hidden;
   border-radius: 0;
@@ -24,33 +28,39 @@
 }
 
 .contentBox {
-  padding: rem(12px) rem(32px);
+  padding: rem(12px) rem(28px);
   height: 100%;
   position: relative;
 }
 
 .paper {
   padding: rem(18px) rem(18px) rem(24px) rem(18px);
-  background-color: rgba(242, 242, 242, 0.01) !important;
+  background-color: var(--glass-pane) !important;
   backdrop-filter: blur(32px);
-
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.032);
+  border: 1px solid var(--glass-edge);
   /* -webkit-backdrop-filter: blur(70px); */
   border-radius: rem(24px) !important;
 }
 
 .navBox {
-  background-color: rgba(242, 242, 242, 0.028);
+  background-color: var(--glass-pronounced);
   border-radius: rem(18px);
   pointer-events: none;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(20px);
   position: fixed;
   bottom: rem(-4px);
   width: 100%;
   height: rem(64px);
   display: flex;
   align-items: center;
+  transition: transform 400ms ease;
+  transform: translateY(0);
+}
+
+.navBox[data-hidden='true'] {
+  opacity: 0.5;
+  transform: translateY(100%);
 }
 
 .navBox > * {
@@ -71,6 +81,7 @@ button.navLink {
   height: rem(40px);
   border-radius: rem(100px);
   svg {
+    stroke-width: rem(1.5px);
     color: var(--mantine-color-gray-4);
   }
   transition:
@@ -88,9 +99,10 @@ button.navLinkSelected {
   background: var(--mantine-color-gray-8);
   padding: rem(8px) rem(13px);
   border-radius: rem(100px);
-  height: rem(40px);
   width: rem(54px);
+  height: rem(40px);
   svg {
+    stroke-width: rem(1.5px);
     color: var(--mantine-color-gray-0);
   }
   &:hover {

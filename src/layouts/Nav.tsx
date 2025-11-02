@@ -1,8 +1,9 @@
 import { ActionIcon, Box, Group } from '@mantine/core';
-import { Globe, Network, Settings, User } from 'lucide-react';
+import { Globe, Settings, User } from 'lucide-react';
 import classes from '../styles/layout.module.css';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { BeamrNav } from '../components/svg/BeamrNav';
+import { useScrollDirection } from '../hooks/useScrollDirection';
 
 const DEFAULT_NAV_LINKS = [
   {
@@ -25,15 +26,16 @@ const DEFAULT_NAV_LINKS = [
 
 export const Nav = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const isHidden = useScrollDirection(50);
 
   const currentPath = location.pathname;
 
-  const navigate = useNavigate();
-
   return (
-    <Box className={classes.navBox}>
+    <Box className={classes.navBox} data-hidden={isHidden}>
       <Group className={classes.innerNavBox}>
-        {DEFAULT_NAV_LINKS.map(({ link, Icon }, index) => {
+        {DEFAULT_NAV_LINKS.map(({ link, Icon }) => {
           const isSelected = currentPath === link;
 
           return (
