@@ -18,7 +18,7 @@ export const Header = () => {
       <Group w="100%" justify="end">
         <Box pos={'relative'}>
           <Avatar src={pfp} size="32" />
-          {/* <ConnectionIndicator /> */}
+          <ConnectionIndicator />
         </Box>
       </Group>
     </Box>
