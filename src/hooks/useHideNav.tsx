@@ -1,21 +1,17 @@
 import { useContext, useEffect } from 'react';
 import { CTAContext, CTAProps } from '../context/CTAContext';
 
-export const useCTA = (props?: CTAProps) => {
+export const useHideNav = () => {
   const ctx = useContext(CTAContext);
   if (!ctx) throw new Error('useCTA must be used within CTAProvider');
 
   useEffect(() => {
-    if (!props) {
-      return;
-    }
-
-    ctx.setCTA(props);
+    ctx.setHideNav(true);
 
     return () => {
-      ctx.setCTA(null);
+      ctx.setHideNav(false);
     };
-  }, [props?.label, props?.disabled]);
+  }, []);
 
   return ctx;
 };

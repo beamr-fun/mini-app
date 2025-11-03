@@ -122,4 +122,9 @@ button.ctaBtn {
   transform: translateX(-50%);
   position: absolute;
   box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
+  transition: top 400ms ease;
+}
+
+button.ctaBtn[data-extend='true'] {
+  top: rem(-80px);
 }

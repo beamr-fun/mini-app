@@ -33,18 +33,19 @@ export const Nav = () => {
 
   const currentPath = location.pathname;
 
-  const { cta } = useCTA();
+  const { cta, hideNav } = useCTA();
 
   const hasButton = !!cta && !!cta.label && !!cta.onClick;
 
   return (
-    <Box className={classes.navBox} data-hidden={isHidden}>
+    <Box className={classes.navBox} data-hidden={hideNav || isHidden}>
       {hasButton && (
         <Button
           className={classes.ctaBtn}
           onClick={cta.onClick}
           disabled={cta.disabled}
           size={'lg'}
+          data-extend={isHidden || hideNav ? 'true' : 'false'}
         >
           {cta.label}
         </Button>

@@ -21,6 +21,7 @@ import beamrLogo from '../assets/beamrLogo.png';
 import { useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { useCTA } from '../hooks/useCTA';
+import { useHideNav } from '../hooks/useHideNav';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');

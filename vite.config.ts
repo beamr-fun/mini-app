@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: [
-      'trademark-projector-exhibition-trademark.trycloudflare.com',
+      'exams-lightbox-dark-photographer.trycloudflare.com',
       'https://mini-app-production-96b0.up.railway.app',
     ],
   },
