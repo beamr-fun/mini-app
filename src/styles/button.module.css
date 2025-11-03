@@ -79,3 +79,16 @@
   font-size: var(--mantine-font-size-xs);
   padding: rem(6px) rem(12px);
 }
+
+.actionIcon {
+  color: var(--mantine-color-gray-0);
+  background: var(--glass-pane);
+  border: rem(1px) solid var(--glass-edge);
+  height: fit-content;
+  width: fit-content;
+  padding: rem(6px) rem(6px);
+  border-radius: rem(12px);
+  &:hover {
+    background: var(--glass-thick);
+  }
+}

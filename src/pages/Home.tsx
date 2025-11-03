@@ -1,7 +1,9 @@
 import {
+  ActionIcon,
   Avatar,
   Box,
   Button,
+  Checkbox,
   Flex,
   Group,
   Image,
@@ -21,7 +23,7 @@ import beamrLogo from '../assets/beamrLogo.png';
 import { useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { useCTA } from '../hooks/useCTA';
-import { useHideNav } from '../hooks/useHideNav';
+import { Check, User } from 'lucide-react';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
@@ -49,6 +51,7 @@ export const Home = () => {
           data={['Sending', 'Receiving']}
           onChange={setTab}
         />
+        <OtherComponents />
         <Cards />
         <Inputs />
         <Buttons />
@@ -56,6 +59,31 @@ export const Home = () => {
       {tab === 'Sending' && <Sending />}
       {tab === 'Receiving' && <Receiving />}
     </PageLayout>
+  );
+};
+
+const OtherComponents = () => {
+  return (
+    <Paper>
+      <Text fz="xl" c="var(--mantine-color-gray-0)" mb="md">
+        Other Components
+      </Text>
+      <Stack>
+        <Box>
+          <Text>Action Icon</Text>
+          <ActionIcon>
+            <User size={24} />
+          </ActionIcon>
+        </Box>
+        <Box>
+          <Text mb="sm">Checkbox</Text>
+          <Checkbox
+            label="Checkbox Label"
+            description="This is a description"
+          />
+        </Box>
+      </Stack>
+    </Paper>
   );
 };
 

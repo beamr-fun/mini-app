@@ -1,4 +1,5 @@
 import {
+  Checkbox,
   ConvertCSSVariablesInput,
   createTheme,
   MantineTheme,
@@ -219,17 +220,6 @@ export const theme = createTheme({
         fullWidth: true,
       },
     },
-    // Checkbox: {
-    //   classNames: {
-    //     indicator: checkBoxClasses.indicator,
-    //   },
-    // },
-
-    CheckboxIndicator: {
-      classNames: {
-        indicator: checkBoxClasses.indicator,
-      },
-    },
 
     ActionIcon: {
       classNames: {
@@ -243,6 +233,15 @@ export const theme = createTheme({
       },
       classNames: {
         header: modalClasses.header,
+      },
+    },
+
+    Checkbox: {
+      classNames: {
+        label: checkBoxClasses.label,
+        input: checkBoxClasses.input,
+        icon: checkBoxClasses.icon,
+        description: checkBoxClasses.description,
       },
     },
   },
