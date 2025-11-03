@@ -20,9 +20,17 @@ import { useUser } from '../hooks/useUser';
 import beamrLogo from '../assets/beamrLogo.png';
 import { useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
+import { useCTA } from '../hooks/useCTA';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
+
+  useCTA({
+    label: 'Home Page',
+    onClick: () => {
+      console.log('Home Page CTA clicked');
+    },
+  });
 
   return (
     <PageLayout>
