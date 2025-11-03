@@ -233,39 +233,6 @@ const Receiving = () => {
   );
 };
 
-// const OrgChart = () => {
-//   return (
-//     <Box>
-//       <Text fz="xl" variant="highlight" mb="sm">
-//         Arrow Chart
-//       </Text>
-//       {/*
-//       <Box pos="relative" h={300}>
-//         <Group>
-//           <Box>
-//           </Box>
-//           </Group> */}
-//       <Flex direction="column" align="center" mb="xl" gap={4}>
-//         <Avatar size={28} bg="red" />
-//         <Arrow />
-//         <Avatar size={28} bg="red" />
-//       </Flex>
-//       <Flex direction="column" align="center">
-//         <Avatar size={28} bg="red" />
-//         <Box style={{ transform: 'Rotate(-20deg)' }}>
-//           <Arrow />
-//         </Box>
-
-//         <Group>
-//           <Avatar size={28} bg="red" />
-//           <Avatar size={28} bg="red" />
-//         </Group>
-//       </Flex>
-//       {/* </Box> */}
-//     </Box>
-//   );
-// };
-
 // const Toggle = () => {
 //   return (
 //     <Box>

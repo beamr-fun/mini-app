@@ -11,9 +11,6 @@ import popoverStyles from './styles/popover.module.css';
 import checkBoxClasses from './styles/checkbox.module.css';
 import modalClasses from './styles/modal.module.css';
 import layoutClasses from './styles/layout.module.css';
-import { root } from 'viem/chains';
-
-console.log('inputClasses', inputClasses);
 
 const GRAY = [
   '#F2F2F2',
@@ -254,8 +251,8 @@ export const cssVariablesResolver = (
   theme: MantineTheme
 ): ConvertCSSVariablesInput => ({
   variables: {
-    '--glass-pane': 'rgba(242, 242, 242, 0.01)',
-    '--glass-edge': 'rgba(255, 255, 255, 0.032)',
+    '--glass-pane': 'rgba(242, 242, 242, 0.02)',
+    '--glass-edge': 'rgba(255, 255, 255, 0.035)',
     '--glass-blur': 'blur(32px)',
     '--glass-pronounced': 'rgba(242, 242, 242, 0.028)',
     '--glass-thick': 'rgba(242, 242, 242, 0.05)',
