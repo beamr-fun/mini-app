@@ -30,7 +30,7 @@ export const Budget = () => {
   useCTA({
     label: 'Set Budget',
     onClick: () => {
-      navigate('/create-pool/3', { viewTransition: true });
+      navigate('/create-pool/3');
     },
     disabled: !form?.values.budget || !form?.values.preferredAddress,
   });

@@ -1,9 +1,8 @@
 .baseInput {
   border-radius: rem(12px);
-
   border: none;
   font-size: var(--mantine-font-size-md);
-  padding-inline: rem(16px);
+  /* padding-inline: rem(16px); */
   background: transparent;
   color: var(--mantine-color-gray-0);
   border-radius: rem(18px);
@@ -13,6 +12,14 @@
 
 .baseInput::active {
   background-color: transparent !important;
+}
+
+.baseInput[data-variant='search'] {
+  height: rem(40px);
+
+  &:focus {
+    border: 1px solid var(--mantine-color-blue-6);
+  }
 }
 
 .wrapper {

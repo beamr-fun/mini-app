@@ -2,26 +2,22 @@ import {
   Avatar,
   Box,
   Button,
+  Card,
   Checkbox,
   Group,
-  Image,
-  Modal,
-  ScrollArea,
   Stack,
   Text,
   TextInput,
 } from '@mantine/core';
 import { useOnboard } from '../hooks/useOnboard';
 import { Search } from 'lucide-react';
-import cometImg from '../assets/comet.png';
 import { useMemo, useState } from 'react';
-import checkStyles from '../styles/checkbox.module.css';
-import { useDisclosure } from '@mantine/hooks';
-import { AppModal } from '../components/AppModal';
 import { useNavigate } from 'react-router-dom';
+import { useCTA } from '../hooks/useCTA';
+import { PageLayout } from '../layouts/PageLayout';
 
 export const Friends = () => {
-  const { budget, following, form, handlePoolCreate, selectedFriends } =
+  const { budget, following, form, selectedFriends, handlePoolCreate } =
     useOnboard();
   const navigate = useNavigate();
 
@@ -47,8 +43,17 @@ export const Friends = () => {
   const hasSelected3 =
     (selectedFriends && selectedFriends?.length >= 3) || false;
 
+  useCTA({
+    label: 'Launch Pool',
+    onClick: () => {
+      handlePoolCreate?.();
+      navigate('/create-pool/4', { viewTransition: true });
+    },
+    disabled: !hasSelected3,
+  });
+
   return (
-    <Box>
+    <PageLayout title="Choose Friends">
       <Group justify="center" mb={24}>
         <Group align="end">
           <Text fz={36}>{budget}/mo</Text>
@@ -64,61 +69,70 @@ export const Friends = () => {
         </Group>
       </Group>
       <Text mb={'xl'}>Seed your Beamr with 3 of your favorite Casters</Text>
-      <Text variant="label" mb="md">
+      <Text fz="lg" mb="md" c={'var(--mantine-color-gray-2)'}>
         Select 3+ Casters to start Beamin!
       </Text>
-      <TextInput
-        leftSection={<Search size={20} />}
-        mb="sm"
-        placeholder="Search by username or display name"
-        onChange={handleSearch}
-      />
-      <ScrollArea h={290}>
-        <Checkbox.Group
-          value={selectedFriends}
-          onChange={(value) => {
-            form?.setFieldValue('selectedFriends', value);
-          }}
-        >
-          <Stack gap="sm">
-            {filteredFriends.map((friend) => {
-              return (
-                <Checkbox.Card
-                  key={friend.user.fid}
-                  value={friend.user.fid.toString()}
-                  classNames={{
-                    card: checkStyles.card,
-                  }}
-                >
-                  <Group p={4}>
-                    <Checkbox.Indicator />
-                    <Group gap={8}>
-                      <Avatar src={friend.user.pfp_url} size={36} />
-                      <Box>
-                        <Text fz="sm">{friend.user.display_name}</Text>
-                        <Text fz="sm" c="dim">
-                          @{friend.user.username}
-                        </Text>
-                      </Box>
-                    </Group>
+      <Card>
+        <TextInput
+          leftSection={<Search size={18} />}
+          mb="sm"
+          variant="search"
+          placeholder="Search by username or display name"
+          onChange={handleSearch}
+          leftSectionWidth={36}
+        />
+
+        <Stack gap={6}>
+          {filteredFriends.map((friend) => {
+            return (
+              <Box
+                key={friend.user.fid}
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  if (
+                    form?.values.selectedFriends?.includes(
+                      friend.user.fid.toString()
+                    )
+                  ) {
+                    form?.setFieldValue(
+                      'selectedFriends',
+                      (form.values.selectedFriends || []).filter(
+                        (fid: string) => fid !== friend.user.fid.toString()
+                      )
+                    );
+                  } else {
+                    form?.setFieldValue(
+                      'selectedFriends',
+
+                      [
+                        ...(form.values.selectedFriends || []),
+                        friend.user.fid.toString(),
+                      ]
+                    );
+                  }
+                }}
+              >
+                <Group p={4}>
+                  <Checkbox.Indicator
+                    checked={form?.values.selectedFriends?.includes(
+                      friend.user.fid.toString()
+                    )}
+                  />
+                  <Group gap={8}>
+                    <Avatar src={friend.user.pfp_url} size={36} />
+                    <Box>
+                      <Text fz="sm">{friend.user.display_name}</Text>
+                      <Text fz="sm" c="dim">
+                        @{friend.user.username}
+                      </Text>
+                    </Box>
                   </Group>
-                </Checkbox.Card>
-              );
-            })}
-          </Stack>
-        </Checkbox.Group>
-      </ScrollArea>
-      <Button
-        size="lg"
-        mt="xl"
-        onClick={() => {
-          handlePoolCreate?.();
-          navigate('/create-pool/4', { viewTransition: true });
-        }}
-        disabled={!hasSelected3}
-      >
-        Create
-      </Button>
-    </Box>
+                </Group>
+              </Box>
+            );
+          })}
+        </Stack>
+      </Card>
+    </PageLayout>
   );
 };

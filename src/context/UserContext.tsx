@@ -87,7 +87,7 @@ export const UserProvider = ({
   children: ReactNode | ReactNode[];
 }) => {
   const IS_TESTING = false;
-  const OVERRIDE = '/create-pool/1';
+  const OVERRIDE = '/create-pool/4';
   const { address } = useAccount();
 
   const [hasLoadedSubscription, setHasLoadedSubscription] = useState(false);
@@ -130,7 +130,6 @@ export const UserProvider = ({
         },
         {
           next: (data) => {
-            console.log('data', data);
             const userSub = data?.data?.User_by_pk;
             setHasLoadedSubscription(true);
 

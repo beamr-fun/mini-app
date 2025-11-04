@@ -1,5 +1,6 @@
 import {
   Checkbox,
+  CheckboxIndicator,
   ConvertCSSVariablesInput,
   createTheme,
   MantineTheme,
@@ -242,6 +243,11 @@ export const theme = createTheme({
         input: checkBoxClasses.input,
         icon: checkBoxClasses.icon,
         description: checkBoxClasses.description,
+      },
+    },
+    CheckboxIndicator: {
+      classNames: {
+        indicator: checkBoxClasses.indicator,
       },
     },
   },
