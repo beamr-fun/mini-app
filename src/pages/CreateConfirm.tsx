@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../layouts/PageLayout';
 import { CheckCheck } from 'lucide-react';
 import { useCTA } from '../hooks/useCTA';
+import sdk from '@farcaster/miniapp-sdk';
 
 export const CreateConfirm = () => {
   const { creationSteps } = useOnboard();
@@ -23,9 +24,11 @@ export const CreateConfirm = () => {
   useCTA({
     label: 'Start Beaming',
     onClick: () => {
-      navigate('/home');
+      sdk.actions.composeCast({
+        text: 'Just created my Beamr Tipping Pool!',
+      });
     },
-    disabled: !allStepsComplete,
+    // disabled: !allStepsComplete,
   });
 
   return (

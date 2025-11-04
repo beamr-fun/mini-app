@@ -15,11 +15,15 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCTA } from '../hooks/useCTA';
 import { PageLayout } from '../layouts/PageLayout';
+import { usePublicClient, useWalletClient } from 'wagmi';
+import { distributeFlow } from '../utils/interactions';
 
 export const Friends = () => {
   const { budget, following, form, selectedFriends, handlePoolCreate } =
     useOnboard();
   const navigate = useNavigate();
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
 
   const [filter, setFilter] = useState('');
 
@@ -46,8 +50,7 @@ export const Friends = () => {
   useCTA({
     label: 'Launch Pool',
     onClick: () => {
-      handlePoolCreate?.();
-      navigate('/create-pool/4', { viewTransition: true });
+      test();
     },
     disabled: !hasSelected3,
   });

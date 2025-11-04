@@ -36,22 +36,15 @@ const wsClient = createClient({
 });
 
 const login = async () => {
-  const [isMiniApp, tokenRes, context] = await Promise.all([
-    sdk.isInMiniApp(),
+  const [tokenRes, context] = await Promise.all([
     sdk.quickAuth.getToken(),
     sdk.context,
   ]);
 
-  if (!isMiniApp) {
-    console.error('Not running in a mini app context');
-    // TODO: Handle this case appropriately, maybe redirect or show a message
-    return;
-  }
-
   const token = tokenRes?.token || null;
 
   if (!token) {
-    console.error('No token provided for socket connection');
+    throw new Error('No auth token available');
   }
 
   const res = await fetch(`${keys.apiUrl}/v1/user/auth`, {
@@ -61,21 +54,20 @@ const login = async () => {
   });
 
   if (!res.ok || res.status !== 200) {
-    console.error('Failed to authenticate user');
-    return;
+    console.error('Failed to authenticate user', await res.text());
+    throw new Error('Failed to authenticate user');
   }
 
   const data = (await res.json()) as AuthResponse;
 
   if (!data.success) {
-    console.error('Authentication failed:', data);
-    return;
+    console.error('Authentication failed', data);
+    throw new Error('Authentication unsuccessful');
   }
 
   return {
     user: data.user,
     jwt: data.jwtPayload,
-    isMiniApp,
     context,
     token: token || undefined,
   };
@@ -87,7 +79,7 @@ export const UserProvider = ({
   children: ReactNode | ReactNode[];
 }) => {
   const IS_TESTING = false;
-  const OVERRIDE = '/create-pool/4';
+  const OVERRIDE = '/create-pool/1';
   const { address } = useAccount();
 
   const [hasLoadedSubscription, setHasLoadedSubscription] = useState(false);

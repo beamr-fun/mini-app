@@ -70,7 +70,7 @@ export const Budget = () => {
                 <Text>{item.option.label}</Text>
                 {item.option.isPrimaryAddress && (
                   <Tag c="var(--mantine-color-gray-0)" fw={500}>
-                    Primary Address
+                    Primary
                   </Tag>
                 )}
                 {item.option.isCurrentAddress && (
