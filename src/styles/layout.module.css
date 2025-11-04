@@ -30,6 +30,9 @@
 .scrollArea {
   height: 100vh;
 }
+.scrollThumb {
+  z-index: 100 !important;
+}
 
 .contentBox {
   padding: rem(12px) rem(28px) rem(136px) rem(28px);
@@ -38,7 +41,7 @@
 }
 
 .paper {
-  padding: rem(18px) rem(18px) rem(24px) rem(18px);
+  padding: rem(18px) rem(18px) rem(24px) rem(18px) !important;
   background-color: var(--glass-pane) !important;
   backdrop-filter: blur(32px);
   overflow: hidden;
@@ -123,6 +126,12 @@ button.ctaBtn {
   position: absolute;
   box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
   transition: top 400ms ease;
+}
+
+button.ctaBtn:disabled {
+  background: var(--mantine-color-gray-8);
+  color: var(--mantine-color-gray-5);
+  cursor: not-allowed;
 }
 
 button.ctaBtn:active {

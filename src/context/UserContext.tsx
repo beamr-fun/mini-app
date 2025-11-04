@@ -86,7 +86,8 @@ export const UserProvider = ({
 }: {
   children: ReactNode | ReactNode[];
 }) => {
-  const IS_TESTING = true;
+  const IS_TESTING = false;
+  const OVERRIDE = '/create-pool/1';
   const { address } = useAccount();
 
   const [hasLoadedSubscription, setHasLoadedSubscription] = useState(false);
@@ -149,6 +150,12 @@ export const UserProvider = ({
   }, []);
 
   useEffect(() => {
+    if (OVERRIDE) {
+      setStartingRoute(OVERRIDE);
+      sdk.actions.ready();
+      return;
+    }
+
     if (IS_TESTING) {
       setStartingRoute('/create-pool/1');
       sdk.actions.ready();

@@ -158,8 +158,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         fid: user.fid,
       };
 
-      console.log('completeArgs', completeArgs);
-
       completePool({
         args: completeArgs,
         apiHeaders: freshApiHeaders,

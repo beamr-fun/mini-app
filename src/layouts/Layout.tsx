@@ -13,7 +13,10 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         style={{ height: '100vh' }}
         className={classes.appBackground}
       >
-        <ScrollArea className={classes.scrollArea} id="main-scroll">
+        <ScrollArea
+          id="main-scroll"
+          classNames={{ root: classes.scrollArea, thumb: classes.scrollThumb }}
+        >
           <Box className={classes.contentBox}>
             <Notifications />
             <Header />

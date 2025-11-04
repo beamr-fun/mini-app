@@ -27,7 +27,7 @@ export const Explainer = () => {
   useCTA({
     label: 'Get Started',
     onClick: () => {
-      navigate('/createPool/2');
+      navigate('/create-pool/2', { viewTransition: true });
     },
   });
 
@@ -53,7 +53,7 @@ export const Explainer = () => {
           <Text fz={'lg'} fw={500} mb="md" c={'var(--mantine-color-gray-0)'}>
             Beamr Tipping Pool
           </Text>
-          <Group gap={70} justify="center">
+          <Group gap={70} justify="center" mb="md">
             <Flex direction="column" align="center" gap={4} pos="relative">
               <Avatar size={28} src={jordAvatar} />
               <Arrow />
@@ -91,8 +91,8 @@ export const Explainer = () => {
             </Flex>
           </Group>
           <Text mb={'md'}>
-            Beamr is a mini-app that allows you to <Bold>beam</Bold> funds to
-            your favorite content creators
+            The Beamr Tipping Pool aims to be the first of many token streaming
+            features offered through this platform.
           </Text>
         </Card>
       </Stack>
