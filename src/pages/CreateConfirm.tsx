@@ -1,8 +1,6 @@
 import {
   Box,
-  Button,
   Card,
-  Checkbox,
   Group,
   Loader,
   Stack,
@@ -13,49 +11,53 @@ import { useOnboard } from '../hooks/useOnboard';
 import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../layouts/PageLayout';
 import { CheckCheck } from 'lucide-react';
+import { useCTA } from '../hooks/useCTA';
 
 export const CreateConfirm = () => {
   const { creationSteps } = useOnboard();
   const navigate = useNavigate();
+  const { colors } = useMantineTheme();
+
+  const allStepsComplete = Object.values(creationSteps).every((step) => step);
+
+  useCTA({
+    label: 'Start Beaming',
+    onClick: () => {
+      navigate('/home');
+    },
+    disabled: !allStepsComplete,
+  });
 
   return (
     <PageLayout title="Complete">
-      <Text fz="sm" mb="lg">
-        (Temporary UI)
+      <Text mb="xs">Congrats! Your Beamr Tipping Pool is being created.</Text>
+      <Text mb="lg" c={colors.gray[3]} fz="sm">
+        The following steps should only take 5-30s
       </Text>
       <Card>
         <Stack mb="xl" gap="xl">
           <LoaderStep
             title={'Creating Pool'}
             description={'Deploying your pool.'}
-            complete={false}
+            complete={creationSteps.createPool}
           />
           <LoaderStep
             title={'Distributing Budget'}
             description={'Requesting funds from your wallet'}
-            complete={false}
+            complete={creationSteps.distributeFlow}
           />
           <LoaderStep
             title={'Confirming Pool'}
             description={'Registering your pool with Beamr.'}
-            complete={false}
+            complete={creationSteps.completePool}
           />
           <LoaderStep
             title={'Indexing'}
             description={'Discovering your pool onchain.'}
-            complete={false}
+            complete={creationSteps.indexTransaction}
           />
         </Stack>
       </Card>
-      <Group justify="center">
-        {Object.values(creationSteps).every((step) => step) ? (
-          <Button size="lg" onClick={() => navigate('/home')}>
-            See Pool
-          </Button>
-        ) : (
-          <Loader />
-        )}
-      </Group>
     </PageLayout>
   );
 };
