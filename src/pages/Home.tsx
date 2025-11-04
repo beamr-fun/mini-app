@@ -270,18 +270,6 @@ const Receiving = () => {
   );
 };
 
-// const Toggle = () => {
-//   return (
-//     <Box>
-//       <Text fz="xl" variant="highlight" mb="sm">
-//         Toggle
-//       </Text>
-
-//       <SegmentedControl data={['Recent', 'Leaderboard']} />
-//     </Box>
-//   );
-// };
-
 const Inputs = () => {
   return (
     <Stack gap="xl">

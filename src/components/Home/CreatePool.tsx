@@ -20,7 +20,6 @@ export const CreatePool = () => {
 
   return (
     <OnboardDataProvider>
-      <PageTitle title={titles[routeNumber]} />
       <Outlet />
     </OnboardDataProvider>
   );

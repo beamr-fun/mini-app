@@ -35,7 +35,7 @@ const wsClient = createClient({
   url: `wss://${keys.indexerUrl}`,
 });
 
-const login = async (clientAddress: Address) => {
+const login = async () => {
   const [isMiniApp, tokenRes, context] = await Promise.all([
     sdk.isInMiniApp(),
     sdk.quickAuth.getToken(),
@@ -102,7 +102,7 @@ export const UserProvider = ({
     refetch,
   } = useQuery({
     queryKey: ['user', address],
-    queryFn: () => login(address as Address),
+    queryFn: () => login(),
     enabled: !!address && !IS_TESTING,
   });
 
@@ -150,7 +150,7 @@ export const UserProvider = ({
 
   useEffect(() => {
     if (IS_TESTING) {
-      setStartingRoute('/home');
+      setStartingRoute('/create-pool/1');
       sdk.actions.ready();
       return;
     }
@@ -215,9 +215,6 @@ export const UserProvider = ({
         getAuthHeaders,
         startingRoute,
         userSubscription,
-
-        // user,
-        // isLoading,
       }}
     >
       {children}

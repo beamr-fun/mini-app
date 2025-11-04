@@ -1,10 +1,18 @@
-import { Box, ScrollArea, Stack } from '@mantine/core';
+import { Box } from '@mantine/core';
 import { ReactNode } from 'react';
+import { PageTitle } from '../components/PageTitle';
 
-export const PageLayout = ({ children }: { children: ReactNode }) => {
+export const PageLayout = ({
+  children,
+  title,
+}: {
+  children: ReactNode;
+  title?: string;
+}) => {
   return (
-    // <ScrollArea mah="vh" pos="relative">
-    <Box>{children}</Box>
-    // </ScrollArea>
+    <Box pt={title ? undefined : 'xl'}>
+      {title && <PageTitle title={title} />}
+      {children}
+    </Box>
   );
 };
