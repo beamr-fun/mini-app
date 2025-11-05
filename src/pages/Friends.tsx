@@ -12,20 +12,23 @@ import {
 import { useOnboard } from '../hooks/useOnboard';
 import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useCTA } from '../hooks/useCTA';
 import { PageLayout } from '../layouts/PageLayout';
-import { usePublicClient, useWalletClient } from 'wagmi';
+import { useNavigate } from 'react-router-dom';
+import sdk from '@farcaster/miniapp-sdk';
+import { createWalletClient, custom } from 'viem';
+import { baseSepolia } from 'viem/chains';
 import { distributeFlow } from '../utils/interactions';
+import { useAccount, usePublicClient } from 'wagmi';
 
 export const Friends = () => {
   const { budget, following, form, selectedFriends, handlePoolCreate } =
     useOnboard();
-  const navigate = useNavigate();
-  const { data: walletClient } = useWalletClient();
-  const publicClient = usePublicClient();
 
   const [filter, setFilter] = useState('');
+  const navigate = useNavigate();
+  const publicClient = usePublicClient();
+  const { address } = useAccount();
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(event.target.value);
@@ -48,12 +51,44 @@ export const Friends = () => {
     (selectedFriends && selectedFriends?.length >= 3) || false;
 
   useCTA({
-    label: 'Launch Pool',
+    label: 'Launch Pools',
     onClick: () => {
-      test();
+      handlePoolCreate?.();
+      navigate('/create-pool/4');
     },
     disabled: !hasSelected3,
   });
+
+  const test = async () => {
+    const provider = await sdk.wallet.getEthereumProvider();
+
+    if (!provider) return;
+
+    const walletClient = createWalletClient({
+      chain: baseSepolia,
+      transport: custom(provider),
+      account: address as `0x${string}`,
+    });
+
+    const result = await distributeFlow({
+      walletClient,
+      args: {
+        poolAddress: '0xee2bCb71d6ed4D01647CF9F6abbd071c6b9253aA',
+        user: address as `0x${string}`,
+        flowRate: 13117283950617n,
+      },
+      publicClient,
+      onSuccess: (txHash) => {
+        console.log('Flow distributed successfully. Tx Hash:', txHash);
+      },
+      onError: (errMsg) => {
+        console.error('Error distributing flow:', errMsg);
+      },
+    });
+
+    console.log('walletClient', walletClient);
+    console.log('result', result);
+  };
 
   return (
     <PageLayout title="Choose Friends">

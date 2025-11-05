@@ -16,19 +16,34 @@ import sdk from '@farcaster/miniapp-sdk';
 
 export const CreateConfirm = () => {
   const { creationSteps } = useOnboard();
-  const navigate = useNavigate();
   const { colors } = useMantineTheme();
+  const { handleDistributeFlow } = useOnboard();
+  const navigate = useNavigate();
 
   const allStepsComplete = Object.values(creationSteps).every((step) => step);
 
+  const distributeReady =
+    creationSteps.createPool &&
+    !creationSteps.distributeFlow &&
+    !creationSteps.completePool &&
+    !creationSteps.indexTransaction;
+
+  const awaitingCreate = Object.values(creationSteps).every((step) => !step);
+
   useCTA({
-    label: 'Start Beaming',
-    onClick: () => {
-      sdk.actions.composeCast({
-        text: 'Just created my Beamr Tipping Pool!',
-      });
-    },
-    // disabled: !allStepsComplete,
+    label: awaitingCreate
+      ? 'Creating Pool'
+      : distributeReady
+        ? 'Distribute Flow'
+        : 'Start Beaming',
+    onClick: distributeReady
+      ? () => {
+          handleDistributeFlow?.();
+        }
+      : () => {
+          navigate('/home');
+        },
+    disabled: !distributeReady && !allStepsComplete,
   });
 
   return (
