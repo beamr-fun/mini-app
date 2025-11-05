@@ -83,7 +83,7 @@
 .actionIcon {
   color: var(--mantine-color-gray-0);
   background: var(--glass-pane);
-  border: rem(1px) solid var(--glass-edge);
+  border: rem(1px) solid var(--glass-pane);
   height: fit-content;
   width: fit-content;
   padding: rem(6px) rem(6px);

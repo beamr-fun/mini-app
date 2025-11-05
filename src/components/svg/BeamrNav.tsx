@@ -1,8 +1,8 @@
-export const BeamrNav = () => {
+export const BeamrNav = ({ size = 28 }: { size?: number }) => {
   return (
     <svg
-      width="28"
-      height="28"
+      width={size}
+      height={size}
       viewBox="0 0 28 28"
       xmlns="http://www.w3.org/2000/svg"
       fill="currentColor" // inherit from CSS `color`

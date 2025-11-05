@@ -12,7 +12,6 @@ import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../layouts/PageLayout';
 import { CheckCheck } from 'lucide-react';
 import { useCTA } from '../hooks/useCTA';
-import sdk from '@farcaster/miniapp-sdk';
 
 export const CreateConfirm = () => {
   const { creationSteps } = useOnboard();
