@@ -3,8 +3,6 @@ import { JWTPayload } from '../types/sharedTypes';
 import { useQuery } from '@tanstack/react-query';
 import { createContext, ReactNode, useEffect, useState } from 'react';
 import { Address } from 'viem';
-import { createClient } from 'graphql-ws';
-import { print } from 'graphql';
 
 import { useAccount } from 'wagmi';
 import { AuthResponse, FCUser } from '../types/sharedTypes';
@@ -16,6 +14,7 @@ import {
 import { keys } from '../utils/setup';
 import { useToken } from '../hooks/useToken';
 import { ADDR } from '../const/addresses';
+import { useGqlSub } from '../hooks/useGqlSub';
 
 type UserSub = LoggedInUserSubscription['User_by_pk'];
 //
@@ -33,10 +32,6 @@ type UserContextType = {
 
 export const UserContext = createContext<UserContextType>({
   getAuthHeaders: async () => false,
-});
-
-const wsClient = createClient({
-  url: `wss://${keys.indexerUrl}`,
 });
 
 const login = async () => {
@@ -87,9 +82,9 @@ export const UserProvider = ({
   const { address } = useAccount();
 
   const [hasLoadedSubscription, setHasLoadedSubscription] = useState(false);
-  const [userSubscription, setUserSubscription] = useState<
-    LoggedInUserSubscription['User_by_pk'] | undefined
-  >(undefined);
+  // const [userSubscription, setUserSubscription] = useState<
+  //   LoggedInUserSubscription['User_by_pk'] | undefined
+  // >(undefined);
   const [startingRoute, setStartingRoute] = useState<string | undefined>();
 
   const { data } = useToken({
@@ -112,61 +107,71 @@ export const UserProvider = ({
     enabled: !!address && !IS_TESTING,
   });
 
+  const { data: userSubRes } = useGqlSub<LoggedInUserSubscription>(
+    LoggedInUserDocument,
+    {
+      variables: { id: apiData?.user?.fid?.toString() || '' },
+      enabled: !!apiData?.user?.fid && !IS_TESTING,
+    }
+  );
+
+  const userSubscription = userSubRes?.User_by_pk;
+
+  // useEffect(() => {
+  //   if (IS_TESTING) {
+  //     return;
+  //   }
+
+  //   let dispose: () => void = () => {};
+
+  //   const getUserSubscription = async () => {
+  //     const context = await sdk.context;
+
+  //     const fid = context?.user?.fid;
+
+  //     if (!fid) {
+  //       return;
+  //     }
+
+  //     dispose = wsClient.subscribe<LoggedInUserSubscription>(
+  //       {
+  //         query: print(LoggedInUserDocument),
+  //         variables: { id: fid.toString() },
+  //       },
+  //       {
+  //         next: (data) => {
+  //           const userSub = data?.data?.User_by_pk;
+  //           setHasLoadedSubscription(true);
+
+  //           if (userSub) {
+  //             setUserSubscription(userSub);
+  //           }
+  //         },
+  //         error: console.error,
+  //         complete: () => {},
+  //       }
+  //     );
+  //   };
+
+  //   getUserSubscription();
+
+  //   return () => dispose();
+  // }, []);
+
   useEffect(() => {
-    if (IS_TESTING) {
-      return;
-    }
+    // if (OVERRIDE) {
+    //   setStartingRoute(OVERRIDE);
+    //   sdk.actions.ready();
+    //   return;
+    // }
 
-    let dispose: () => void = () => {};
-
-    const getUserSubscription = async () => {
-      const context = await sdk.context;
-
-      const fid = context?.user?.fid;
-
-      if (!fid) {
-        return;
-      }
-
-      dispose = wsClient.subscribe<LoggedInUserSubscription>(
-        {
-          query: print(LoggedInUserDocument),
-          variables: { id: fid.toString() },
-        },
-        {
-          next: (data) => {
-            const userSub = data?.data?.User_by_pk;
-            setHasLoadedSubscription(true);
-
-            if (userSub) {
-              setUserSubscription(userSub);
-            }
-          },
-          error: console.error,
-          complete: () => {},
-        }
-      );
-    };
-
-    getUserSubscription();
-
-    return () => dispose();
-  }, []);
-
-  useEffect(() => {
-    if (OVERRIDE) {
-      setStartingRoute(OVERRIDE);
-      sdk.actions.ready();
-      return;
-    }
-
-    if (IS_TESTING) {
-      setStartingRoute('/create-pool/1');
-      sdk.actions.ready();
-      return;
-    }
+    // if (IS_TESTING) {
+    //   setStartingRoute('/create-pool/1');
+    //   sdk.actions.ready();
+    //   return;
+    // }
     if (startingRoute) return;
-    if (hasLoadedSubscription && apiData) {
+    if (userSubscription && apiData) {
       if (!userSubscription || !userSubscription?.pools?.length) {
         console.log('No pools found for user in subscription data');
         setStartingRoute('/create-pool/1');
