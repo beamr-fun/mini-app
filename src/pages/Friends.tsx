@@ -10,7 +10,7 @@ import {
 } from '@mantine/core';
 import { useOnboard } from '../hooks/useOnboard';
 import { Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useCTA } from '../hooks/useCTA';
 import { PageLayout } from '../layouts/PageLayout';
 import { useNavigate } from 'react-router-dom';
@@ -43,12 +43,13 @@ export const Friends = () => {
     (selectedFriends && selectedFriends?.length >= 3) || false;
 
   useCTA({
-    label: 'Launch Pools',
+    label: 'Launch',
     onClick: () => {
-      handlePoolCreate?.();
       navigate('/create-pool/4');
+      handlePoolCreate?.();
     },
     disabled: !hasSelected3,
+    extraDeps: [form?.values.selectedFriends],
   });
 
   return (
@@ -82,7 +83,7 @@ export const Friends = () => {
         />
 
         <Stack gap={6}>
-          {filteredFriends.map((friend) => {
+          {filteredFriends.slice(0, 10).map((friend) => {
             return (
               <Box
                 key={friend.user.fid}

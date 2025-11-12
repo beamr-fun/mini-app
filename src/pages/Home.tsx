@@ -17,7 +17,7 @@ import { useUser } from '../hooks/useUser';
 import beamrLogo from '../assets/beamrLogo.png';
 import beamrTokenLogo from '../assets/beamrTokenLogo.png';
 import { BeamrNav } from '../components/svg/BeamrNav';
-import { useState } from 'react';
+import { use, useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { IconTransfer } from '../components/svg/IconTransfer';
 import { TrendingUp } from 'lucide-react';
@@ -53,6 +53,54 @@ export const Home = () => {
 
 const BalanceDisplay = () => {
   const { colors } = useMantineTheme();
+  const { userSubscription, userBalance } = useUser();
+
+  console.log('userBalance', userBalance);
+
+  const totalIncomingPerMonth = useMemo(() => {
+    if (!userSubscription?.incoming) {
+      return 0n;
+    }
+
+    if (userSubscription.incoming.length === 0) {
+      return 0n;
+    }
+
+    let totalPerSecond = 0n;
+
+    userSubscription.incoming.forEach((item) => {
+      const perUnitFlowRate =
+        BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
+      const beamFlowRate = perUnitFlowRate * BigInt(item.units);
+      totalPerSecond += beamFlowRate;
+    });
+
+    return flowratePerSecondToMonth(totalPerSecond);
+  }, [userSubscription?.incoming]);
+
+  const totalOutgoingPerMonth = useMemo(() => {
+    if (!userSubscription?.outgoing) {
+      return 0n;
+    }
+
+    if (userSubscription.outgoing.length === 0) {
+      return 0n;
+    }
+
+    let totalPerSecond = 0n;
+
+    userSubscription.outgoing.forEach((item) => {
+      const perUnitFlowRate =
+        BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
+      const beamFlowRate = perUnitFlowRate * BigInt(item.units);
+      totalPerSecond += beamFlowRate;
+    });
+
+    return flowratePerSecondToMonth(totalPerSecond);
+  }, [userSubscription?.outgoing]);
+
+  // number of total incoming vs. total outgoing as a percentage
+
   return (
     <Card mb="md">
       <Group gap={2} c={colors.gray[3]} mb={'md'}>
@@ -76,7 +124,7 @@ const BalanceDisplay = () => {
       </Group>
       <Group c={colors.green[7]} gap={4} mb={'sm'}>
         <TrendingUp size={18} />
-        <Text fz="sm">Net Rate +658/mo</Text>
+        <Text fz="sm">Net Rate 658/mo</Text>
       </Group>
       <Progress
         mb="xs"
@@ -93,8 +141,8 @@ const BalanceDisplay = () => {
         </Text>
       </Group>
       <Group justify="space-between">
-        <Text fz="sm">53.25/mo</Text>
-        <Text fz="sm">34.60/mo</Text>
+        <Text fz="sm">{totalIncomingPerMonth}</Text>
+        <Text fz="sm">{totalOutgoingPerMonth}</Text>
       </Group>
     </Card>
   );

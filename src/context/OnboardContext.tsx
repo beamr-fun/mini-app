@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import { useForm, UseFormReturnType } from '@mantine/form';
 import { useQuery } from '@tanstack/react-query';
 import { Follower } from '@neynar/nodejs-sdk/build/api';
@@ -93,9 +93,14 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     args: [form.values.preferredAddress as `0x${string}`],
   });
 
-  const handlePoolCreate = async () => {
+  console.log('form.values.selectedFriends', form.values.selectedFriends);
+
+  const handlePoolCreate = useCallback(async () => {
     // handle errors later
     if (!user || !form || !address) return;
+
+    console.log('*********');
+    console.log('selectedFriends', form.values.selectedFriends);
 
     // call API to create pool
     try {
@@ -139,7 +144,14 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error in pool creation process:', error);
       setErrorMsg((error as Error).message);
     }
-  };
+  }, [
+    user,
+    form,
+    address,
+    getAuthHeaders,
+    publicClient,
+    form.values.selectedFriends.length,
+  ]);
 
   const handleDistributeFlow = async () => {
     if (!address || !poolAddress || !walletClient || !user) return;

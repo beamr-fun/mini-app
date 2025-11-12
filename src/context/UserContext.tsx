@@ -14,6 +14,8 @@ import {
   LoggedInUserSubscription,
 } from '../generated/graphql';
 import { keys } from '../utils/setup';
+import { useToken } from '../hooks/useToken';
+import { ADDR } from '../const/addresses';
 
 type UserSub = LoggedInUserSubscription['User_by_pk'];
 //
@@ -25,6 +27,7 @@ type UserContextType = {
   token?: string;
   getAuthHeaders: () => Promise<APIHeaders | false>;
   startingRoute?: string;
+  userBalance?: bigint;
 };
 
 export const UserContext = createContext<UserContextType>({
@@ -87,6 +90,14 @@ export const UserProvider = ({
     LoggedInUserSubscription['User_by_pk'] | undefined
   >(undefined);
   const [startingRoute, setStartingRoute] = useState<string | undefined>();
+
+  const { data } = useToken({
+    userAddress: address,
+    tokenAddress: ADDR.SUPER_TOKEN,
+    calls: { balanceOf: true },
+  });
+
+  const userBalance = data?.balanceOf as bigint | undefined;
 
   const {
     data: apiData,
@@ -153,10 +164,6 @@ export const UserProvider = ({
       return;
     }
     if (startingRoute) return;
-
-    console.log('apiData', apiData);
-    console.log('hasLoadedSubscription', hasLoadedSubscription);
-
     if (hasLoadedSubscription && apiData) {
       if (!userSubscription || !userSubscription?.pools?.length) {
         console.log('No pools found for user in subscription data');
@@ -213,6 +220,7 @@ export const UserProvider = ({
         getAuthHeaders,
         startingRoute,
         userSubscription,
+        userBalance,
       }}
     >
       {children}
