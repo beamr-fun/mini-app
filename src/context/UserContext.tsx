@@ -1,7 +1,7 @@
 import sdk from '@farcaster/miniapp-sdk';
 import { JWTPayload } from '../types/sharedTypes';
 import { useQuery } from '@tanstack/react-query';
-import { createContext, ReactNode, useEffect, useState } from 'react';
+import { createContext, ReactNode, useEffect, useMemo, useState } from 'react';
 import { Address } from 'viem';
 
 import { useAccount } from 'wagmi';
@@ -78,7 +78,6 @@ export const UserProvider = ({
   children: ReactNode | ReactNode[];
 }) => {
   const IS_TESTING = false;
-  const OVERRIDE = '/create-pool/1';
   const { address } = useAccount();
 
   const [hasLoadedSubscription, setHasLoadedSubscription] = useState(false);
@@ -115,7 +114,22 @@ export const UserProvider = ({
     }
   );
 
-  const userSubscription = userSubRes?.User_by_pk;
+  const userSubscription = useMemo(() => {
+    if (!userSubRes) {
+      return undefined;
+    }
+
+    if (!userSubRes.User_by_pk) {
+      return undefined;
+    }
+
+    const onlyMostRecentOutgoing = userSubRes.User_by_pk?.outgoing.filter(
+      (outgoing) =>
+        outgoing.beamPool?.id === '0x33A49b63639cE3aF37941bdb02B13023E0468BaF'
+    );
+
+    return { ...userSubRes.User_by_pk, outgoing: onlyMostRecentOutgoing };
+  }, [userSubRes]);
 
   // useEffect(() => {
   //   if (IS_TESTING) {
