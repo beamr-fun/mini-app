@@ -8,6 +8,7 @@ import { Friends } from './pages/Friends';
 import { CreateConfirm } from './pages/CreateConfirm';
 import { Text } from '@mantine/core';
 import { useUser } from './hooks/useUser';
+import { Global } from './pages/Global';
 
 const ConditionalRedirect = () => {
   const { startingRoute } = useUser();
@@ -24,6 +25,7 @@ export const ClientRoutes = () => {
     <Routes>
       <Route path="/" element={<ConditionalRedirect />} />
       <Route path="/home" element={<Home />} />
+      <Route path="/global" element={<Global />} />
       <Route path="/create-pool" element={<CreatePool />}>
         <Route index element={<Navigate to="1" replace />} />
         <Route path="1" element={<Explainer />} />

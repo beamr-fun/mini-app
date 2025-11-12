@@ -13,6 +13,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
+    "subscription GlobalMostRecent {\n  Beam(\n    order_by: {lastUpdated: desc}\n    limit: 30\n    where: {beamPool: {active: {_eq: true}}}\n  ) {\n    id\n    units\n    lastUpdated\n    beamPool {\n      flowRate\n      totalUnits\n    }\n    from {\n      fid\n      id\n      profile {\n        id\n        pfp_url\n        display_name\n        username\n        id\n      }\n    }\n    to {\n      fid\n      id\n      profile {\n        id\n        pfp_url\n        display_name\n        username\n        id\n      }\n    }\n  }\n}": types.GlobalMostRecentDocument,
     "subscription LoggedInUser($id: String!) {\n  User_by_pk(id: $id) {\n    id\n    pools {\n      id\n    }\n    incoming(\n      order_by: {lastUpdated: desc}\n      where: {beamPool: {active: {_eq: true}}}\n    ) {\n      id\n      units\n      lastUpdated\n      beamPool {\n        flowRate\n        totalUnits\n      }\n      from {\n        fid\n        id\n        profile {\n          id\n          pfp_url\n          display_name\n          username\n          id\n        }\n      }\n    }\n    outgoing(\n      order_by: {lastUpdated: desc}\n      where: {beamPool: {active: {_eq: true}}}\n    ) {\n      units\n      id\n      beamPool {\n        flowRate\n        totalUnits\n        id\n      }\n      to {\n        id\n        fid\n        profile {\n          id\n          display_name\n          username\n          pfp_url\n          id\n        }\n      }\n    }\n  }\n}": types.LoggedInUserDocument,
     "subscription GetTxById($id: String!) {\n  TX_by_pk(id: $id) {\n    id\n  }\n}": types.GetTxByIdDocument,
 };
@@ -31,6 +32,10 @@ const documents = {
  */
 export function gql(source: string): unknown;
 
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "subscription GlobalMostRecent {\n  Beam(\n    order_by: {lastUpdated: desc}\n    limit: 30\n    where: {beamPool: {active: {_eq: true}}}\n  ) {\n    id\n    units\n    lastUpdated\n    beamPool {\n      flowRate\n      totalUnits\n    }\n    from {\n      fid\n      id\n      profile {\n        id\n        pfp_url\n        display_name\n        username\n        id\n      }\n    }\n    to {\n      fid\n      id\n      profile {\n        id\n        pfp_url\n        display_name\n        username\n        id\n      }\n    }\n  }\n}"): (typeof documents)["subscription GlobalMostRecent {\n  Beam(\n    order_by: {lastUpdated: desc}\n    limit: 30\n    where: {beamPool: {active: {_eq: true}}}\n  ) {\n    id\n    units\n    lastUpdated\n    beamPool {\n      flowRate\n      totalUnits\n    }\n    from {\n      fid\n      id\n      profile {\n        id\n        pfp_url\n        display_name\n        username\n        id\n      }\n    }\n    to {\n      fid\n      id\n      profile {\n        id\n        pfp_url\n        display_name\n        username\n        id\n      }\n    }\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
