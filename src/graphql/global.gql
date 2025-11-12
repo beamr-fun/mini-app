@@ -35,3 +35,41 @@ subscription GlobalMostRecent {
     }
   }
 }
+
+subscription GlobalTop {
+  Beam(
+    order_by: { beamPool: { flowRate: desc_nulls_last } }
+    limit: 30
+    where: { beamPool: { active: { _eq: true } } }
+  ) {
+    id
+    units
+    lastUpdated
+    beamPool {
+      flowRate
+      totalUnits
+    }
+    from {
+      fid
+      id
+      profile {
+        id
+        pfp_url
+        display_name
+        username
+        id
+      }
+    }
+    to {
+      fid
+      id
+      profile {
+        id
+        pfp_url
+        display_name
+        username
+        id
+      }
+    }
+  }
+}

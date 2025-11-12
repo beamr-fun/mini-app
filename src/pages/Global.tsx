@@ -2,7 +2,6 @@ import {
   Avatar,
   AvatarGroup,
   Box,
-  Button,
   Card,
   Group,
   Image,
@@ -11,7 +10,6 @@ import {
   Text,
   useMantineTheme,
 } from '@mantine/core';
-import { Link } from 'react-router-dom';
 import { PageLayout } from '../layouts/PageLayout';
 import beamrLogo from '../assets/beamrLogo.png';
 import beamrTokenLogo from '../assets/beamrTokenLogo.png';
@@ -21,6 +19,8 @@ import { useGqlSub } from '../hooks/useGqlSub';
 import {
   GlobalMostRecentDocument,
   GlobalMostRecentSubscription,
+  GlobalTopDocument,
+  GlobalTopSubscription,
 } from '../generated/graphql';
 
 type BeamsData = GlobalMostRecentSubscription['Beam'];
@@ -33,7 +33,13 @@ export const Global = () => {
     {}
   );
 
+  const { data: leaderRaw } = useGqlSub<GlobalTopSubscription>(
+    GlobalTopDocument,
+    {}
+  );
+
   const recentBeams = recentRaw?.Beam || [];
+  const leaderBeams = leaderRaw?.Beam || [];
 
   return (
     <PageLayout>
@@ -54,8 +60,41 @@ export const Global = () => {
           mb="md"
         />
         {tab === 'Recent' && <Recent beams={recentBeams} />}
+        {tab === 'Leaderboard' && <Leader beams={leaderBeams} />}
       </Card>
     </PageLayout>
+  );
+};
+
+const Leader = ({ beams }: { beams: BeamsData }) => {
+  return (
+    <Stack gap="sm">
+      <GlobalHeader />
+      <Stack gap="sm">
+        {beams?.map((beam) => {
+          const perUnitFlowRate =
+            BigInt(beam.beamPool?.flowRate) / BigInt(beam.beamPool?.totalUnits);
+          const beamFlowRate = perUnitFlowRate * BigInt(beam.units);
+
+          const percentage = Number(
+            (
+              (Number(beam.units) / Number(beam.beamPool?.totalUnits)) *
+              100
+            ).toFixed(2)
+          );
+
+          return (
+            <GlobalRow
+              key={beam.id}
+              flowRate={beamFlowRate}
+              senderUrl={beam.from?.profile?.pfp_url || ''}
+              receiverUrl={beam.to?.profile?.pfp_url || ''}
+              percentage={percentage}
+            />
+          );
+        })}
+      </Stack>
+    </Stack>
   );
 };
 
