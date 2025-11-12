@@ -9,6 +9,7 @@ import { CreateConfirm } from './pages/CreateConfirm';
 import { Text } from '@mantine/core';
 import { useUser } from './hooks/useUser';
 import { Global } from './pages/Global';
+import { Settings } from './pages/Settings';
 
 const ConditionalRedirect = () => {
   const { startingRoute } = useUser();
@@ -26,6 +27,7 @@ export const ClientRoutes = () => {
       <Route path="/" element={<ConditionalRedirect />} />
       <Route path="/home" element={<Home />} />
       <Route path="/global" element={<Global />} />
+      <Route path="/settings" element={<Settings />} />
       <Route path="/create-pool" element={<CreatePool />}>
         <Route index element={<Navigate to="1" replace />} />
         <Route path="1" element={<Explainer />} />
