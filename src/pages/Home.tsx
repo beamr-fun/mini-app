@@ -28,6 +28,7 @@ import {
 } from '../hooks/useFlowingBalance';
 import { formatEther } from 'viem';
 import { useAccount } from 'wagmi';
+import { DancingText } from '../components/DancingText';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
@@ -60,7 +61,6 @@ export const Home = () => {
 
 const BalanceDisplay = () => {
   const { colors } = useMantineTheme();
-  const { address } = useAccount();
   const { userSubscription, userBalance, userBalanceFetchedAt } = useUser();
 
   const totalIncomingFlowRate = useMemo(() => {
@@ -130,29 +130,21 @@ const BalanceDisplay = () => {
 
   const netMonthly = flowratePerSecondToMonth(netFlowRate);
 
-  const flowingBalance = useFlowingBalance(
-    userBalance || 0n,
-    userBalanceFetchedAt || new Date(),
-    totalIncomingFlowRate - totalOutgoingFlowRate
-  );
-
-  console.log('address', address);
-
-  const decimalPlaces = useSignificantFlowingDecimal(
-    totalIncomingFlowRate - totalOutgoingFlowRate,
-    40
-  );
-
   return (
     <Card mb="md">
       <Group gap={2} c={colors.gray[3]} mb={'md'}>
         <BeamrNav size={18} />
         <Text mr={6}>Beamr</Text>
-        <Text fw={500} fz={'lg'} c={colors.gray[0]} mr={'auto'}>
-          {decimalPlaces !== undefined
-            ? toFixedUsingString(formatEther(flowingBalance), decimalPlaces)
-            : formatEther(flowingBalance)}
-        </Text>
+        <DancingText
+          userBalance={userBalance || 0n}
+          fetchedAt={userBalanceFetchedAt || new Date()}
+          flowRate={totalIncomingFlowRate - totalOutgoingFlowRate}
+          fw={500}
+          fz={'lg'}
+          c={colors.gray[0]}
+          mr={'auto'}
+        />
+
         <ActionIcon>
           <Group gap={6}>
             <IconTransfer />
