@@ -55,9 +55,7 @@ const BalanceDisplay = () => {
   const { colors } = useMantineTheme();
   const { userSubscription, userBalance } = useUser();
 
-  console.log('userBalance', userBalance);
-
-  const totalIncomingPerMonth = useMemo(() => {
+  const totalIncomingFlowRate = useMemo(() => {
     if (!userSubscription?.incoming) {
       return 0n;
     }
@@ -66,19 +64,19 @@ const BalanceDisplay = () => {
       return 0n;
     }
 
-    let totalPerSecond = 0n;
+    let total = 0n;
 
     userSubscription.incoming.forEach((item) => {
       const perUnitFlowRate =
         BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
       const beamFlowRate = perUnitFlowRate * BigInt(item.units);
-      totalPerSecond += beamFlowRate;
+      total += beamFlowRate;
     });
 
-    return flowratePerSecondToMonth(totalPerSecond);
+    return total;
   }, [userSubscription?.incoming]);
 
-  const totalOutgoingPerMonth = useMemo(() => {
+  const totalOutgoingFlowRate = useMemo(() => {
     if (!userSubscription?.outgoing) {
       return 0n;
     }
@@ -87,19 +85,40 @@ const BalanceDisplay = () => {
       return 0n;
     }
 
-    let totalPerSecond = 0n;
+    let total = 0n;
 
     userSubscription.outgoing.forEach((item) => {
       const perUnitFlowRate =
         BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
       const beamFlowRate = perUnitFlowRate * BigInt(item.units);
-      totalPerSecond += beamFlowRate;
+      total += beamFlowRate;
     });
 
-    return flowratePerSecondToMonth(totalPerSecond);
+    return total;
   }, [userSubscription?.outgoing]);
 
-  // number of total incoming vs. total outgoing as a percentage
+  const totalIncomingPerMonth = totalIncomingFlowRate
+    ? flowratePerSecondToMonth(totalIncomingFlowRate)
+    : 0n;
+
+  const totalOutgoingPerMonth = totalOutgoingFlowRate
+    ? flowratePerSecondToMonth(totalOutgoingFlowRate)
+    : 0n;
+
+  const netFlowRate =
+    totalIncomingFlowRate >= totalOutgoingFlowRate
+      ? totalIncomingFlowRate - totalOutgoingFlowRate
+      : totalOutgoingFlowRate - totalIncomingFlowRate;
+
+  const percentageOfIncoming =
+    totalIncomingFlowRate && totalOutgoingFlowRate
+      ? Number(
+          totalIncomingFlowRate / totalIncomingFlowRate +
+            totalOutgoingFlowRate * 100n
+        )
+      : 0;
+
+  console.log('netFlowRate', netFlowRate);
 
   return (
     <Card mb="md">
