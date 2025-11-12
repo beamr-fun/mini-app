@@ -26,7 +26,7 @@ export function formatBalance(balance: number | string, decimals = 2): string {
   }
 
   const factor = 10 ** decimals;
-  const floored = Math.floor(num * factor) / factor;
+  const floored = Math.round(num * factor) / factor;
 
   let str = floored.toFixed(decimals);
   str = str.replace(/\.?0+$/, '');

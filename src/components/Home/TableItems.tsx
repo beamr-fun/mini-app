@@ -1,6 +1,6 @@
 import { Avatar, Box, Group, Text, useMantineTheme } from '@mantine/core';
 import { flowratePerSecondToMonth } from '../../utils/common';
-import beamrTokenLogo from '../../assets/beamr-token-logo.png';
+import beamrTokenLogo from '../../assets/beamrTokenLogo.png';
 
 export const TableRow = ({
   pfpUrl,
