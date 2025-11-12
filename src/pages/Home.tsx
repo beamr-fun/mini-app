@@ -1,7 +1,5 @@
 import {
   ActionIcon,
-  Avatar,
-  Box,
   Card,
   Flex,
   Group,
@@ -15,20 +13,14 @@ import {
 import { PageLayout } from '../layouts/PageLayout';
 import { useUser } from '../hooks/useUser';
 import beamrLogo from '../assets/beamrLogo.png';
-import beamrTokenLogo from '../assets/beamrTokenLogo.png';
 import { BeamrNav } from '../components/svg/BeamrNav';
-import { use, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { IconTransfer } from '../components/svg/IconTransfer';
 import { TrendingUp } from 'lucide-react';
-import {
-  toFixedUsingString,
-  useFlowingBalance,
-  useSignificantFlowingDecimal,
-} from '../hooks/useFlowingBalance';
-import { formatEther } from 'viem';
-import { useAccount } from 'wagmi';
+
 import { DancingText } from '../components/DancingText';
+import { TableHeader, TableRow } from '../components/Home/TableItems';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
@@ -288,51 +280,6 @@ const Receiving = () => {
         })}
       </Stack>
     </Stack>
-  );
-};
-
-const TableHeader = ({ sending }: { sending: boolean }) => {
-  const { colors } = useMantineTheme();
-  return (
-    <Group justify="space-between" c={colors.gray[0]} mb="12px">
-      <Text w={32} fz="sm" fw={500} ta="left">
-        {sending ? 'To' : 'From'}
-      </Text>
-      <Text w={32} fz="sm" fw={500} ta="left">
-        Token
-      </Text>
-      <Text w={75} fz="sm" fw={500} ta="right">
-        Amount/mo
-      </Text>
-      <Text w={48} fz="sm" fw={500} ta="right">
-        Pool %
-      </Text>
-    </Group>
-  );
-};
-
-const TableRow = ({
-  pfpUrl,
-  flowRate,
-  percentage,
-}: {
-  pfpUrl: string;
-  flowRate: bigint;
-  percentage: number;
-}) => {
-  return (
-    <Group justify="space-between">
-      <Avatar size={32} radius="xl" src={pfpUrl} />
-      <Box w={32} ta="left">
-        <Avatar src={beamrTokenLogo} size={24} />
-      </Box>
-      <Box w={75} ta="right">
-        {flowratePerSecondToMonth(flowRate)}
-      </Box>
-      <Text w={48} ta="right">
-        {percentage}%
-      </Text>
-    </Group>
   );
 };
 
