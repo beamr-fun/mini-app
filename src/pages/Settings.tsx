@@ -10,12 +10,22 @@ import {
   Group,
   Stack,
   Text,
+  TextInput,
   useMantineTheme,
 } from '@mantine/core';
 import { Tag } from '../components/Tag';
 import beamrTokenLogo from '../assets/beamrTokenLogo.png';
 import { useDisclosure } from '@mantine/hooks';
-import { ChevronDown, ChevronRight, ChevronUp } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Heart,
+  MessageSquareReply,
+  RefreshCcw,
+  Speech,
+  Users,
+} from 'lucide-react';
 
 export const Settings = () => {
   const { colors } = useMantineTheme();
@@ -51,7 +61,30 @@ export const Settings = () => {
             </Group>
 
             <Collapse in={opened}>
-              <Box h={150}>d</Box>
+              <Text mb={10} c={colors.gray[3]}>
+                Shares Per Action
+              </Text>
+              <Stack gap="sm" mb="md">
+                <Group gap="sm">
+                  <Heart size={20} color={colors.red[7]} />
+                  <Text>5</Text>
+                </Group>
+                <Group gap="sm">
+                  <RefreshCcw size={20} color={colors.green[7]} />
+                  <Text>10</Text>
+                </Group>
+                <Group gap="sm">
+                  <Users size={20} color={colors.purple[7]} />
+                  <Text>15</Text>
+                </Group>
+                <Group gap="sm">
+                  <MessageSquareReply size={20} color={colors.blue[5]} />
+                  <Text>25</Text>
+                </Group>
+              </Stack>
+              <Button size="xs" variant="secondary" mb={'sm'}>
+                Edit Preferences
+              </Button>
             </Collapse>
             <Group gap={4}>
               <Text c={colors.gray[3]} fz="sm">

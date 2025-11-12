@@ -165,7 +165,7 @@ const GlobalHeader = () => {
 
   return (
     <Group justify="space-between" c={colors.gray[0]} mb="12px">
-      <Text w={32} fz="sm" fw={500} ta="left">
+      <Text w={50} fz="sm" fw={500} ta="left">
         Users
       </Text>
       <Text w={32} fz="sm" fw={500} ta="left">
