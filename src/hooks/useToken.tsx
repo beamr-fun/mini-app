@@ -32,6 +32,7 @@ const getReads = async (args: TokenHookProps) => {
   const { abi, tokenAddress, calls, spender, userAddress } = args;
 
   if (!calls || !abi || !tokenAddress) {
+    const fetchedAt = new Date();
     return {
       balanceOf: undefined,
       totalSupply: undefined,
@@ -39,6 +40,7 @@ const getReads = async (args: TokenHookProps) => {
       symbol: undefined,
       decimals: undefined,
       allowance: undefined,
+      fetchedAt,
     };
   }
 
@@ -104,21 +106,30 @@ const getReads = async (args: TokenHookProps) => {
     }
   }
 
+  const timestampStart = Date.now();
+
   const result = await publicClient.multicall({
     contracts: reads,
   });
 
-  return reads.reduce(
-    (acc, ops, index) => {
-      const { functionName } = ops;
-      const response = result[index];
-      if (response) {
-        acc[functionName as keyof Calls] = response.result;
-      }
-      return acc;
-    },
-    {} as Record<keyof Calls, any>
-  ) as TokenHookValues;
+  const timestampEnd = Date.now();
+
+  const fetchedAt = new Date((timestampStart + timestampEnd) / 2);
+
+  return {
+    ...reads.reduce(
+      (acc, ops, index) => {
+        const { functionName } = ops;
+        const response = result[index];
+        if (response) {
+          acc[functionName as keyof Calls] = response.result;
+        }
+        return acc;
+      },
+      {} as Record<keyof Calls, any>
+    ),
+    fetchedAt,
+  } as TokenHookValues & { fetchedAt: Date };
 };
 
 export const useToken = ({

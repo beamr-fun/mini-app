@@ -21,6 +21,13 @@ import { use, useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { IconTransfer } from '../components/svg/IconTransfer';
 import { TrendingUp } from 'lucide-react';
+import {
+  toFixedUsingString,
+  useFlowingBalance,
+  useSignificantFlowingDecimal,
+} from '../hooks/useFlowingBalance';
+import { formatEther } from 'viem';
+import { useAccount } from 'wagmi';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
@@ -53,7 +60,8 @@ export const Home = () => {
 
 const BalanceDisplay = () => {
   const { colors } = useMantineTheme();
-  const { userSubscription, userBalance } = useUser();
+  const { address } = useAccount();
+  const { userSubscription, userBalance, userBalanceFetchedAt } = useUser();
 
   const totalIncomingFlowRate = useMemo(() => {
     if (!userSubscription?.incoming) {
@@ -105,20 +113,35 @@ const BalanceDisplay = () => {
     ? flowratePerSecondToMonth(totalOutgoingFlowRate)
     : 0n;
 
-  const netFlowRate =
-    totalIncomingFlowRate >= totalOutgoingFlowRate
-      ? totalIncomingFlowRate - totalOutgoingFlowRate
-      : totalOutgoingFlowRate - totalIncomingFlowRate;
+  const moreIncomingThanOutgoing =
+    totalIncomingFlowRate >= totalOutgoingFlowRate;
+
+  const netFlowRate = moreIncomingThanOutgoing
+    ? totalIncomingFlowRate - totalOutgoingFlowRate
+    : totalOutgoingFlowRate - totalIncomingFlowRate;
 
   const percentageOfIncoming =
     totalIncomingFlowRate && totalOutgoingFlowRate
       ? Number(
-          totalIncomingFlowRate / totalIncomingFlowRate +
-            totalOutgoingFlowRate * 100n
-        )
+          (totalIncomingFlowRate * 10000n) /
+            (totalIncomingFlowRate + totalOutgoingFlowRate)
+        ) / 100
       : 0;
 
-  console.log('netFlowRate', netFlowRate);
+  const netMonthly = flowratePerSecondToMonth(netFlowRate);
+
+  const flowingBalance = useFlowingBalance(
+    userBalance || 0n,
+    userBalanceFetchedAt || new Date(),
+    totalIncomingFlowRate - totalOutgoingFlowRate
+  );
+
+  console.log('address', address);
+
+  const decimalPlaces = useSignificantFlowingDecimal(
+    totalIncomingFlowRate - totalOutgoingFlowRate,
+    40
+  );
 
   return (
     <Card mb="md">
@@ -126,7 +149,9 @@ const BalanceDisplay = () => {
         <BeamrNav size={18} />
         <Text mr={6}>Beamr</Text>
         <Text fw={500} fz={'lg'} c={colors.gray[0]} mr={'auto'}>
-          59,258.0064565458
+          {decimalPlaces !== undefined
+            ? toFixedUsingString(formatEther(flowingBalance), decimalPlaces)
+            : formatEther(flowingBalance)}
         </Text>
         <ActionIcon>
           <Group gap={6}>
@@ -141,15 +166,22 @@ const BalanceDisplay = () => {
           </Group>
         </ActionIcon>
       </Group>
-      <Group c={colors.green[7]} gap={4} mb={'sm'}>
+      <Group
+        c={moreIncomingThanOutgoing ? colors.green[7] : colors.purple[7]}
+        gap={4}
+        mb={'sm'}
+      >
         <TrendingUp size={18} />
-        <Text fz="sm">Net Rate 658/mo</Text>
+        <Text fz="sm">
+          Net Rate {moreIncomingThanOutgoing ? '+' : '-'}
+          {netMonthly}
+        </Text>
       </Group>
       <Progress
         mb="xs"
         color={colors.green[7]}
         bg={colors.purple[7]}
-        value={60}
+        value={percentageOfIncoming}
       />
       <Group justify="space-between">
         <Text c={colors.green[7]} fz="sm">

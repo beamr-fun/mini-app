@@ -28,6 +28,7 @@ type UserContextType = {
   getAuthHeaders: () => Promise<APIHeaders | false>;
   startingRoute?: string;
   userBalance?: bigint;
+  userBalanceFetchedAt?: Date;
 };
 
 export const UserContext = createContext<UserContextType>({
@@ -98,6 +99,7 @@ export const UserProvider = ({
   });
 
   const userBalance = data?.balanceOf as bigint | undefined;
+  const userBalanceFetchedAt = data?.fetchedAt;
 
   const {
     data: apiData,
@@ -221,6 +223,7 @@ export const UserProvider = ({
         startingRoute,
         userSubscription,
         userBalance,
+        userBalanceFetchedAt,
       }}
     >
       {children}
