@@ -257,7 +257,6 @@ const Receiving = () => {
   return (
     <Stack gap="sm">
       <TableHeader sending={false} />
-
       <Stack gap="sm">
         {userSubscription.incoming.map((item) => {
           const perUnitFlowRate =

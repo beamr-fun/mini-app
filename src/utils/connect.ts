@@ -6,8 +6,6 @@ import miniAppConnector from '@farcaster/miniapp-wagmi-connector';
 
 export const appChain = isDev ? baseSepolia : base;
 
-console.log('keys.rpc', keys.rpc);
-
 export const config = createConfig({
   chains: [appChain],
   transports: {

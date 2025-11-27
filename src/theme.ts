@@ -1,6 +1,4 @@
 import {
-  Checkbox,
-  CheckboxIndicator,
   ConvertCSSVariablesInput,
   createTheme,
   MantineTheme,

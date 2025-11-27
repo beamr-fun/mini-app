@@ -1,4 +1,4 @@
-import { Address } from 'viem';
+import { Address, erc20Abi } from 'viem';
 import { GDAForwarderAbi } from '../abi/GDAFowarder';
 import { ADDR } from '../const/addresses';
 
@@ -29,17 +29,6 @@ export const distributeFlow = async ({
     ) {
       throw new Error('Public client is not available');
     }
-    console.log('GDAForwarderAbi', GDAForwarderAbi);
-
-    console.log('flowRate', flowRate);
-    console.log('user', user);
-    console.log('ADDR.GDA_FORWARDER', ADDR.GDA_FORWARDER);
-    console.log('ADDR.SUPER_TOKEN', ADDR.SUPER_TOKEN);
-    console.log('poolAddress', poolAddress);
-    console.log('publicClient.chain.name', publicClient.chain.name);
-    console.log('walletClient.chain.name', walletClient.chain.name);
-
-    console.log('walletClient.account', walletClient.account);
 
     // const simulation = await publicClient.simulateContract({
     //   abi: GDAForwarderAbi,
@@ -75,6 +64,27 @@ export const distributeFlow = async ({
   } catch (error) {
     console.error('Error in distributeFlow:', error);
     onError((error as Error).message);
+  }
+};
+
+export const transfer = async ({
+  amount,
+  to,
+  walletClient,
+}: {
+  amount: bigint;
+  to: Address;
+  walletClient: any;
+}) => {
+  const hash = await walletClient.writeContract({
+    abi: erc20Abi,
+    address: ADDR.BEAMR,
+    functionName: 'transfer',
+    args: [amount, to],
+  });
+
+  if (!hash) {
+    throw new Error('Failed to get transaction hash');
   }
 };
 

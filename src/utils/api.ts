@@ -126,7 +126,7 @@ export const createPool = async ({
 
     // Wait five seconds
 
-    console.log('Waiting 5 seconds before proceeding to completePool...');
+    console.log('Waiting 2 seconds before proceeding to completePool...');
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
