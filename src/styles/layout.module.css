@@ -1,0 +1,145 @@
+.appBackground {
+  flex-direction: column;
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: radial-gradient(
+      circle at 50vw -20vh,
+      rgba(0, 80, 120, 1),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 135vw 75vh,
+      rgba(0, 80, 120, 0.35),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at -10vw 110vh,
+      rgba(0, 80, 120, 0.35),
+      transparent 30%
+    ),
+    #0a0a0a;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  /* backdrop-filter: blur(10px); */
+  background-size: cover;
+  overflow: hidden;
+  border-radius: 0;
+}
+
+.scrollArea {
+  height: 100vh;
+}
+.scrollThumb {
+  z-index: 100 !important;
+}
+
+.contentBox {
+  padding: rem(12px) rem(28px) rem(136px) rem(28px);
+  height: 100%;
+  position: relative;
+}
+
+.paper {
+  padding: rem(18px) rem(18px) rem(24px) rem(18px) !important;
+  background-color: var(--glass-pane) !important;
+  backdrop-filter: blur(32px);
+  overflow: hidden;
+  border: 1px solid var(--glass-edge);
+  /* -webkit-backdrop-filter: blur(70px); */
+  border-radius: rem(24px) !important;
+}
+
+.navBox {
+  background-color: var(--glass-pronounced);
+  border-radius: rem(18px);
+  pointer-events: none;
+  backdrop-filter: blur(20px);
+  position: fixed;
+  bottom: rem(-4px);
+  width: 100%;
+  height: rem(64px);
+  display: flex;
+  align-items: center;
+  transition: transform 400ms ease;
+  transform: translateY(0);
+}
+
+.navBox[data-hidden='true'] {
+  transform: translateY(100%);
+}
+
+.navBox > * {
+  pointer-events: auto;
+}
+
+div.innerNavBox {
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 rem(40px);
+  width: 100%;
+}
+
+button.navLink {
+  background: transparent;
+  padding: rem(8px) rem(13px);
+  width: rem(54px);
+  height: rem(40px);
+  border-radius: rem(100px);
+  svg {
+    stroke-width: rem(1.5px);
+    color: var(--mantine-color-gray-4);
+  }
+  transition:
+    background-color 150ms ease-in,
+    svg color 150ms ease-in;
+  &:hover {
+    background-color: rgba(242, 242, 242, 0.1);
+    svg {
+      color: var(--mantine-color-gray-3);
+    }
+  }
+}
+
+button.navLinkSelected {
+  background: var(--mantine-color-gray-8);
+  padding: rem(8px) rem(13px);
+  border-radius: rem(100px);
+  width: rem(54px);
+  height: rem(40px);
+  svg {
+    stroke-width: rem(1.5px);
+    color: var(--mantine-color-gray-0);
+  }
+  &:hover {
+    background-color: rgba(242, 242, 242, 0.1);
+    svg {
+      color: var(--mantine-color-gray-3);
+    }
+  }
+}
+
+button.ctaBtn {
+  top: rem(-68px);
+  left: 50%;
+  transform: translateX(-50%);
+  position: absolute;
+  box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
+  transition: top 400ms ease;
+}
+
+button.ctaBtn:disabled {
+  background: var(--mantine-color-gray-8);
+  color: var(--mantine-color-gray-5);
+  cursor: not-allowed;
+}
+
+button.ctaBtn:active {
+  top: rem(-69px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+button.ctaBtn[data-extend='true'] {
+  top: rem(-80px);
+}

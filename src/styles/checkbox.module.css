@@ -1,12 +1,41 @@
-.card {
-  border: none !important;
+.label {
+  font-size: var(--mantine-font-size-md);
+  color: var(--mantine-color-gray-1);
+}
 
-  &:hover {
-    background: var(--mantine-color-gray-8);
+.description {
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-gray-5);
+}
+
+input.input {
+  width: rem(20px);
+  height: rem(20px);
+  border-radius: rem(5px);
+  border: none;
+  background-color: var(--mantine-color-gray-7);
+
+  &:checked {
+    background: linear-gradient(
+      90deg,
+      var(--mantine-color-blue-7) 0%,
+      var(--mantine-color-blue-5) 100%
+    );
   }
 }
+
 .indicator {
-  background-color: var(--mantine-color-gray-9) !important;
-  border: 1px solid var(--mantine-color-gray-5) !important;
-  border-radius: 4px !important;
+  width: rem(20px);
+  height: rem(20px);
+  border-radius: rem(5px);
+  border: none;
+  background-color: var(--mantine-color-gray-7);
+
+  &[data-checked='true'] {
+    background: linear-gradient(
+      90deg,
+      var(--mantine-color-blue-7) 0%,
+      var(--mantine-color-blue-5) 100%
+    );
+  }
 }

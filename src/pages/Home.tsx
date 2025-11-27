@@ -1,9 +1,10 @@
 import {
-  Avatar,
-  Box,
-  Button,
+  ActionIcon,
+  Card,
   Flex,
   Group,
+  Image,
+  Progress,
   SegmentedControl,
   Stack,
   Text,
@@ -12,75 +13,173 @@ import {
 import { PageLayout } from '../layouts/PageLayout';
 import { useUser } from '../hooks/useUser';
 import beamrLogo from '../assets/beamrLogo.png';
-import { useState } from 'react';
-import {
-  flowratePerMonthToSecond,
-  flowratePerSecondToMonth,
-} from '../utils/common';
-import { usePublicClient, useWalletClient } from 'wagmi';
-import { ADDR } from '../const/addresses';
-import { Address, erc20Abi, parseEther } from 'viem';
-import { distributeFlow } from '../utils/interactions';
+import { BeamrNav } from '../components/svg/BeamrNav';
+import { useMemo, useState } from 'react';
+import { flowratePerSecondToMonth } from '../utils/common';
+import { IconTransfer } from '../components/svg/IconTransfer';
+import { TrendingUp } from 'lucide-react';
+
+import { DancingText } from '../components/DancingText';
+import { TableHeader, TableRow } from '../components/Home/TableItems';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
-  const { address, userSubscription } = useUser();
-  const publicClient = usePublicClient();
-  const { data: walletClient } = useWalletClient();
-
-  const testDistributeFlow = async () => {
-    if (!userSubscription) {
-      console.log('No outgoing subscriptions to test distribute flow');
-      return;
-    }
-
-    if (userSubscription.pools.length === 0) {
-      console.log('No pools found in user subscription');
-      return;
-    }
-
-    distributeFlow({
-      onError(errMsg) {
-        throw new Error(errMsg);
-      },
-      onSuccess(txHash) {
-        console.log('Success!: Distribute flow tx hash:', txHash);
-        // setCreationSteps((prev) => ({ ...prev, distributeFlow: true }));
-        // startTxPoll({
-        //   id: txHash,
-        //   onError() {
-        //     throw new Error('Transaction indexing failed');
-        //   },
-        //   onSuccess() {
-        //     setCreationSteps((prev) => ({ ...prev, indexTransaction: true }));
-        //   },
-        // });
-      },
-      args: {
-        poolAddress: userSubscription.pools[0].id as Address,
-        user: address as Address,
-        flowRate: flowratePerMonthToSecond(parseEther('5')),
-      },
-      walletClient,
-      publicClient,
-    });
-  };
 
   return (
     <PageLayout>
-      <Group justify="center" mt="md" mb="lg">
-        <Avatar src={beamrLogo} size={128} />
-      </Group>
-      <Button onClick={testDistributeFlow}>Test Distribute Flow</Button>
-      <SegmentedControl
-        value={tab}
-        data={['Sending', 'Receiving']}
-        onChange={setTab}
-        mb="lg"
+      <Image
+        src={beamrLogo}
+        alt="Beamr Logo"
+        width={80}
+        height={80}
+        mb="xl"
+        fit="contain"
       />
-      {tab === 'Sending' && <Sending />}
-      {tab === 'Receiving' && <Receiving />}
+      <BalanceDisplay />
+      <Card>
+        <SegmentedControl
+          w="100%"
+          value={tab}
+          onChange={setTab}
+          data={['Sending', 'Receiving']}
+          mb="md"
+        />
+        {tab === 'Sending' && <Sending />}
+        {tab === 'Receiving' && <Receiving />}
+      </Card>
     </PageLayout>
+  );
+};
+
+const BalanceDisplay = () => {
+  const { colors } = useMantineTheme();
+  const { userSubscription, userBalance, userBalanceFetchedAt } = useUser();
+
+  const totalIncomingFlowRate = useMemo(() => {
+    if (!userSubscription?.incoming) {
+      return 0n;
+    }
+
+    if (userSubscription.incoming.length === 0) {
+      return 0n;
+    }
+
+    let total = 0n;
+
+    userSubscription.incoming.forEach((item) => {
+      const perUnitFlowRate =
+        BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
+      const beamFlowRate = perUnitFlowRate * BigInt(item.units);
+      total += beamFlowRate;
+    });
+
+    return total;
+  }, [userSubscription?.incoming]);
+
+  const totalOutgoingFlowRate = useMemo(() => {
+    if (!userSubscription?.outgoing) {
+      return 0n;
+    }
+
+    if (userSubscription.outgoing.length === 0) {
+      return 0n;
+    }
+
+    let total = 0n;
+
+    userSubscription.outgoing.forEach((item) => {
+      const perUnitFlowRate =
+        BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
+      const beamFlowRate = perUnitFlowRate * BigInt(item.units);
+      total += beamFlowRate;
+    });
+
+    return total;
+  }, [userSubscription?.outgoing]);
+
+  const totalIncomingPerMonth = totalIncomingFlowRate
+    ? flowratePerSecondToMonth(totalIncomingFlowRate)
+    : 0n;
+
+  const totalOutgoingPerMonth = totalOutgoingFlowRate
+    ? flowratePerSecondToMonth(totalOutgoingFlowRate)
+    : 0n;
+
+  const moreIncomingThanOutgoing =
+    totalIncomingFlowRate >= totalOutgoingFlowRate;
+
+  const netFlowRate = moreIncomingThanOutgoing
+    ? totalIncomingFlowRate - totalOutgoingFlowRate
+    : totalOutgoingFlowRate - totalIncomingFlowRate;
+
+  const percentageOfIncoming =
+    totalIncomingFlowRate && totalOutgoingFlowRate
+      ? Number(
+          (totalIncomingFlowRate * 10000n) /
+            (totalIncomingFlowRate + totalOutgoingFlowRate)
+        ) / 100
+      : 0;
+
+  const netMonthly = flowratePerSecondToMonth(netFlowRate);
+
+  return (
+    <Card mb="md">
+      <Group gap={2} c={colors.gray[3]} mb={'md'}>
+        <BeamrNav size={18} />
+        <Text mr={6}>Beamr</Text>
+        <DancingText
+          userBalance={userBalance || 0n}
+          fetchedAt={userBalanceFetchedAt || new Date()}
+          flowRate={totalIncomingFlowRate - totalOutgoingFlowRate}
+          fw={500}
+          fz={'lg'}
+          c={colors.gray[0]}
+          mr={'auto'}
+        />
+
+        <ActionIcon>
+          <Group gap={6}>
+            <IconTransfer />
+            <Text
+              fz="xs"
+              style={{ transform: 'translateY(-1px)' }}
+              c={colors.blue[5]}
+            >
+              Buy
+            </Text>
+          </Group>
+        </ActionIcon>
+      </Group>
+      <Group
+        c={moreIncomingThanOutgoing ? colors.green[7] : colors.purple[7]}
+        gap={4}
+        mb={'sm'}
+      >
+        <TrendingUp size={18} />
+        <Text fz="sm">
+          Net Rate {moreIncomingThanOutgoing ? '+' : '-'}
+          {netMonthly}
+        </Text>
+      </Group>
+      <Progress
+        mb="xs"
+        color={colors.green[7]}
+        bg={colors.purple[7]}
+        value={percentageOfIncoming}
+      />
+      <Group justify="space-between">
+        <Text c={colors.green[7]} fz="sm">
+          Incoming
+        </Text>
+        <Text c={colors.purple[7]} fz="sm">
+          Outgoing
+        </Text>
+      </Group>
+      <Group justify="space-between">
+        <Text fz="sm">{totalIncomingPerMonth}</Text>
+        <Text fz="sm">{totalOutgoingPerMonth}</Text>
+      </Group>
+    </Card>
   );
 };
 
@@ -94,20 +193,8 @@ const Sending = () => {
 
   if (userSubscription && userSubscription.outgoing.length === 0)
     return (
-      <Stack gap="lg" px="xs">
-        {/* Header */}
-        <Group gap="md" justify="space-between">
-          <Text w={32}>From</Text>
-          <Text w={75} ta="right">
-            Amount/mo
-          </Text>
-          <Text w={32} ta="center">
-            Token
-          </Text>
-          <Text w={48} ta="right">
-            Pool %
-          </Text>
-        </Group>
+      <Stack gap="sm" px="xs">
+        <TableHeader sending={true} />
         <Flex justify={'center'} align={'center'} h={100} direction={'column'}>
           <Text size="xl" mb="md">
             No outgoing streams
@@ -118,48 +205,30 @@ const Sending = () => {
     );
 
   return (
-    <Stack gap="lg" px="xs">
-      <Group gap="md" justify="space-between">
-        <Text w={32}>From</Text>
-        <Text w={75} ta="right">
-          Amount/mo
-        </Text>
-        <Text w={32} ta="center">
-          Token
-        </Text>
-        <Text w={48} ta="right">
-          Pool %
-        </Text>
-      </Group>
+    <Stack gap="sm">
+      <TableHeader sending={true} />
 
-      {userSubscription.outgoing.map((item) => {
-        const perUnitFlowRate =
-          BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
-        const beamFlowRate = perUnitFlowRate * BigInt(item.units);
-        const percentage = Number(
-          (
-            (Number(item.units) / Number(item.beamPool?.totalUnits)) *
-            100
-          ).toFixed(2)
-        );
-        return (
-          <Group key={item.id} gap="md" justify="space-between">
-            <Group gap="sm">
-              <Avatar size={32} radius="xl" src={item.to?.profile?.pfp_url} />
-            </Group>
-
-            <Text w={75} ta="center">
-              {flowratePerSecondToMonth(beamFlowRate)}
-            </Text>
-            <Box w={32} ta="center">
-              <Avatar size={32} radius="xl" src={beamrLogo} />
-            </Box>
-            <Text w={48} ta="center">
-              {percentage}%
-            </Text>
-          </Group>
-        );
-      })}
+      <Stack gap="12px">
+        {userSubscription.outgoing.map((item) => {
+          const perUnitFlowRate =
+            BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
+          const beamFlowRate = perUnitFlowRate * BigInt(item.units);
+          const percentage = Number(
+            (
+              (Number(item.units) / Number(item.beamPool?.totalUnits)) *
+              100
+            ).toFixed(2)
+          );
+          return (
+            <TableRow
+              key={item.id}
+              flowRate={beamFlowRate}
+              percentage={percentage}
+              pfpUrl={item.to?.profile?.pfp_url || ''}
+            />
+          );
+        })}
+      </Stack>
     </Stack>
   );
 };
@@ -174,19 +243,8 @@ const Receiving = () => {
 
   if (userSubscription && userSubscription.incoming.length === 0)
     return (
-      <Stack gap="lg" px="xs">
-        <Group gap="md" justify="space-between">
-          <Text w={32}>To</Text>
-          <Text w={75} ta="right">
-            Amount/mo
-          </Text>
-          <Text w={32} ta="center">
-            Token
-          </Text>
-          <Text w={48} ta="right">
-            Pool %
-          </Text>
-        </Group>
+      <Stack gap="sm" px="xs">
+        <TableHeader sending={false} />
         <Flex justify={'center'} align={'center'} h={100} direction={'column'}>
           <Text size="xl" mb="md">
             No incoming streams
@@ -197,96 +255,32 @@ const Receiving = () => {
     );
 
   return (
-    <Stack gap="lg" px="xs">
-      <Group gap="md" justify="space-between">
-        <Text w={32}>To</Text>
-        <Text w={75} ta="right">
-          Amount/mo
-        </Text>
-        <Text w={32} ta="center">
-          Token
-        </Text>
-        <Text w={48} ta="right">
-          Pool %
-        </Text>
-      </Group>
-
-      {userSubscription.incoming.map((item) => {
-        const perUnitFlowRate =
-          BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
-        const beamFlowRate = perUnitFlowRate * BigInt(item.units);
-        const percentage = Number(
-          (
-            (Number(item.units) / Number(item.beamPool?.totalUnits)) *
-            100
-          ).toFixed(2)
-        );
-        return (
-          <Group key={item.id} gap="md" justify="space-between">
-            <Group gap="sm">
-              <Avatar size={32} radius="xl" src={item.from?.profile?.pfp_url} />
-            </Group>
-
-            <Text w={75} ta="center">
-              {flowratePerSecondToMonth(beamFlowRate)}
-            </Text>
-            <Box w={32} ta="center">
-              <Avatar size={32} radius="xl" src={beamrLogo} />
-            </Box>
-            <Text w={48} ta="center">
-              {percentage}%
-            </Text>
-          </Group>
-        );
-      })}
+    <Stack gap="sm">
+      <TableHeader sending={false} />
+      <Stack gap="sm">
+        {userSubscription.incoming.map((item) => {
+          const perUnitFlowRate =
+            BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
+          const beamFlowRate = perUnitFlowRate * BigInt(item.units);
+          const percentage = Number(
+            (
+              (Number(item.units) / Number(item.beamPool?.totalUnits)) *
+              100
+            ).toFixed(2)
+          );
+          return (
+            <TableRow
+              key={item.id}
+              flowRate={beamFlowRate}
+              percentage={percentage}
+              pfpUrl={item.from?.profile?.pfp_url || ''}
+            />
+          );
+        })}
+      </Stack>
     </Stack>
   );
 };
-
-// const OrgChart = () => {
-//   return (
-//     <Box>
-//       <Text fz="xl" variant="highlight" mb="sm">
-//         Arrow Chart
-//       </Text>
-//       {/*
-//       <Box pos="relative" h={300}>
-//         <Group>
-//           <Box>
-//           </Box>
-//           </Group> */}
-//       <Flex direction="column" align="center" mb="xl" gap={4}>
-//         <Avatar size={28} bg="red" />
-//         <Arrow />
-//         <Avatar size={28} bg="red" />
-//       </Flex>
-//       <Flex direction="column" align="center">
-//         <Avatar size={28} bg="red" />
-//         <Box style={{ transform: 'Rotate(-20deg)' }}>
-//           <Arrow />
-//         </Box>
-
-//         <Group>
-//           <Avatar size={28} bg="red" />
-//           <Avatar size={28} bg="red" />
-//         </Group>
-//       </Flex>
-//       {/* </Box> */}
-//     </Box>
-//   );
-// };
-
-// const Toggle = () => {
-//   return (
-//     <Box>
-//       <Text fz="xl" variant="highlight" mb="sm">
-//         Toggle
-//       </Text>
-
-//       <SegmentedControl data={['Recent', 'Leaderboard']} />
-//     </Box>
-//   );
-// };
 
 // const Inputs = () => {
 //   return (
@@ -522,5 +516,54 @@ const Receiving = () => {
 //         </Stack>
 //       </Box>
 //     </Stack>
+//   );
+// };
+
+// const OtherComponents = () => {
+//   return (
+//     <Paper>
+//       <Text fz="xl" c="var(--mantine-color-gray-0)" mb="md">
+//         Other Components
+//       </Text>
+//       <Stack>
+//         <Box>
+//           <Text>Action Icon</Text>
+//           <ActionIcon>
+//             <User size={24} />
+//           </ActionIcon>
+//         </Box>
+//         <Box>
+//           <Text mb="sm">Checkbox</Text>
+//           <Checkbox
+//             label="Checkbox Label"
+//             description="This is a description"
+//           />
+//         </Box>
+//       </Stack>
+//     </Paper>
+//   );
+// };
+
+// const Cards = () => {
+//   return (
+//     <Paper>
+//       <Text fz="xl" c="var(--mantine-color-gray-0)" mb="md">
+//         Card
+//       </Text>
+//       <Stack gap="md">
+//         <Select
+//           label="Base Input"
+//           placeholder="Pick value"
+//           data={['React', 'Angular', 'Vue', 'Svelte']}
+//         />
+//         <NumberInput
+//           label="Required Input"
+//           rightSection={'ETH'}
+//           rightSectionWidth={50}
+//           required
+//         />
+//         <TextInput label="Base Input" placeholder="This is placeholder text" />
+//       </Stack>
+//     </Paper>
 //   );
 // };

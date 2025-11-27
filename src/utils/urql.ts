@@ -1,7 +1,9 @@
-const HASURA_URL = 'http://localhost:8080/v1/graphql';
+import { keys } from './setup';
+
+const HASURA_URL = keys.indexerUrl;
 
 export async function fetchTx(id: string) {
-  const res = await fetch(HASURA_URL, {
+  const res = await fetch(`https://${HASURA_URL}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -15,8 +17,6 @@ export async function fetchTx(id: string) {
       variables: { id },
     }),
   });
-
-  console.log('res', res);
 
   if (!res.ok) throw new Error(`GraphQL error: ${res.statusText}`);
 

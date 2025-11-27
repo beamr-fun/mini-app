@@ -1,10 +1,8 @@
 import sdk from '@farcaster/miniapp-sdk';
 import { JWTPayload } from '../types/sharedTypes';
 import { useQuery } from '@tanstack/react-query';
-import { createContext, ReactNode, useEffect, useState } from 'react';
+import { createContext, ReactNode, useEffect, useMemo, useState } from 'react';
 import { Address } from 'viem';
-import { createClient } from 'graphql-ws';
-import { print } from 'graphql';
 
 import { useAccount } from 'wagmi';
 import { AuthResponse, FCUser } from '../types/sharedTypes';
@@ -14,6 +12,9 @@ import {
   LoggedInUserSubscription,
 } from '../generated/graphql';
 import { keys } from '../utils/setup';
+import { useToken } from '../hooks/useToken';
+import { ADDR } from '../const/addresses';
+import { useGqlSub } from '../hooks/useGqlSub';
 
 type UserSub = LoggedInUserSubscription['User_by_pk'];
 //
@@ -25,33 +26,24 @@ type UserContextType = {
   token?: string;
   getAuthHeaders: () => Promise<APIHeaders | false>;
   startingRoute?: string;
+  userBalance?: bigint;
+  userBalanceFetchedAt?: Date;
 };
 
 export const UserContext = createContext<UserContextType>({
   getAuthHeaders: async () => false,
 });
 
-const wsClient = createClient({
-  url: `wss://${keys.indexerUrl}`,
-});
-
-const login = async (clientAddress: Address) => {
-  const [isMiniApp, tokenRes, context] = await Promise.all([
-    sdk.isInMiniApp(),
+const login = async () => {
+  const [tokenRes, context] = await Promise.all([
     sdk.quickAuth.getToken(),
     sdk.context,
   ]);
 
-  if (!isMiniApp) {
-    console.error('Not running in a mini app context');
-    // TODO: Handle this case appropriately, maybe redirect or show a message
-    return;
-  }
-
   const token = tokenRes?.token || null;
 
   if (!token) {
-    console.error('No token provided for socket connection');
+    throw new Error('No auth token available');
   }
 
   const res = await fetch(`${keys.apiUrl}/v1/user/auth`, {
@@ -61,21 +53,20 @@ const login = async (clientAddress: Address) => {
   });
 
   if (!res.ok || res.status !== 200) {
-    console.error('Failed to authenticate user');
-    return;
+    console.error('Failed to authenticate user', await res.text());
+    throw new Error('Failed to authenticate user');
   }
 
   const data = (await res.json()) as AuthResponse;
 
   if (!data.success) {
-    console.error('Authentication failed:', data);
-    return;
+    console.error('Authentication failed', data);
+    throw new Error('Authentication unsuccessful');
   }
 
   return {
     user: data.user,
     jwt: data.jwtPayload,
-    isMiniApp,
     context,
     token: token || undefined,
   };
@@ -86,13 +77,23 @@ export const UserProvider = ({
 }: {
   children: ReactNode | ReactNode[];
 }) => {
+  const IS_TESTING = false;
   const { address } = useAccount();
 
   const [hasLoadedSubscription, setHasLoadedSubscription] = useState(false);
-  const [userSubscription, setUserSubscription] = useState<
-    LoggedInUserSubscription['User_by_pk'] | undefined
-  >(undefined);
+  // const [userSubscription, setUserSubscription] = useState<
+  //   LoggedInUserSubscription['User_by_pk'] | undefined
+  // >(undefined);
   const [startingRoute, setStartingRoute] = useState<string | undefined>();
+
+  const { data } = useToken({
+    userAddress: address,
+    tokenAddress: ADDR.SUPER_TOKEN,
+    calls: { balanceOf: true },
+  });
+
+  const userBalance = data?.balanceOf as bigint | undefined;
+  const userBalanceFetchedAt = data?.fetchedAt;
 
   const {
     data: apiData,
@@ -101,55 +102,90 @@ export const UserProvider = ({
     refetch,
   } = useQuery({
     queryKey: ['user', address],
-    queryFn: () => login(address as Address),
-    enabled: !!address,
+    queryFn: () => login(),
+    enabled: !!address && !IS_TESTING,
   });
 
+  const { data: userSubRes } = useGqlSub<LoggedInUserSubscription>(
+    LoggedInUserDocument,
+    {
+      variables: { id: apiData?.user?.fid?.toString() || '' },
+      enabled: !!apiData?.user?.fid && !IS_TESTING,
+    }
+  );
+
+  const userSubscription = useMemo(() => {
+    if (!userSubRes) {
+      return undefined;
+    }
+
+    if (!userSubRes.User_by_pk) {
+      return undefined;
+    }
+
+    const onlyMostRecentOutgoing = userSubRes.User_by_pk?.outgoing.filter(
+      (outgoing) =>
+        outgoing.beamPool?.id === '0x33A49b63639cE3aF37941bdb02B13023E0468BaF'
+    );
+
+    return { ...userSubRes.User_by_pk, outgoing: onlyMostRecentOutgoing };
+  }, [userSubRes]);
+
+  // useEffect(() => {
+  //   if (IS_TESTING) {
+  //     return;
+  //   }
+
+  //   let dispose: () => void = () => {};
+
+  //   const getUserSubscription = async () => {
+  //     const context = await sdk.context;
+
+  //     const fid = context?.user?.fid;
+
+  //     if (!fid) {
+  //       return;
+  //     }
+
+  //     dispose = wsClient.subscribe<LoggedInUserSubscription>(
+  //       {
+  //         query: print(LoggedInUserDocument),
+  //         variables: { id: fid.toString() },
+  //       },
+  //       {
+  //         next: (data) => {
+  //           const userSub = data?.data?.User_by_pk;
+  //           setHasLoadedSubscription(true);
+
+  //           if (userSub) {
+  //             setUserSubscription(userSub);
+  //           }
+  //         },
+  //         error: console.error,
+  //         complete: () => {},
+  //       }
+  //     );
+  //   };
+
+  //   getUserSubscription();
+
+  //   return () => dispose();
+  // }, []);
+
   useEffect(() => {
-    let dispose: () => void = () => {};
+    // if (OVERRIDE) {
+    //   setStartingRoute(OVERRIDE);
+    //   sdk.actions.ready();
+    //   return;
+    // }
 
-    const getUserSubscription = async () => {
-      const context = await sdk.context;
-
-      const fid = context?.user?.fid;
-
-      if (!fid) {
-        return;
-      }
-
-      dispose = wsClient.subscribe<LoggedInUserSubscription>(
-        {
-          query: print(LoggedInUserDocument),
-          variables: { id: fid.toString() },
-        },
-        {
-          next: (data) => {
-            console.log('data', data);
-            const userSub = data?.data?.User_by_pk;
-            setHasLoadedSubscription(true);
-
-            if (userSub) {
-              setUserSubscription(userSub);
-            }
-          },
-          error: console.error,
-          complete: () => {},
-        }
-      );
-    };
-
-    getUserSubscription();
-
-    return () => dispose();
-  }, []);
-
-  useEffect(() => {
+    // if (IS_TESTING) {
+    //   setStartingRoute('/create-pool/1');
+    //   sdk.actions.ready();
+    //   return;
+    // }
     if (startingRoute) return;
-
-    console.log('apiData', apiData);
-    console.log('hasLoadedSubscription', hasLoadedSubscription);
-
-    if (hasLoadedSubscription && apiData) {
+    if (userSubscription && apiData) {
       if (!userSubscription || !userSubscription?.pools?.length) {
         console.log('No pools found for user in subscription data');
         setStartingRoute('/create-pool/1');
@@ -205,9 +241,8 @@ export const UserProvider = ({
         getAuthHeaders,
         startingRoute,
         userSubscription,
-
-        // user,
-        // isLoading,
+        userBalance,
+        userBalanceFetchedAt,
       }}
     >
       {children}

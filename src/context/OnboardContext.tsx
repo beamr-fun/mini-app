@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import { useForm, UseFormReturnType } from '@mantine/form';
 import { useQuery } from '@tanstack/react-query';
 import { Follower } from '@neynar/nodejs-sdk/build/api';
@@ -9,6 +9,8 @@ import { useUser } from '../hooks/useUser';
 import { completePool, createPool, fetchUserFollowing } from '../utils/api';
 import { distributeFlow } from '../utils/interactions';
 import { startTxPoll } from '../utils/urql';
+import { switchChain } from 'viem/actions';
+import { appChain } from '../utils/connect';
 
 type CreationSteps = {
   createPool: boolean;
@@ -34,6 +36,7 @@ type OnboardContextType = {
   poolId?: Address;
   errMsg?: string;
   handlePoolCreate?: () => Promise<void>;
+  handleDistributeFlow?: () => Promise<void>;
 };
 
 export const OnboardContext = React.createContext<OnboardContextType>({
@@ -90,9 +93,14 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     args: [form.values.preferredAddress as `0x${string}`],
   });
 
-  const handlePoolCreate = async () => {
+  console.log('form.values.selectedFriends', form.values.selectedFriends);
+
+  const handlePoolCreate = useCallback(async () => {
     // handle errors later
     if (!user || !form || !address) return;
+
+    console.log('*********');
+    console.log('selectedFriends', form.values.selectedFriends);
 
     // call API to create pool
     try {
@@ -102,11 +110,13 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       const apiHeaders = await getAuthHeaders();
 
       const poolAddress = await createPool({
-        onSuccess(_poolAddress) {
-          setPoolAddress(_poolAddress as Address);
+        onSuccess(poolAddress) {
+          console.log('poolAddress', poolAddress);
+          setPoolAddress(poolAddress as Address);
           setCreationSteps((prev) => ({ ...prev, createPool: true }));
         },
         onError(errorMsg) {
+          console.log('Errored out here');
           throw new Error(errorMsg);
         },
         apiHeaders,
@@ -125,55 +135,75 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Pool address not returned from createPool');
       }
 
-      await distributeFlow({
-        onError(errMsg) {
-          throw new Error(errMsg);
-        },
-        onSuccess(txHash) {
-          setCreationSteps((prev) => ({ ...prev, distributeFlow: true }));
-          startTxPoll({
-            id: txHash,
-            onError() {
-              throw new Error('Transaction indexing failed');
-            },
-            onSuccess() {
-              setCreationSteps((prev) => ({ ...prev, indexTransaction: true }));
-            },
-          });
-        },
-        args: {
-          poolAddress: poolAddress as Address,
-          user: address as Address,
-          flowRate: flowRate,
-        },
-        walletClient,
-        publicClient,
-      });
+      if (!publicClient) {
+        throw new Error('Public client not available');
+      }
 
-      const freshApiHeaders = await getAuthHeaders();
-
-      const completeArgs = {
-        poolAddress,
-        creatorAddress: address,
-        fid: user.fid,
-      };
-
-      console.log('completeArgs', completeArgs);
-
-      completePool({
-        args: completeArgs,
-        apiHeaders: freshApiHeaders,
-        onSuccess() {
-          setCreationSteps((prev) => ({ ...prev, completePool: true }));
-        },
-        onError(errorMsg) {
-          throw new Error(errorMsg);
-        },
-      });
+      console.log('poolAddress', poolAddress);
     } catch (error) {
       console.error('Error in pool creation process:', error);
       setErrorMsg((error as Error).message);
     }
+  }, [
+    user,
+    form,
+    address,
+    getAuthHeaders,
+    publicClient,
+    form.values.selectedFriends.length,
+  ]);
+
+  const handleDistributeFlow = async () => {
+    if (!address || !poolAddress || !walletClient || !user) return;
+
+    const test = await switchChain(walletClient, { id: appChain.id });
+
+    const flowRate =
+      parseEther(form.values.budget.toString()) / 30n / 24n / 60n / 60n; // budget per month to flow rate per second
+
+    await distributeFlow({
+      onError(errMsg) {
+        throw new Error(errMsg);
+      },
+      onSuccess(txHash) {
+        setCreationSteps((prev) => ({ ...prev, distributeFlow: true }));
+        startTxPoll({
+          id: txHash,
+          onError() {
+            throw new Error('Transaction indexing failed');
+          },
+          onSuccess() {
+            setCreationSteps((prev) => ({ ...prev, indexTransaction: true }));
+          },
+        });
+      },
+      args: {
+        poolAddress: poolAddress as Address,
+        user: address as Address,
+        flowRate: flowRate,
+      },
+      walletClient,
+      publicClient,
+    });
+
+    const freshApiHeaders = await getAuthHeaders();
+
+    const completeArgs = {
+      poolAddress,
+      creatorAddress: address,
+      fid: user.fid,
+    };
+
+    completePool({
+      args: completeArgs,
+      apiHeaders: freshApiHeaders,
+      onSuccess() {
+        setCreationSteps((prev) => ({ ...prev, completePool: true }));
+      },
+      onError(errorMsg) {
+        throw new Error(errorMsg);
+      },
+    });
   };
 
   return (
@@ -187,6 +217,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         selectedFriends: form.values.selectedFriends,
         creationSteps: creationSteps,
         handlePoolCreate: handlePoolCreate,
+        handleDistributeFlow: handleDistributeFlow,
         errMsg: errorMsg,
       }}
     >

@@ -1,17 +1,18 @@
 .root {
-  background: var(--mantine-color-gray-9);
-  border: 1px solid var(--mantine-color-gray-8);
-  border-radius: 12px;
-  padding: 6px;
+  background-color: var(--glass-pane);
+  border: 1px solid var(--glass-edge);
+  border-radius: rem(18px);
+  backdrop-filter: var(--glass-blur);
 }
 
 .indicator {
-  background: var(--mantine-color-gray-9);
-  border: 1px solid var(--mantine-color-gray-0);
-  border-radius: 8px;
+  /* margin: rem(4px); */
+  background-color: var(--glass-thick);
+  border: 1px solid var(--glass-edge);
+  border-radius: rem(24px);
 }
 
 .label {
+  padding: rem(7px);
   font-size: var(--mantine-font-size-sm);
-  padding: 5px;
 }

@@ -10,6 +10,7 @@ import segmentedClasses from './styles/segmentedControl.module.css';
 import popoverStyles from './styles/popover.module.css';
 import checkBoxClasses from './styles/checkbox.module.css';
 import modalClasses from './styles/modal.module.css';
+import layoutClasses from './styles/layout.module.css';
 
 const GRAY = [
   '#F2F2F2',
@@ -142,6 +143,7 @@ export const theme = createTheme({
     },
     Input: {
       classNames: {
+        wrapper: inputClasses.wrapper,
         input: inputClasses.baseInput,
       },
     },
@@ -152,7 +154,7 @@ export const theme = createTheme({
         error: inputClasses.errorText,
       },
       defaultProps: {
-        inputWrapperOrder: ['label', 'input', 'error', 'description'],
+        // inputWrapperOrder: ['label', 'input', 'error', 'description'],
       },
     },
     TextInput: {
@@ -163,7 +165,7 @@ export const theme = createTheme({
     },
     Textarea: {
       classNames: {
-        root: inputClasses.baseInput,
+        // root: inputClasses.baseInput,
         input: inputClasses.textarea,
       },
       defaultProps: {
@@ -198,6 +200,11 @@ export const theme = createTheme({
         },
       },
     },
+    Paper: {
+      classNames: {
+        root: layoutClasses.paper,
+      },
+    },
     Tooltip: {
       classNames: { tooltip: popoverStyles.tooltip },
     },
@@ -210,17 +217,6 @@ export const theme = createTheme({
       defaultProps: {
         size: 'md',
         fullWidth: true,
-      },
-    },
-    // Checkbox: {
-    //   classNames: {
-    //     indicator: checkBoxClasses.indicator,
-    //   },
-    // },
-
-    CheckboxIndicator: {
-      classNames: {
-        indicator: checkBoxClasses.indicator,
       },
     },
 
@@ -238,12 +234,31 @@ export const theme = createTheme({
         header: modalClasses.header,
       },
     },
+
+    Checkbox: {
+      classNames: {
+        label: checkBoxClasses.label,
+        input: checkBoxClasses.input,
+        icon: checkBoxClasses.icon,
+        description: checkBoxClasses.description,
+      },
+    },
+    CheckboxIndicator: {
+      classNames: {
+        indicator: checkBoxClasses.indicator,
+      },
+    },
   },
 });
 export const cssVariablesResolver = (
   theme: MantineTheme
 ): ConvertCSSVariablesInput => ({
   variables: {
+    '--glass-pane': 'rgba(242, 242, 242, 0.02)',
+    '--glass-edge': 'rgba(255, 255, 255, 0.035)',
+    '--glass-blur': 'blur(32px)',
+    '--glass-pronounced': 'rgba(242, 242, 242, 0.028)',
+    '--glass-thick': 'rgba(242, 242, 242, 0.05)',
     '--mantine-color-body': 'var(--mantine-color-gray-9)',
     '--mantine-color-text': 'var(--mantine-color-gray-1)',
     '--mantine-color-dimmed': 'var(--mantine-color-gray-4)',

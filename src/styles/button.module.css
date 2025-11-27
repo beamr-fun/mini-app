@@ -1,95 +1,94 @@
 .root {
-  /* keep your existing props… */
-  background:
-    /* inner fill */
-    linear-gradient(var(--mantine-color-gray-9), var(--mantine-color-gray-9))
-      padding-box,
-    /* border gradient */
-      linear-gradient(
-        90deg,
-        var(--mantine-color-gray-3),
-        var(--mantine-color-blue-6)
-      )
-      border-box;
-  border: 1px solid transparent; /* required for the trick */
-  color: var(--mantine-color-gray-0);
-  border-radius: 12px;
+  position: relative;
+  z-index: 0;
+  width: rem(200px);
   font-weight: 500;
+  color: var(--mantine-color-gray-0);
+  background: linear-gradient(
+    110deg,
+    var(--mantine-color-blue-7) 10%,
+    var(--mantine-color-blue-5) 100%
+  );
+  background-color: var(--mantine-color-blue-7);
+  background-repeat: no-repeat;
+  border-radius: rem(100px);
   font-size: var(--mantine-font-size-md);
-  min-width: 198px;
-  padding: 11px 24px;
-  height: 40px;
-  transition: all 150ms ease;
+  padding: rem(12px) rem(24px);
+  min-height: rem(44px);
 }
 
-.root:hover {
-  background:
-    linear-gradient(var(--mantine-color-gray-9), var(--mantine-color-gray-9))
-      padding-box,
-    linear-gradient(
-        90deg,
-        var(--mantine-color-gray-2),
-        var(--mantine-color-blue-5)
-      )
-      border-box;
-  color: #fff;
+.root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    110deg,
+    var(--mantine-color-blue-7) 10%,
+    var(--mantine-color-blue-5) 70%
+  );
+  opacity: 0;
+  transition: opacity 250ms ease-in;
 }
 
-/* keep disabled looking disabled */
+.root:hover::after {
+  opacity: 1;
+}
+
 .root:disabled {
-  background:
-    linear-gradient(var(--mantine-color-gray-9), var(--mantine-color-gray-9))
-      padding-box,
-    linear-gradient(
-        90deg,
-        var(--mantine-color-gray-8),
-        var(--mantine-color-gray-8)
-      )
-      border-box;
-  border: 1px solid transparent;
-  color: var(--mantine-color-gray-7);
+  background: rgba(100, 100, 100, 0.1);
+
+  color: var(--mantine-color-gray-0);
   cursor: not-allowed;
 }
 
-/* SECONDARY: override back to solid border (no gradient) */
+.root:disabled::after {
+  display: none;
+}
+
 .root[data-variant='secondary'] {
-  background: var(--mantine-color-gray-9);
-  border: 1px solid var(--mantine-color-gray-0);
+  background: transparent;
+  border: rem(1px) solid var(--mantine-color-blue-7);
+  transition: border-color 150ms ease-in;
 }
 
 .root[data-variant='secondary']:hover {
-  border-color: #fff;
+  border: rem(1px) solid var(--mantine-color-blue-6);
 }
+
+.root[data-variant='secondary']:hover::after {
+  display: none;
+}
+
 .root[data-size='lg'] {
-  padding: 15px 32px;
-  min-width: 100%;
-  height: 50px;
+  width: rem(295px);
+  min-height: rem(52px);
   font-size: var(--mantine-font-size-lg);
 }
 
 .root[data-size='sm'] {
-  padding: 7px 16px;
-  min-width: 148px;
-  height: 32px;
+  width: rem(150px);
+  min-height: rem(34px);
   font-size: var(--mantine-font-size-sm);
+  padding: rem(8px) rem(16px);
 }
 
 .root[data-size='xs'] {
-  padding: 5px 12px;
-  min-width: 105px;
-  height: 24px;
-  border-radius: 8px;
+  width: rem(107px);
+  min-height: rem(24px);
   font-size: var(--mantine-font-size-xs);
+  padding: rem(6px) rem(12px);
 }
 
 .actionIcon {
-  background-color: var(--mantine-color-gray-9);
-
+  color: var(--mantine-color-gray-0);
+  background: var(--glass-pane);
+  border: rem(1px) solid var(--glass-pane);
+  height: fit-content;
+  width: fit-content;
+  padding: rem(6px) rem(6px);
+  border-radius: rem(12px);
   &:hover {
-    background-color: var(--mantine-color-gray-8);
-  }
-
-  &:active {
-    background-color: var(--mantine-color-gray-7);
+    background: var(--glass-thick);
   }
 }

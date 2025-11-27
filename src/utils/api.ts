@@ -116,8 +116,6 @@ export const createPool = async ({
       logs: receipt.logs,
     }) as any;
 
-    console.log('decoded', decoded);
-
     const poolAddress = decoded.find(
       (log: any) => log.eventName === 'PoolCreated'
     )?.args.pool;
@@ -125,6 +123,12 @@ export const createPool = async ({
     if (!poolAddress) {
       throw new Error('PoolCreated event not found in transaction logs');
     }
+
+    // Wait five seconds
+
+    console.log('Waiting 2 seconds before proceeding to completePool...');
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     onSuccess(poolAddress);
 
