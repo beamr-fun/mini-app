@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { formatEther } from 'viem';
 
 // Constants
-export const ANIMATION_MINIMUM_STEP_TIME = 40;
+export const ANIMATION_MINIMUM_STEP_TIME = 20;
 
 // Utility functions
 export const absoluteValue = (n: bigint) => {

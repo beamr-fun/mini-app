@@ -5,7 +5,7 @@ import { createContext, ReactNode, useEffect, useMemo, useState } from 'react';
 import { Address } from 'viem';
 
 import { useAccount } from 'wagmi';
-import { AuthResponse, FCUser } from '../types/sharedTypes';
+import { AuthResponse } from '../types/sharedTypes';
 import { APIHeaders } from '../utils/api';
 import {
   LoggedInUserDocument,
@@ -15,11 +15,12 @@ import { keys } from '../utils/setup';
 import { useToken } from '../hooks/useToken';
 import { ADDR } from '../const/addresses';
 import { useGqlSub } from '../hooks/useGqlSub';
+import { User } from '@neynar/nodejs-sdk/build/api';
 
 type UserSub = LoggedInUserSubscription['User_by_pk'];
 //
 type UserContextType = {
-  user?: FCUser;
+  user?: User;
   address?: Address;
   jwtPayload?: JWTPayload;
   userSubscription?: UserSub;
@@ -48,6 +49,7 @@ const login = async () => {
 
   const res = await fetch(`${keys.apiUrl}/v1/user/auth`, {
     headers: {
+      'content-type': 'application/json',
       authorization: `Bearer ${token}`,
     },
   });

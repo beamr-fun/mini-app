@@ -20,7 +20,7 @@ export const DancingText = ({
   ...rest
 }: DancingTextProps) => {
   const flowingBalance = useFlowingBalance(userBalance, fetchedAt, flowRate);
-  const decimalPlaces = useSignificantFlowingDecimal(flowRate, 40);
+  const decimalPlaces = useSignificantFlowingDecimal(flowRate, 10);
   return (
     <Text {...rest}>
       {decimalPlaces !== undefined
