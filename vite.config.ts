@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: [
-      'dont-pointed-analog-next.trycloudflare.com',
+      'persistent-combines-expensive-frequency.trycloudflare.com',
       'https://mini-app-production-96b0.up.railway.app',
     ],
   },

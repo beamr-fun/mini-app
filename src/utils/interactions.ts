@@ -1,6 +1,11 @@
-import { Address, erc20Abi } from 'viem';
+import { Address, encodeFunctionData, erc20Abi } from 'viem';
+import { OPERATION_TYPE, prepareOperation } from '@sfpro/sdk/constant';
+import { gdaAbi, gdaAddress } from '@sfpro/sdk/abi/core';
 import { GDAForwarderAbi } from '../abi/GDAFowarder';
 import { ADDR } from '../const/addresses';
+import { SuperfluidAbi } from '../abi/Superfluid';
+import { baseSepolia } from 'viem/chains';
+// import { gdaAbi } from '../abi/GDA';
 
 export const distributeFlow = async ({
   args: { poolAddress, user, flowRate },
@@ -164,3 +169,87 @@ export const transfer = async ({
 
 //   console.log('Transaction receipt:', receipt);
 // };
+
+const calcFlowRateAndFee = (
+  totalFlowRate: bigint
+): { userFlow: bigint; feeFlow: bigint } => {
+  const SCALE = BigInt(10000);
+  const HALF_SCALE = SCALE / BigInt(2);
+  const USER_BASIS_POINTS = BigInt(9500); // 95% to user
+
+  const numerator = totalFlowRate * USER_BASIS_POINTS;
+
+  const userPoolFlowRateRounded = (numerator + HALF_SCALE) / SCALE;
+
+  const feeFlowRate = totalFlowRate - userPoolFlowRateRounded;
+
+  return {
+    userFlow: userPoolFlowRateRounded,
+    feeFlow: feeFlowRate,
+  };
+};
+
+export const tryDoubleDistribute = async (
+  walletClient: any,
+  address?: Address
+) => {
+  if (!walletClient || !address) {
+    console.log('Wallet client or address not available');
+    return;
+  }
+
+  try {
+    // flow rate, 30 token per month
+    const FLOW_RATE_TOKENS_PER_MONTH = 30n * 10n ** 18n;
+    const SECONDS_IN_MONTH = 30n * 24n * 60n * 60n;
+    const totalFlowRate = FLOW_RATE_TOKENS_PER_MONTH / SECONDS_IN_MONTH;
+
+    const { userFlow, feeFlow } = calcFlowRateAndFee(totalFlowRate);
+
+    console.log('userFlow', userFlow);
+    console.log('feeFlow', feeFlow);
+
+    const userPool = '0xFDa7981E3d5a0f338a8AD40dA2f7E563BFa420e8';
+
+    console.log('ADDR.SUPER_TOKEN', ADDR.SUPER_TOKEN);
+    console.log('ADDR.COLLECTOR_POOL', ADDR.COLLECTOR_POOL);
+    console.log('ADDR.GDA_FORWARDER', ADDR.GDA_FORWARDER);
+    console.log('ADDR.SUPER_FLUID', ADDR.SUPER_FLUID);
+
+    const operations = [
+      prepareOperation({
+        operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
+        target: gdaAddress[baseSepolia.id],
+        data: encodeFunctionData({
+          abi: gdaAbi,
+          functionName: 'distributeFlow',
+          args: [ADDR.SUPER_TOKEN, address, userPool, 1000n, '0x'],
+        }),
+        userData: address,
+      }),
+      prepareOperation({
+        operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
+        target: gdaAddress[baseSepolia.id],
+        data: encodeFunctionData({
+          abi: gdaAbi,
+          functionName: 'distributeFlow',
+          args: [ADDR.SUPER_TOKEN, address, ADDR.COLLECTOR_POOL, 1000n, '0x'],
+        }),
+        userData: address,
+      }),
+    ];
+
+    // const result = await publicClient.simulateContract();
+
+    const hash = await walletClient.writeContract({
+      abi: SuperfluidAbi,
+      functionName: 'batchCall',
+      address: ADDR.SUPER_FLUID,
+      args: [operations],
+    });
+
+    console.log('hash', hash);
+  } catch (error) {
+    console.error('Error in tryDoubleDistribute:', error);
+  }
+};

@@ -5,6 +5,8 @@ type Addresses = {
   SUPER_TOKEN: Address;
   GDA_FORWARDER: Address;
   SUPER_FLUID: Address;
+  COLLECTOR_POOL: Address;
+  GDA: Address;
 };
 
 export const ADDR_DEV: Addresses = {
@@ -12,6 +14,8 @@ export const ADDR_DEV: Addresses = {
   BEAMR: '0xaA44dC224415459f3b026e66047adad912EfEC69',
   GDA_FORWARDER: '0x6DA13Bde224A05a288748d857b9e7DDEffd1dE08',
   SUPER_FLUID: '0x109412E3C84f0539b43d39dB691B08c90f58dC7c',
+  GDA: '0x53F4f44C813Dc380182d0b2b67fe5832A12B97f8',
+  COLLECTOR_POOL: '0x91f6999Cf1c917204E305BDeC7704725ad44EB67',
 } as const;
 
 export const ADDR_PROD: Addresses = {
@@ -19,6 +23,8 @@ export const ADDR_PROD: Addresses = {
   BEAMR: '0x',
   GDA_FORWARDER: '0x',
   SUPER_FLUID: '0x',
+  GDA: '0x',
+  COLLECTOR_POOL: '0x',
 } as const;
 
 export const ADDR = import.meta.env.VITE_ENV === 'dev' ? ADDR_DEV : ADDR_PROD;

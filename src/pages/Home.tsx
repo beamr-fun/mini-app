@@ -14,16 +14,25 @@ import { PageLayout } from '../layouts/PageLayout';
 import { useUser } from '../hooks/useUser';
 import beamrLogo from '../assets/beamrLogo.png';
 import { BeamrNav } from '../components/svg/BeamrNav';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { IconTransfer } from '../components/svg/IconTransfer';
 import { TrendingUp } from 'lucide-react';
 
 import { DancingText } from '../components/DancingText';
 import { TableHeader, TableRow } from '../components/Home/TableItems';
+import { tryDoubleDistribute } from '../utils/interactions';
+import { useWalletClient } from 'wagmi';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
+  const { data: walletClient } = useWalletClient();
+  const { address } = useUser();
+
+  useEffect(() => {
+    if (!walletClient || !address) return;
+    tryDoubleDistribute(walletClient, address);
+  }, [walletClient, address]);
 
   return (
     <PageLayout>

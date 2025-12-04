@@ -43,6 +43,8 @@ const login = async () => {
 
   const token = tokenRes?.token || null;
 
+  console.log('token', token);
+
   if (!token) {
     throw new Error('No auth token available');
   }
