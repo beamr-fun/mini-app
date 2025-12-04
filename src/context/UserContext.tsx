@@ -18,7 +18,7 @@ import { useGqlSub } from '../hooks/useGqlSub';
 import { User } from '@neynar/nodejs-sdk/build/api';
 
 type UserSub = LoggedInUserSubscription['User_by_pk'];
-//
+
 type UserContextType = {
   user?: User;
   address?: Address;
@@ -29,9 +29,21 @@ type UserContextType = {
   startingRoute?: string;
   userBalance?: bigint;
   userBalanceFetchedAt?: Date;
+  hasPool: boolean;
+  incomingOnly: boolean;
+  isLoadingSub: boolean;
+  userSubError: Error | null;
+  isLoadingAPI: boolean;
+  apiError: Error | null;
 };
 
 export const UserContext = createContext<UserContextType>({
+  hasPool: false,
+  incomingOnly: false,
+  isLoadingSub: false,
+  userSubError: null,
+  isLoadingAPI: false,
+  apiError: null,
   getAuthHeaders: async () => false,
 });
 
@@ -42,8 +54,6 @@ const login = async () => {
   ]);
 
   const token = tokenRes?.token || null;
-
-  console.log('token', token);
 
   if (!token) {
     throw new Error('No auth token available');
@@ -84,11 +94,9 @@ export const UserProvider = ({
   const IS_TESTING = false;
   const { address } = useAccount();
 
-  const [hasLoadedSubscription, setHasLoadedSubscription] = useState(false);
-  // const [userSubscription, setUserSubscription] = useState<
-  //   LoggedInUserSubscription['User_by_pk'] | undefined
-  // >(undefined);
   const [startingRoute, setStartingRoute] = useState<string | undefined>();
+  const [hasPool, setHasPool] = useState<boolean>(false);
+  const [incomingOnly, setIncomingOnly] = useState<boolean>(false);
 
   const { data } = useToken({
     userAddress: address,
@@ -101,8 +109,8 @@ export const UserProvider = ({
 
   const {
     data: apiData,
-    isLoading,
-    error,
+    isLoading: isLoadingAPI,
+    error: apiError,
     refetch,
   } = useQuery({
     queryKey: ['user', address],
@@ -110,13 +118,14 @@ export const UserProvider = ({
     enabled: !!address && !IS_TESTING,
   });
 
-  const { data: userSubRes } = useGqlSub<LoggedInUserSubscription>(
-    LoggedInUserDocument,
-    {
-      variables: { id: apiData?.user?.fid?.toString() || '' },
-      enabled: !!apiData?.user?.fid && !IS_TESTING,
-    }
-  );
+  const {
+    data: userSubRes,
+    isLoading: isLoadingSub,
+    error: userSubError,
+  } = useGqlSub<LoggedInUserSubscription>(LoggedInUserDocument, {
+    variables: { id: apiData?.user?.fid?.toString() || '' },
+    enabled: !!apiData?.user?.fid && !IS_TESTING,
+  });
 
   const userSubscription = useMemo(() => {
     if (!userSubRes) {
@@ -127,85 +136,34 @@ export const UserProvider = ({
       return undefined;
     }
 
-    const onlyMostRecentOutgoing = userSubRes.User_by_pk?.outgoing.filter(
-      (outgoing) =>
-        outgoing.beamPool?.id === '0x33A49b63639cE3aF37941bdb02B13023E0468BaF'
-    );
-
-    return { ...userSubRes.User_by_pk, outgoing: onlyMostRecentOutgoing };
+    return userSubRes.User_by_pk;
   }, [userSubRes]);
 
-  // useEffect(() => {
-  //   if (IS_TESTING) {
-  //     return;
-  //   }
-
-  //   let dispose: () => void = () => {};
-
-  //   const getUserSubscription = async () => {
-  //     const context = await sdk.context;
-
-  //     const fid = context?.user?.fid;
-
-  //     if (!fid) {
-  //       return;
-  //     }
-
-  //     dispose = wsClient.subscribe<LoggedInUserSubscription>(
-  //       {
-  //         query: print(LoggedInUserDocument),
-  //         variables: { id: fid.toString() },
-  //       },
-  //       {
-  //         next: (data) => {
-  //           const userSub = data?.data?.User_by_pk;
-  //           setHasLoadedSubscription(true);
-
-  //           if (userSub) {
-  //             setUserSubscription(userSub);
-  //           }
-  //         },
-  //         error: console.error,
-  //         complete: () => {},
-  //       }
-  //     );
-  //   };
-
-  //   getUserSubscription();
-
-  //   return () => dispose();
-  // }, []);
-
   useEffect(() => {
-    // if (OVERRIDE) {
-    //   setStartingRoute(OVERRIDE);
-    //   sdk.actions.ready();
-    //   return;
-    // }
-
-    // if (IS_TESTING) {
-    //   setStartingRoute('/create-pool/1');
-    //   sdk.actions.ready();
-    //   return;
-    // }
     if (startingRoute) return;
-    if (userSubscription && apiData) {
-      if (!userSubscription || !userSubscription?.pools?.length) {
-        console.log('No pools found for user in subscription data');
-        setStartingRoute('/create-pool/1');
-      } else {
-        setStartingRoute('/home');
-        console.log('User subscription pools:', userSubscription.pools);
-      }
+    if (!apiData) return;
 
-      sdk.actions.ready();
+    if (isLoadingSub) return;
+
+    if (!userSubscription) {
+      setHasPool(false);
+      setStartingRoute('/global');
+    } else {
+      if (userSubscription.pools.length > 0) {
+        setHasPool(true);
+        setStartingRoute('/home');
+      } else {
+        setHasPool(false);
+        setIncomingOnly(true);
+        setStartingRoute('/global');
+      }
     }
-  }, [hasLoadedSubscription, userSubscription, apiData]);
+
+    sdk.actions.ready();
+  }, [isLoadingSub, userSubscription, apiData]);
 
   const getAuthHeaders = async () => {
     if (!apiData || !apiData?.user || !apiData?.jwt || !apiData?.token) {
-      // try to re-login
-      // return login(address as Address);
       await refetch();
 
       if (!apiData || !apiData?.jwt || !apiData?.user || !apiData?.token) {
@@ -247,6 +205,12 @@ export const UserProvider = ({
         userSubscription,
         userBalance,
         userBalanceFetchedAt,
+        hasPool,
+        incomingOnly,
+        isLoadingSub,
+        apiError,
+        isLoadingAPI,
+        userSubError,
       }}
     >
       {children}
