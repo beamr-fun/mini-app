@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { CreatePool } from './components/Home/CreatePool';
 
 import { Home } from './pages/Home';
@@ -18,25 +18,26 @@ const ConditionalRedirect = () => {
   const { startingRoute } = useUser();
   const { data: walletClient } = useWalletClient();
   const { connect, connectors } = useConnect();
+  const location = useLocation();
 
   if (startingRoute === '/' || !startingRoute) {
-    const handleTransfer = () => {
-      console.log('walletClient', walletClient);
-      if (!walletClient) return;
+    // const handleTransfer = () => {
+    //   console.log('walletClient', walletClient);
+    //   if (!walletClient) return;
 
-      connect({ connector: connectors[0] });
+    //   connect({ connector: connectors[0] });
 
-      transfer({
-        walletClient,
-        amount: BigInt(1000000),
-        to: '0xA55905B9053BB0710432ae15Ed863F97B109393B',
-      });
-    };
+    //   transfer({
+    //     walletClient,
+    //     amount: BigInt(1000000),
+    //     to: '0xA55905B9053BB0710432ae15Ed863F97B109393B',
+    //   });
+    // };
 
     return (
       <Box>
-        <Button onClick={handleTransfer}>Transfer</Button>
-        <Text>Loading...</Text>
+        {/* <Button onClick={handleTransfer}>Transfer</Button> */}
+        <Text>YOU SHOULD NOT SEE THIS</Text>
       </Box>
     );
   }
@@ -45,6 +46,7 @@ const ConditionalRedirect = () => {
 };
 
 export const ClientRoutes = () => {
+  console.log('location', location.pathname);
   return (
     <Routes>
       <Route path="/" element={<ConditionalRedirect />} />

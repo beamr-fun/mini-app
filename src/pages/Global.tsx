@@ -3,6 +3,7 @@ import {
   AvatarGroup,
   Box,
   Card,
+  Flex,
   Group,
   Image,
   SegmentedControl,
@@ -22,24 +23,31 @@ import {
   GlobalTopDocument,
   GlobalTopSubscription,
 } from '../generated/graphql';
+import { useUser } from '../hooks/useUser';
+import { useCTA } from '../hooks/useCTA';
+import { useNavigate } from 'react-router-dom';
 
 type BeamsData = GlobalMostRecentSubscription['Beam'];
 
 export const Global = () => {
   const [tab, setTab] = useState('Recent');
+  const { hasPool } = useUser();
+  const navigate = useNavigate();
 
-  const { data: recentRaw } = useGqlSub<GlobalMostRecentSubscription>(
-    GlobalMostRecentDocument,
-    {}
-  );
+  const { data: recentRaw, isLoading: isLoadingRecent } =
+    useGqlSub<GlobalMostRecentSubscription>(GlobalMostRecentDocument, {});
 
-  const { data: leaderRaw } = useGqlSub<GlobalTopSubscription>(
-    GlobalTopDocument,
-    {}
-  );
+  const { data: leaderRaw, isLoading: isLoadingLeader } =
+    useGqlSub<GlobalTopSubscription>(GlobalTopDocument, {});
 
   const recentBeams = recentRaw?.Beam || [];
   const leaderBeams = leaderRaw?.Beam || [];
+
+  useCTA(
+    hasPool
+      ? undefined
+      : { label: 'Start Beaming', onClick: () => navigate('/create-pool/1') }
+  );
 
   return (
     <PageLayout>
@@ -59,14 +67,46 @@ export const Global = () => {
           data={['Recent', 'Leaderboard']}
           mb="md"
         />
-        {tab === 'Recent' && <Recent beams={recentBeams} />}
-        {tab === 'Leaderboard' && <Leader beams={leaderBeams} />}
+        {tab === 'Recent' && (
+          <Recent beams={recentBeams} isLoading={isLoadingRecent} />
+        )}
+        {tab === 'Leaderboard' && (
+          <Leader beams={leaderBeams} isLoading={isLoadingLeader} />
+        )}
       </Card>
     </PageLayout>
   );
 };
 
-const Leader = ({ beams }: { beams: BeamsData }) => {
+const Leader = ({
+  beams,
+  isLoading,
+}: {
+  beams: BeamsData;
+  isLoading: boolean;
+}) => {
+  const { colors } = useMantineTheme();
+
+  if (isLoading) {
+    // create loading UI later
+    // theoretically, we shouldn't see this anyways
+    return null;
+  }
+
+  if (beams.length === 0) {
+    return (
+      <Stack gap="sm" px="xs">
+        <GlobalHeader />
+        <Flex justify={'center'} align={'center'} h={100} direction={'column'}>
+          <Text size="xl" mb="md">
+            No Streams
+          </Text>
+          <Text c={colors.gray[2]}>No Beams at all for this contract. </Text>
+        </Flex>
+      </Stack>
+    );
+  }
+
   return (
     <Stack gap="sm">
       <GlobalHeader />
@@ -98,7 +138,35 @@ const Leader = ({ beams }: { beams: BeamsData }) => {
   );
 };
 
-const Recent = ({ beams }: { beams: BeamsData }) => {
+const Recent = ({
+  beams,
+  isLoading,
+}: {
+  beams: BeamsData;
+  isLoading: boolean;
+}) => {
+  const { colors } = useMantineTheme();
+
+  if (isLoading) {
+    // create loading UI later
+    // theoretically, we shouldn't see this anyways
+    return null;
+  }
+
+  if (beams.length === 0) {
+    return (
+      <Stack gap="sm" px="xs">
+        <GlobalHeader />
+        <Flex justify={'center'} align={'center'} h={100} direction={'column'}>
+          <Text size="xl" mb="md">
+            No Streams
+          </Text>
+          <Text c={colors.gray[2]}>No Beams at all for this contract. </Text>
+        </Flex>
+      </Stack>
+    );
+  }
+
   return (
     <Stack gap="sm">
       <GlobalHeader />

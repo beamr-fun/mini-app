@@ -31,7 +31,7 @@ type OnboardContextType = {
   selectedFriends?: string[];
   form?: UseFormReturnType<OnboardFormValues>;
   balance?: bigint;
-  following?: Follower[];
+  following?: Follower[] | null;
   creationSteps: CreationSteps;
   poolId?: Address;
   errMsg?: string;
@@ -67,11 +67,21 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
 
   const {
     data: userFollowing,
-    error,
-    isLoading,
+    error: followingError,
+    isLoading: isLoadingFollowing,
   } = useQuery({
     queryKey: ['userFollowing', user?.fid],
-    queryFn: () => fetchUserFollowing(user!.fid),
+    queryFn: async () => {
+      const headers = await getAuthHeaders();
+
+      if (!headers) {
+        // HANDLE ERROR
+        console.error('No auth headers available');
+        return null;
+      }
+
+      return fetchUserFollowing(user!.fid, headers);
+    },
     enabled: !!user?.fid,
   });
   const form = useForm({
@@ -92,8 +102,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     },
     args: [form.values.preferredAddress as `0x${string}`],
   });
-
-  console.log('form.values.selectedFriends', form.values.selectedFriends);
 
   const handlePoolCreate = useCallback(async () => {
     // handle errors later

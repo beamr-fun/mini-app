@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Card,
   Group,
   NumberInput,
@@ -53,12 +52,12 @@ export const Budget = () => {
           label="Wallet Address"
           placeholder="0xb3amr..."
           defaultValue={address || undefined}
-          data={user?.eth_addresses.map((addr) => ({
+          data={user?.verified_addresses.eth_addresses.map((addr) => ({
             label: truncateAddress(addr),
             value: addr,
             isPrimaryAddress:
               addr.toLocaleLowerCase() ===
-              user?.primary_address?.toLocaleLowerCase(),
+              user.verified_addresses.primary.eth_address?.toLocaleLowerCase(),
             isCurrentAddress:
               addr.toLocaleLowerCase() === address?.toLocaleLowerCase(),
           }))}

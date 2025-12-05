@@ -2,14 +2,16 @@ import { Follower } from '@neynar/nodejs-sdk/build/api';
 import { isAddress, parseEventLogs } from 'viem';
 import z from 'zod';
 import { BeamRABI } from '../abi/BeamR';
-import { distributeFlow } from './interactions';
 import { keys } from './setup';
 
 export type APIHeaders = {
   'Content-Type': string;
   authorization: string;
 };
-export const fetchUserFollowing = async (fid: number) => {
+export const fetchUserFollowing = async (
+  fid: number,
+  apiHeaders: APIHeaders
+) => {
   const cached = sessionStorage.getItem(`userFollowing_${fid}`);
 
   if (cached) {
@@ -17,7 +19,9 @@ export const fetchUserFollowing = async (fid: number) => {
     return JSON.parse(cached) as Follower[];
   }
 
-  const res = await fetch(`${keys.apiUrl}/v1/user/following/${fid}/all`);
+  const res = await fetch(`${keys.apiUrl}/v1/user/following/${fid}/all`, {
+    headers: apiHeaders,
+  });
   const data = await res.json();
   if (!res.ok) {
     throw new Error(data?.error || 'Failed to fetch user following');
