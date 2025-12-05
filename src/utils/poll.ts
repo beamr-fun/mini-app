@@ -1,29 +1,28 @@
 import { keys } from './setup';
 
-const HASURA_URL = keys.indexerUrl;
-
 export async function fetchTx(id: string) {
-  const res = await fetch(`https://${HASURA_URL}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query: `
+  const res = await fetch(
+    `${keys.indexerUrl.includes('localhost' || '127.0.0') ? 'http' : 'https'}://${keys.indexerUrl}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: `
         query ($id: String!) {
           TX_by_pk(id: $id) {
             id
           }
         }
       `,
-      variables: { id },
-    }),
-  });
+        variables: { id },
+      }),
+    }
+  );
 
   if (!res.ok) throw new Error(`GraphQL error: ${res.statusText}`);
 
   const json = await res.json();
   if (json.errors) throw new Error(json.errors[0].message);
-
-  console.log('json', json);
 
   return json.data.TX_by_pk;
 }

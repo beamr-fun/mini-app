@@ -103,16 +103,12 @@ export const createPool = async ({
       headers: apiHeaders,
     });
 
-    console.log('res', res);
-
     if (!res.ok) {
       const data = await res.json();
       throw new Error(data?.error || 'Failed to create pool');
     }
 
     const json = await res.json();
-
-    console.log('json', json);
 
     if (!json.hash) {
       console.error('No transaction hash in response', json);
@@ -127,14 +123,10 @@ export const createPool = async ({
       hash: json.hash,
     });
 
-    console.log('receipt', receipt);
-
     if (receipt.status !== 'success') {
       console.error('Transaction failed', receipt);
       return;
     }
-
-    // Why does the new ABI cause type issues here?
 
     const decoded = parseEventLogs({
       abi: BeamRABI,
@@ -145,15 +137,9 @@ export const createPool = async ({
       (log: any) => log.eventName === 'PoolCreated'
     )?.args.pool;
 
-    console.log('poolAddress', poolAddress);
-
     if (!poolAddress) {
       throw new Error('PoolCreated event not found in transaction logs');
     }
-
-    // Wait five seconds
-
-    console.log('Waiting 2 seconds before proceeding to completePool...');
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -210,8 +196,6 @@ export const completePool = async ({
     }
 
     const data = await finalRes.json();
-
-    console.log('DATA FROM COMPLETE', data);
 
     onSuccess();
 

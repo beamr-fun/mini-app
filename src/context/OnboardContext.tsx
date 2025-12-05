@@ -8,9 +8,7 @@ import { Address, erc20Abi, parseEther } from 'viem';
 import { useUser } from '../hooks/useUser';
 import { completePool, createPool, fetchBesties } from '../utils/api';
 import { distributeFlow } from '../utils/interactions';
-import { startTxPoll } from '../utils/urql';
-import { switchChain } from 'viem/actions';
-import { appChain } from '../utils/connect';
+import { startTxPoll } from '../utils/poll';
 
 type CreationSteps = {
   createPool: boolean;
@@ -159,7 +157,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   ]);
 
   const handleDistributeFlow = async () => {
-    if (!address || !poolAddress || !walletClient || !user || 1 == 1) return;
+    if (!address || !poolAddress || !walletClient || !user) return;
 
     const flowRate =
       parseEther(form.values.budget.toString()) / 30n / 24n / 60n / 60n; // budget per month to flow rate per second

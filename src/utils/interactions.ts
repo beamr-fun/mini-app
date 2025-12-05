@@ -5,7 +5,6 @@ import { GDAForwarderAbi } from '../abi/GDAFowarder';
 import { ADDR } from '../const/addresses';
 import { SuperfluidAbi } from '../abi/Superfluid';
 import { baseSepolia } from 'viem/chains';
-// import { gdaAbi } from '../abi/GDA';
 
 export const distributeFlow = async ({
   args: { poolAddress, user, flowRate },
@@ -35,21 +34,45 @@ export const distributeFlow = async ({
       throw new Error('Public client is not available');
     }
 
-    // const simulation = await publicClient.simulateContract({
-    //   abi: GDAForwarderAbi,
-    //   address: ADDR.GDA_FORWARDER,
-    //   functionName: 'distributeFlow',
-    //   from: user,
-    //   args: [ADDR.SUPER_TOKEN, user, poolAddress, flowRate, '0x'],
-    // });
+    const userFlowRate = (flowRate * 95n) / 100n; // 95% to user
+    console.log('userFlowRate', userFlowRate);
+    const feeFlowRate = flowRate - userFlowRate; // 5% fee
+    console.log('flowRate', flowRate);
 
-    // console.log('simulation', simulation);
+    const operations = [
+      prepareOperation({
+        operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
+        target: gdaAddress[baseSepolia.id],
+        data: encodeFunctionData({
+          abi: gdaAbi,
+          functionName: 'distributeFlow',
+          args: [ADDR.SUPER_TOKEN, user, poolAddress, userFlowRate, '0x'],
+        }),
+        userData: '0x',
+      }),
+      prepareOperation({
+        operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
+        target: gdaAddress[baseSepolia.id],
+        data: encodeFunctionData({
+          abi: gdaAbi,
+          functionName: 'distributeFlow',
+          args: [
+            ADDR.SUPER_TOKEN,
+            user,
+            ADDR.COLLECTOR_POOL,
+            feeFlowRate,
+            '0x',
+          ],
+        }),
+        userData: '0x',
+      }),
+    ];
 
     const hash = await walletClient.writeContract({
-      abi: GDAForwarderAbi,
-      address: ADDR.GDA_FORWARDER,
-      functionName: 'distributeFlow',
-      args: [ADDR.SUPER_TOKEN, user, poolAddress, flowRate, '0x'],
+      abi: SuperfluidAbi,
+      functionName: 'batchCall',
+      address: ADDR.SUPER_FLUID,
+      args: [operations],
     });
 
     if (!hash) {
