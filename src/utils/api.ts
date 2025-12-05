@@ -103,12 +103,16 @@ export const createPool = async ({
       headers: apiHeaders,
     });
 
+    console.log('res', res);
+
     if (!res.ok) {
       const data = await res.json();
       throw new Error(data?.error || 'Failed to create pool');
     }
 
     const json = await res.json();
+
+    console.log('json', json);
 
     if (!json.hash) {
       console.error('No transaction hash in response', json);
@@ -122,6 +126,8 @@ export const createPool = async ({
     const receipt = await publicClient.waitForTransactionReceipt({
       hash: json.hash,
     });
+
+    console.log('receipt', receipt);
 
     if (receipt.status !== 'success') {
       console.error('Transaction failed', receipt);
@@ -138,6 +144,8 @@ export const createPool = async ({
     const poolAddress = decoded.find(
       (log: any) => log.eventName === 'PoolCreated'
     )?.args.pool;
+
+    console.log('poolAddress', poolAddress);
 
     if (!poolAddress) {
       throw new Error('PoolCreated event not found in transaction logs');

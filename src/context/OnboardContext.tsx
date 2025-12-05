@@ -6,12 +6,7 @@ import { ADDR } from '../const/addresses';
 import { usePublicClient, useReadContract, useWalletClient } from 'wagmi';
 import { Address, erc20Abi, parseEther } from 'viem';
 import { useUser } from '../hooks/useUser';
-import {
-  completePool,
-  createPool,
-  fetchBesties,
-  fetchUserFollowing,
-} from '../utils/api';
+import { completePool, createPool, fetchBesties } from '../utils/api';
 import { distributeFlow } from '../utils/interactions';
 import { startTxPoll } from '../utils/urql';
 import { switchChain } from 'viem/actions';
@@ -124,7 +119,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
 
       const poolAddress = await createPool({
         onSuccess(poolAddress) {
-          console.log('poolAddress', poolAddress);
           setPoolAddress(poolAddress as Address);
           setCreationSteps((prev) => ({ ...prev, createPool: true }));
         },
@@ -151,8 +145,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       if (!publicClient) {
         throw new Error('Public client not available');
       }
-
-      console.log('poolAddress', poolAddress);
     } catch (error) {
       console.error('Error in pool creation process:', error);
       setErrorMsg((error as Error).message);
@@ -167,9 +159,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   ]);
 
   const handleDistributeFlow = async () => {
-    if (!address || !poolAddress || !walletClient || !user) return;
-
-    const test = await switchChain(walletClient, { id: appChain.id });
+    if (!address || !poolAddress || !walletClient || !user || 1 == 1) return;
 
     const flowRate =
       parseEther(form.values.budget.toString()) / 30n / 24n / 60n / 60n; // budget per month to flow rate per second
