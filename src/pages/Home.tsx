@@ -23,6 +23,7 @@ import { DancingText } from '../components/DancingText';
 import { TableHeader, TableRow } from '../components/Home/TableItems';
 import { tryDoubleDistribute } from '../utils/interactions';
 import { useWalletClient } from 'wagmi';
+import { fetchTx } from '../utils/poll';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
@@ -30,9 +31,10 @@ export const Home = () => {
   const { address } = useUser();
 
   useEffect(() => {
-    if (!walletClient || !address) return;
-    tryDoubleDistribute(walletClient, address);
-  }, [walletClient, address]);
+    fetchTx(
+      '0x3db370e2ec566d1c7159f9d14e34ebc29171d740e905e0981e644f327aeda0dd'
+    );
+  }, []);
 
   return (
     <PageLayout>

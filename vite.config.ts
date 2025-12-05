@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: [
-      'springer-cartoon-exceed-favourites.trycloudflare.com',
+      'loc-wing-attorneys-makers.trycloudflare.com',
       'https://mini-app-production-96b0.up.railway.app',
     ],
   },

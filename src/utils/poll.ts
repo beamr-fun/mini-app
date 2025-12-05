@@ -22,6 +22,8 @@ export async function fetchTx(id: string) {
   if (!res.ok) throw new Error(`GraphQL error: ${res.statusText}`);
 
   const json = await res.json();
+
+  console.log('json', json);
   if (json.errors) throw new Error(json.errors[0].message);
 
   return json.data.TX_by_pk;
