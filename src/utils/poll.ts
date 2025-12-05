@@ -2,7 +2,7 @@ import { keys } from './setup';
 
 export async function fetchTx(id: string) {
   const res = await fetch(
-    `${keys.indexerUrl.includes('localhost' || '127.0.0') ? 'http' : 'https'}://${keys.indexerUrl}`,
+    `${keys.indexerUrl.includes('localhost') ? 'http' : 'https'}://${keys.indexerUrl}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
