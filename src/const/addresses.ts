@@ -1,4 +1,5 @@
 import { Address } from 'viem';
+import { isTestnet } from '../utils/setup';
 
 type Addresses = {
   BEAMR: Address;
@@ -27,4 +28,4 @@ export const ADDR_PROD: Addresses = {
   COLLECTOR_POOL: '0x',
 } as const;
 
-export const ADDR = import.meta.env.VITE_ENV === 'dev' ? ADDR_DEV : ADDR_PROD;
+export const ADDR = isTestnet ? ADDR_DEV : ADDR_PROD;
