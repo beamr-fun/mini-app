@@ -10,13 +10,13 @@ import {
 } from '@mantine/core';
 import { useOnboard } from '../hooks/useOnboard';
 import { Search } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useCTA } from '../hooks/useCTA';
 import { PageLayout } from '../layouts/PageLayout';
 import { useNavigate } from 'react-router-dom';
 
 export const Friends = () => {
-  const { budget, following, form, selectedFriends, handlePoolCreate } =
+  const { budget, besties, form, selectedFriends, handlePoolCreate } =
     useOnboard();
 
   const [filter, setFilter] = useState('');
@@ -27,17 +27,17 @@ export const Friends = () => {
   };
 
   const filteredFriends = useMemo(() => {
-    if (!following) return [];
+    if (!besties) return [];
 
     const query = filter.toLowerCase();
-    return following
+    return besties
       .filter(
         (friend) =>
-          friend.user.username.toLowerCase().includes(query) ||
-          friend.user.display_name?.toLowerCase().includes(query)
+          friend.username.toLowerCase().includes(query) ||
+          friend.display_name?.toLowerCase().includes(query)
       )
       .map((friend) => ({ ...friend, checked: false }));
-  }, [following, filter]);
+  }, [besties, filter]);
 
   const hasSelected3 =
     (selectedFriends && selectedFriends?.length >= 3) || false;
@@ -83,21 +83,21 @@ export const Friends = () => {
         />
 
         <Stack gap={6}>
-          {filteredFriends.slice(0, 10).map((friend) => {
+          {filteredFriends.map((friend) => {
             return (
               <Box
-                key={friend.user.fid}
+                key={friend.fid}
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
                   if (
                     form?.values.selectedFriends?.includes(
-                      friend.user.fid.toString()
+                      friend.fid.toString()
                     )
                   ) {
                     form?.setFieldValue(
                       'selectedFriends',
                       (form.values.selectedFriends || []).filter(
-                        (fid: string) => fid !== friend.user.fid.toString()
+                        (fid: string) => fid !== friend.fid.toString()
                       )
                     );
                   } else {
@@ -106,7 +106,7 @@ export const Friends = () => {
 
                       [
                         ...(form.values.selectedFriends || []),
-                        friend.user.fid.toString(),
+                        friend.fid.toString(),
                       ]
                     );
                   }
@@ -115,15 +115,15 @@ export const Friends = () => {
                 <Group p={4}>
                   <Checkbox.Indicator
                     checked={form?.values.selectedFriends?.includes(
-                      friend.user.fid.toString()
+                      friend.fid.toString()
                     )}
                   />
                   <Group gap={8}>
-                    <Avatar src={friend.user.pfp_url} size={36} />
+                    <Avatar src={friend.pfp_url} size={36} />
                     <Box>
-                      <Text fz="sm">{friend.user.display_name}</Text>
+                      <Text fz="sm">{friend.display_name}</Text>
                       <Text fz="sm" c="dim">
-                        @{friend.user.username}
+                        @{friend.username}
                       </Text>
                     </Box>
                   </Group>

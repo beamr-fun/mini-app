@@ -1,12 +1,17 @@
 import React, { ReactNode, useCallback } from 'react';
 import { useForm, UseFormReturnType } from '@mantine/form';
 import { useQuery } from '@tanstack/react-query';
-import { Follower } from '@neynar/nodejs-sdk/build/api';
+import { User } from '@neynar/nodejs-sdk/build/api';
 import { ADDR } from '../const/addresses';
 import { usePublicClient, useReadContract, useWalletClient } from 'wagmi';
 import { Address, erc20Abi, parseEther } from 'viem';
 import { useUser } from '../hooks/useUser';
-import { completePool, createPool, fetchUserFollowing } from '../utils/api';
+import {
+  completePool,
+  createPool,
+  fetchBesties,
+  fetchUserFollowing,
+} from '../utils/api';
 import { distributeFlow } from '../utils/interactions';
 import { startTxPoll } from '../utils/urql';
 import { switchChain } from 'viem/actions';
@@ -31,7 +36,7 @@ type OnboardContextType = {
   selectedFriends?: string[];
   form?: UseFormReturnType<OnboardFormValues>;
   balance?: bigint;
-  following?: Follower[] | null;
+  besties?: User[] | null;
   creationSteps: CreationSteps;
   poolId?: Address;
   errMsg?: string;
@@ -66,7 +71,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   const { user, address, getAuthHeaders } = useUser();
 
   const {
-    data: userFollowing,
+    data: besties,
     error: followingError,
     isLoading: isLoadingFollowing,
   } = useQuery({
@@ -80,7 +85,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
 
-      return fetchUserFollowing(user!.fid, headers);
+      return fetchBesties(user!.fid, headers);
     },
     enabled: !!user?.fid,
   });
@@ -221,7 +226,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         preferredAddress: form.values.preferredAddress,
         form: form,
         balance: userBalance,
-        following: userFollowing,
+        besties,
         selectedFriends: form.values.selectedFriends,
         creationSteps: creationSteps,
         handlePoolCreate: handlePoolCreate,

@@ -1,4 +1,4 @@
-import { Follower } from '@neynar/nodejs-sdk/build/api';
+import { Follower, User } from '@neynar/nodejs-sdk/build/api';
 import { isAddress, parseEventLogs } from 'viem';
 import z from 'zod';
 import { BeamRABI } from '../abi/BeamR';
@@ -8,6 +8,21 @@ export type APIHeaders = {
   'Content-Type': string;
   authorization: string;
 };
+
+export const fetchBesties = async (fid: number, apiHeaders: APIHeaders) => {
+  const res = await fetch(`${keys.apiUrl}/v1/user/besties/${fid}`, {
+    headers: apiHeaders,
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to fetch besties');
+  }
+
+  return data.besties as User[];
+};
+
 export const fetchUserFollowing = async (
   fid: number,
   apiHeaders: APIHeaders
