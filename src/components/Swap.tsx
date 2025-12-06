@@ -7,6 +7,7 @@ import {
   Group,
   Modal,
   NumberInput,
+  ScrollArea,
   Stack,
   Text,
   useMantineTheme,
@@ -29,12 +30,12 @@ export const Swap = ({
     <Modal.Root opened={opened} onClose={onClose} fullScreen bg="black">
       <Modal.Overlay />
       <Modal.Content>
-        <Modal.Header mb={14}>
+        <Modal.Header>
           <Modal.Title></Modal.Title>
           <Modal.CloseButton />
         </Modal.Header>
         <Modal.Body>
-          <Box mb={32}>
+          <Box mb={24}>
             <Text fz={'xl'} fw={500} mb={4} c={colors.gray[0]}>
               Get Beamr Tokens
             </Text>
@@ -44,12 +45,10 @@ export const Swap = ({
           <SwapUI
             token1={{
               balance: '1000',
-              onChange: (e) => {},
               unit: 'ETH',
             }}
             token2={{
               balance: '0',
-              onChange: (e) => {},
               unit: 'BEAMR',
             }}
           />
@@ -61,15 +60,6 @@ export const Swap = ({
 
 type SwapToken = {
   balance: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  unit: string;
-};
-
-type SwapCardProps = {
-  orientation: 'From' | 'To';
-  balance?: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  value: string;
   unit: string;
 };
 
@@ -85,6 +75,10 @@ const SwapUI = ({
   const [switched, setSwitched] = useState(false);
   const [token1Val, setToken1Val] = useInputState('0');
   const [token2Val, setToken2Val] = useInputState('0');
+  const [token1Err, setToken1Err] = useState('');
+  const [token2Err, setToken2Err] = useState('');
+
+  const [formError, setFormError] = useState('');
   const { colors } = useMantineTheme();
 
   const handleSwap = () => {
@@ -94,7 +88,7 @@ const SwapUI = ({
   return (
     <Box>
       <Flex
-        gap="sm"
+        gap="4"
         direction={switched ? 'column-reverse' : 'column'}
         pos="relative"
         mb="md"
@@ -105,26 +99,32 @@ const SwapUI = ({
           onChange={setToken1Val}
           value={token1Val}
           unit={token1.unit}
+          error={token1Err}
         />
+        <Box pos="relative">
+          {canSwap && (
+            <ActionIcon
+              pos="absolute"
+              top={-20}
+              style={{ zIndex: 1 }}
+              left={'42%'}
+              bg={colors.gray[9]}
+              onClick={() => setSwitched(!switched)}
+            >
+              <ArrowDown />
+            </ActionIcon>
+          )}
+        </Box>
         <SwapInputCard
           orientation={switched ? 'From' : 'To'}
           balance={token2.balance}
           onChange={setToken2Val}
           value={token2Val}
           unit={token2.unit}
+          error={token2Err}
         />
-        {canSwap && (
-          <ActionIcon
-            pos="absolute"
-            top={'42%'}
-            left={'42%'}
-            bg={colors.gray[9]}
-            onClick={() => setSwitched(!switched)}
-          >
-            <ArrowDown />
-          </ActionIcon>
-        )}
       </Flex>
+      {formError && <p className={classes.error}>{formError}</p>}
       <Group justify="center">
         <Button size="lg" onClick={handleSwap}>
           Swap {switched ? token2.unit : token1.unit} to{' '}
@@ -135,15 +135,25 @@ const SwapUI = ({
   );
 };
 
+type SwapCardProps = {
+  orientation: 'From' | 'To';
+  balance?: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  value: string;
+  unit: string;
+  error?: string | null;
+};
+
 const SwapInputCard = ({
   orientation,
   balance,
   onChange,
   value,
   unit,
+  error,
 }: SwapCardProps) => {
   return (
-    <div className={classes.wrapper}>
+    <div className={classes.wrapper} data-error={error ? 'true' : 'false'}>
       <label className={classes.label}>Swap {orientation}</label>
       <div className={classes.inner}>
         <input
@@ -166,6 +176,7 @@ const SwapInputCard = ({
         <p className={classes.unit}>{unit}</p>
       </div>
       <p className={classes.balance}>Balance: {balance}</p>
+      {error && <p className={classes.error}>{error}</p>}
     </div>
   );
 };
