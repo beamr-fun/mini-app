@@ -1,7 +1,9 @@
 import {
+  ActionIcon,
   Box,
   Card,
   Group,
+  Modal,
   NumberInput,
   Select,
   Stack,
@@ -17,14 +19,19 @@ import { useUser } from '../hooks/useUser';
 import { useAccount } from 'wagmi';
 import { PageLayout } from '../layouts/PageLayout';
 import { useCTA } from '../hooks/useCTA';
+import { IconTransfer } from '../components/svg/IconTransfer';
+import { useState } from 'react';
+import { useDisclosure } from '@mantine/hooks';
+import { SwapUI } from '../components/SwapUI';
 
 export const Budget = () => {
   const { user } = useUser();
   const { balance } = useOnboard();
-  const theme = useMantineTheme();
   const navigate = useNavigate();
   const { form } = useOnboard();
   const { address } = useAccount();
+  const { colors } = useMantineTheme();
+  const [opened, { open, close }] = useDisclosure(false);
 
   useCTA({
     label: 'Set Budget',
@@ -40,6 +47,7 @@ export const Budget = () => {
 
   return (
     <PageLayout title="Budget">
+      <SwapModal opened={opened} onClose={close} />
       <Text mb="md">
         Select the wallet address you would like to starting Beaming with.{' '}
         <Bold>
@@ -95,6 +103,18 @@ export const Budget = () => {
               BEAMR
             </Text>
           </Group>
+          <ActionIcon onClick={open}>
+            <Group gap={6}>
+              <IconTransfer />
+              <Text
+                fz="xs"
+                style={{ transform: 'translateY(-1px)' }}
+                c={colors.blue[5]}
+              >
+                Buy
+              </Text>
+            </Group>
+          </ActionIcon>
         </Stack>
         <Box>
           <NumberInput
@@ -109,5 +129,45 @@ export const Budget = () => {
         </Box>
       </Card>
     </PageLayout>
+  );
+};
+
+const SwapModal = ({
+  opened,
+  onClose,
+}: {
+  opened: boolean;
+  onClose: () => void;
+}) => {
+  const { colors } = useMantineTheme();
+  return (
+    <Modal.Root opened={opened} onClose={onClose} fullScreen bg="black">
+      <Modal.Overlay />
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title></Modal.Title>
+          <Modal.CloseButton />
+        </Modal.Header>
+        <Modal.Body>
+          <Box mb={24}>
+            <Text fz={'xl'} fw={500} mb={4} c={colors.gray[0]}>
+              Swap Tokens
+            </Text>
+            <Text>Add Beamr to your account to unlock full access</Text>
+          </Box>
+          <SwapUI
+            canSwap={false}
+            token1={{
+              balance: '1000',
+              unit: 'ETH',
+            }}
+            token2={{
+              balance: '0',
+              unit: 'BEAMR',
+            }}
+          />
+        </Modal.Body>
+      </Modal.Content>
+    </Modal.Root>
   );
 };

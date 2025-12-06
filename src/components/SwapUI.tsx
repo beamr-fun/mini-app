@@ -80,8 +80,7 @@ export const SwapUI = ({
       {formError && <p className={classes.error}>{formError}</p>}
       <Group justify="center">
         <Button size="lg" onClick={handleSwap}>
-          Swap {switched ? token2.unit : token1.unit} to{' '}
-          {switched ? token1.unit : token2.unit}
+          Buy {switched ? token1.unit : token2.unit}
         </Button>
       </Group>
     </Box>
