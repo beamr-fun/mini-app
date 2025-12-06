@@ -1,69 +1,22 @@
+import { useState } from 'react';
+import classes from '../styles/swap.module.css';
+import { useInputState } from '@mantine/hooks';
 import {
   ActionIcon,
   Box,
   Button,
-  Card,
   Flex,
   Group,
-  Modal,
-  NumberInput,
-  ScrollArea,
-  Stack,
-  Text,
   useMantineTheme,
 } from '@mantine/core';
-import classes from '../styles/swap.module.css';
-import { useInputState, useToggle } from '@mantine/hooks';
-import { Arrow } from './Arrow';
 import { ArrowDown } from 'lucide-react';
-import { useState } from 'react';
-
-export const Swap = ({
-  opened,
-  onClose,
-}: {
-  opened: boolean;
-  onClose: () => void;
-}) => {
-  const { colors } = useMantineTheme();
-  return (
-    <Modal.Root opened={opened} onClose={onClose} fullScreen bg="black">
-      <Modal.Overlay />
-      <Modal.Content>
-        <Modal.Header>
-          <Modal.Title></Modal.Title>
-          <Modal.CloseButton />
-        </Modal.Header>
-        <Modal.Body>
-          <Box mb={24}>
-            <Text fz={'xl'} fw={500} mb={4} c={colors.gray[0]}>
-              Get Beamr Tokens
-            </Text>
-            <Text>Add Beamr to your account to unlock full access</Text>
-          </Box>
-
-          <SwapUI
-            token1={{
-              balance: '1000',
-              unit: 'ETH',
-            }}
-            token2={{
-              balance: '0',
-              unit: 'BEAMR',
-            }}
-          />
-        </Modal.Body>
-      </Modal.Content>
-    </Modal.Root>
-  );
-};
 
 type SwapToken = {
   balance: string;
   unit: string;
 };
 
-const SwapUI = ({
+export const SwapUI = ({
   token1,
   token2,
   canSwap = true,
