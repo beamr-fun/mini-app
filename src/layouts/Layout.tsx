@@ -21,12 +21,12 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
             </linearGradient>
           </defs>
         </svg>
+
         <ScrollArea
           id="main-scroll"
           classNames={{ root: classes.scrollArea, thumb: classes.scrollThumb }}
         >
           <Box className={classes.contentBox}>
-            <Notifications />
             <Header />
             {children}
           </Box>

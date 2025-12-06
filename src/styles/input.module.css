@@ -108,6 +108,8 @@
 
 .numberInputRoot {
   width: 100%;
+
+  background-color: transparent;
 }
 
 .numberInput {

@@ -11,6 +11,7 @@ import { UserProvider } from './context/UserContext.tsx';
 import { MantineProvider } from '@mantine/core';
 import { cssVariablesResolver, theme } from './theme.ts';
 import { RouterProvider } from 'react-router-dom';
+import { Notifications } from '@mantine/notifications';
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             defaultColorScheme="dark"
             cssVariablesResolver={cssVariablesResolver}
           >
+            <Notifications />
             <App />
           </MantineProvider>
         </UserProvider>

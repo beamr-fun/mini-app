@@ -231,7 +231,10 @@ export const theme = createTheme({
         centered: true,
       },
       classNames: {
+        root: modalClasses.root,
+        content: modalClasses.content,
         header: modalClasses.header,
+        inner: modalClasses.inner,
       },
     },
 

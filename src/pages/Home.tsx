@@ -14,27 +14,19 @@ import { PageLayout } from '../layouts/PageLayout';
 import { useUser } from '../hooks/useUser';
 import beamrLogo from '../assets/beamrLogo.png';
 import { BeamrNav } from '../components/svg/BeamrNav';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { IconTransfer } from '../components/svg/IconTransfer';
 import { TrendingUp } from 'lucide-react';
 
 import { DancingText } from '../components/DancingText';
 import { TableHeader, TableRow } from '../components/Home/TableItems';
-import { tryDoubleDistribute } from '../utils/interactions';
-import { useWalletClient } from 'wagmi';
-import { fetchTx } from '../utils/poll';
+import { Swap } from '../components/Swap';
+import { useDisclosure } from '@mantine/hooks';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
-  const { data: walletClient } = useWalletClient();
-  const { address } = useUser();
-
-  useEffect(() => {
-    fetchTx(
-      '0x3db370e2ec566d1c7159f9d14e34ebc29171d740e905e0981e644f327aeda0dd'
-    );
-  }, []);
+  const [opened, { open, close }] = useDisclosure(true);
 
   return (
     <PageLayout>
@@ -46,7 +38,8 @@ export const Home = () => {
         mb="xl"
         fit="contain"
       />
-      <BalanceDisplay />
+      <Swap opened={opened} onClose={close} />
+      <BalanceDisplay openSwap={open} />
       <Card>
         <SegmentedControl
           w="100%"
@@ -62,7 +55,7 @@ export const Home = () => {
   );
 };
 
-const BalanceDisplay = () => {
+const BalanceDisplay = ({ openSwap }: { openSwap: () => void }) => {
   const { colors } = useMantineTheme();
   const { userSubscription, userBalance, userBalanceFetchedAt } = useUser();
 
@@ -148,7 +141,7 @@ const BalanceDisplay = () => {
           mr={'auto'}
         />
 
-        <ActionIcon>
+        <ActionIcon onClick={openSwap}>
           <Group gap={6}>
             <IconTransfer />
             <Text

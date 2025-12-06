@@ -1,0 +1,58 @@
+.wrapper {
+  padding: 20px;
+  background: var(--glass-pane);
+  backdrop-filter: blur(32px);
+  overflow: hidden;
+  border-radius: rem(24px);
+}
+
+.label {
+  font-size: var(--mantine-font-size-md);
+  color: var(--mantine-color-gray-3);
+}
+
+.inner {
+  margin-top: rem(4px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: rem(4px);
+}
+
+.input {
+  width: 70%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: rem(24px);
+}
+
+.input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.unit {
+  font-weight: 500;
+  color: var(--mantine-color-gray-3);
+  margin-block: 0;
+}
+
+.bottom {
+  display: flex;
+  justify-content: flex-end;
+  color: var(--mantine-color-gray-3);
+}
+
+.balance {
+  margin-block: 0;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-gray-3);
+  text-align: right;
+}
