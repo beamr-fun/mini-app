@@ -19,18 +19,51 @@ import { BeamrNav } from '../components/svg/BeamrNav';
 import { useEffect, useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { IconTransfer } from '../components/svg/IconTransfer';
-import { TrendingUp } from 'lucide-react';
+import { Radio, TrendingUp } from 'lucide-react';
 
 import { DancingText } from '../components/DancingText';
 import { TableHeader, TableRow } from '../components/Home/TableItems';
 import { useDisclosure } from '@mantine/hooks';
 import { SwapUI } from '../components/SwapUI';
-import { tryDoubleConnect } from '../utils/interactions';
+import { Link } from 'react-router-dom';
+import { useCTA } from '../hooks/useCTA';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
   const [opened, { open, close }] = useDisclosure(false);
 
+  const [poolsToConnect, setPoolsToConnect] = useState<string[]>([]);
+
+  const { setCTA } = useCTA();
+
+  const handleConnectStage = (poolId: string) => {
+    let newPools = [...poolsToConnect];
+
+    if (poolsToConnect.includes(poolId)) {
+      newPools = newPools.filter((id) => id !== poolId);
+    } else {
+      newPools.push(poolId);
+    }
+
+    if (newPools.length === 0) {
+      setCTA(null);
+    } else {
+      setCTA({
+        label: `Connect to ${newPools.length} Pool${newPools.length + 1 > 1 ? 's' : ''}`,
+        onClick: () => {
+          console.log('Connecting to pools:', newPools);
+        },
+      });
+    }
+
+    setPoolsToConnect(newPools);
+  };
+
+  useEffect(() => {
+    return () => {
+      setCTA(null);
+    };
+  }, []);
   return (
     <PageLayout>
       <Image
@@ -52,7 +85,12 @@ export const Home = () => {
           mb="md"
         />
         {tab === 'Sending' && <Sending />}
-        {tab === 'Receiving' && <Receiving />}
+        {tab === 'Receiving' && (
+          <Receiving
+            onConnectClick={handleConnectStage}
+            poolsToConnect={poolsToConnect}
+          />
+        )}
       </Card>
     </PageLayout>
   );
@@ -186,6 +224,18 @@ const BalanceDisplay = ({ openSwap }: { openSwap: () => void }) => {
         <Text fz="sm">{totalIncomingPerMonth}</Text>
         <Text fz="sm">{totalOutgoingPerMonth}</Text>
       </Group>
+      <Group gap={'xs'} mt="sm">
+        <Text
+          fz="sm"
+          component={Link}
+          td="underline"
+          c={colors.gray[3]}
+          to="/connections"
+        >
+          Manage Connections
+        </Text>
+        <Radio size={16} color={colors.gray[3]} />
+      </Group>
     </Card>
   );
 };
@@ -228,6 +278,7 @@ const Sending = () => {
           );
           return (
             <TableRow
+              sending={true}
               key={item.id}
               flowRate={beamFlowRate}
               percentage={percentage}
@@ -240,7 +291,13 @@ const Sending = () => {
   );
 };
 
-const Receiving = () => {
+const Receiving = ({
+  onConnectClick,
+  poolsToConnect,
+}: {
+  poolsToConnect: string[];
+  onConnectClick: (poolId: string) => void;
+}) => {
   const { userSubscription } = useUser();
   const { colors } = useMantineTheme();
 
@@ -277,10 +334,19 @@ const Receiving = () => {
           );
           return (
             <TableRow
+              sending={false}
               key={item.id}
               flowRate={beamFlowRate}
               percentage={percentage}
               pfpUrl={item.from?.profile?.pfp_url || ''}
+              isConnectSelected={poolsToConnect.includes(
+                item?.beamPool?.id as string
+              )}
+              connectOnClick={
+                item?.beamPool?.id
+                  ? () => onConnectClick(item?.beamPool?.id as string)
+                  : undefined
+              }
             />
           );
         })}

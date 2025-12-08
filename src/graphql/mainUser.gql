@@ -14,7 +14,7 @@ subscription LoggedInUser($id: String!) {
       beamPool {
         flowRate
         totalUnits
-        address
+        id
       }
       from {
         fid

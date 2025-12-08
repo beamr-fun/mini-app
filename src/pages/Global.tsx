@@ -61,10 +61,7 @@ export const Global = () => {
         mb="xl"
         fit="contain"
       />
-      <Button size="sm" onClick={handletest}>
-        {' '}
-        Test
-      </Button>
+
       <Card>
         <SegmentedControl
           w="100%"

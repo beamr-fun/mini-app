@@ -4,6 +4,7 @@ export type CTAProps = {
   label: string;
   onClick: () => void;
   disabled?: boolean;
+  enables?: boolean;
 };
 
 type CTAContextType = {
