@@ -16,7 +16,7 @@ import { PageLayout } from '../layouts/PageLayout';
 import { useUser } from '../hooks/useUser';
 import beamrLogo from '../assets/beamrLogo.png';
 import { BeamrNav } from '../components/svg/BeamrNav';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { IconTransfer } from '../components/svg/IconTransfer';
 import { TrendingUp } from 'lucide-react';
@@ -25,6 +25,7 @@ import { DancingText } from '../components/DancingText';
 import { TableHeader, TableRow } from '../components/Home/TableItems';
 import { useDisclosure } from '@mantine/hooks';
 import { SwapUI } from '../components/SwapUI';
+import { tryDoubleConnect } from '../utils/interactions';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');

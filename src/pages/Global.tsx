@@ -2,6 +2,7 @@ import {
   Avatar,
   AvatarGroup,
   Box,
+  Button,
   Card,
   Flex,
   Group,
@@ -26,6 +27,7 @@ import {
 import { useUser } from '../hooks/useUser';
 import { useCTA } from '../hooks/useCTA';
 import { useNavigate } from 'react-router-dom';
+import { tryDoubleConnect } from '../utils/interactions';
 
 type BeamsData = GlobalMostRecentSubscription['Beam'];
 
@@ -59,6 +61,10 @@ export const Global = () => {
         mb="xl"
         fit="contain"
       />
+      <Button size="sm" onClick={handletest}>
+        {' '}
+        Test
+      </Button>
       <Card>
         <SegmentedControl
           w="100%"

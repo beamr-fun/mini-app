@@ -139,6 +139,7 @@ export const UserProvider = ({
     return userSubRes.User_by_pk;
   }, [userSubRes]);
 
+  console.log('userSub', userSubscription);
   useEffect(() => {
     if (startingRoute) return;
     if (!apiData) return;

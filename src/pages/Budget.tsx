@@ -20,7 +20,6 @@ import { useAccount } from 'wagmi';
 import { PageLayout } from '../layouts/PageLayout';
 import { useCTA } from '../hooks/useCTA';
 import { IconTransfer } from '../components/svg/IconTransfer';
-import { useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { SwapUI } from '../components/SwapUI';
 
