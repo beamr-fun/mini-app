@@ -4,8 +4,6 @@ import { gdaAbi, gdaAddress } from '@sfpro/sdk/abi/core';
 import { ADDR } from '../const/addresses';
 import { SuperfluidAbi } from '../abi/Superfluid';
 import { baseSepolia } from 'viem/chains';
-import { publicClient } from './connect';
-import { startTxPoll } from './poll';
 
 export const distributeFlow = async ({
   args: { poolAddress, user, flowRate },

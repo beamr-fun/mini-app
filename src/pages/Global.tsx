@@ -15,7 +15,7 @@ import {
 import { PageLayout } from '../layouts/PageLayout';
 import beamrLogo from '../assets/beamrLogo.png';
 import beamrTokenLogo from '../assets/beamrTokenLogo.png';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { useGqlSub } from '../hooks/useGqlSub';
 import {
@@ -30,6 +30,16 @@ import { useNavigate } from 'react-router-dom';
 
 type BeamsData = GlobalMostRecentSubscription['Beam'];
 
+type LeaderPool = {
+  pfpUrl: string;
+  username: string;
+  flowRate: string;
+  totalUnits: string;
+  displayName: string;
+  fid: number;
+  id: string;
+};
+
 export const Global = () => {
   const [tab, setTab] = useState('Recent');
   const { hasPool } = useUser();
@@ -42,7 +52,22 @@ export const Global = () => {
     useGqlSub<GlobalTopSubscription>(GlobalTopDocument, {});
 
   const recentBeams = recentRaw?.Beam || [];
-  const leaderBeams = leaderRaw?.Beam || [];
+  const leaderboardData = useMemo(() => {
+    if (!leaderRaw?.BeamPool) return [];
+
+    return leaderRaw.BeamPool.map((pool) => {
+      return {
+        pfpUrl: pool.creatorAccount?.user?.profile?.pfp_url || '',
+        username: pool.creatorAccount?.user?.profile?.username || 'Unknown',
+        flowRate: pool.flowRate,
+        totalUnits: pool.totalUnits,
+        displayName:
+          pool.creatorAccount?.user?.profile?.display_name || 'Unknown',
+        fid: pool.creatorAccount?.user?.fid,
+        id: pool.id,
+      } as LeaderPool;
+    });
+  }, [leaderRaw]);
 
   useCTA(
     hasPool
@@ -73,7 +98,10 @@ export const Global = () => {
           <Recent beams={recentBeams} isLoading={isLoadingRecent} />
         )}
         {tab === 'Leaderboard' && (
-          <Leader beams={leaderBeams} isLoading={isLoadingLeader} />
+          <Leader
+            leaderboardData={leaderboardData}
+            isLoading={isLoadingLeader}
+          />
         )}
       </Card>
     </PageLayout>
@@ -81,10 +109,10 @@ export const Global = () => {
 };
 
 const Leader = ({
-  beams,
+  leaderboardData,
   isLoading,
 }: {
-  beams: BeamsData;
+  leaderboardData: LeaderPool[];
   isLoading: boolean;
 }) => {
   const { colors } = useMantineTheme();
@@ -95,10 +123,10 @@ const Leader = ({
     return null;
   }
 
-  if (beams.length === 0) {
+  if (leaderboardData.length === 0) {
     return (
       <Stack gap="sm" px="xs">
-        <GlobalHeader />
+        <LeaderHeader />
         <Flex justify={'center'} align={'center'} h={100} direction={'column'}>
           <Text size="xl" mb="md">
             No Streams
@@ -111,27 +139,15 @@ const Leader = ({
 
   return (
     <Stack gap="sm">
-      <GlobalHeader />
+      <LeaderHeader />
       <Stack gap="sm">
-        {beams?.map((beam) => {
-          const perUnitFlowRate =
-            BigInt(beam.beamPool?.flowRate) / BigInt(beam.beamPool?.totalUnits);
-          const beamFlowRate = perUnitFlowRate * BigInt(beam.units);
-
-          const percentage = Number(
-            (
-              (Number(beam.units) / Number(beam.beamPool?.totalUnits)) *
-              100
-            ).toFixed(2)
-          );
-
+        {leaderboardData?.map((pool) => {
           return (
-            <GlobalRow
-              key={beam.id}
-              flowRate={beamFlowRate}
-              senderUrl={beam.from?.profile?.pfp_url || ''}
-              receiverUrl={beam.to?.profile?.pfp_url || ''}
-              percentage={percentage}
+            <LeaderRow
+              key={pool.id}
+              flowRate={BigInt(pool.flowRate)}
+              pfpUrl={pool.pfpUrl}
+              place={leaderboardData.indexOf(pool) + 1}
             />
           );
         })}
@@ -247,6 +263,51 @@ const GlobalHeader = () => {
       <Text w={48} fz="sm" fw={500} ta="right">
         Pool %
       </Text>
+    </Group>
+  );
+};
+
+const LeaderHeader = () => {
+  const { colors } = useMantineTheme();
+  return (
+    <Group justify="space-between" c={colors.gray[0]} mb="12px">
+      <Text w={50} fz="sm" fw={500} ta="left">
+        Place
+      </Text>
+      <Text w={32} fz="sm" fw={500} ta="left">
+        User
+      </Text>
+      <Text w={75} fz="sm" fw={500} ta="right">
+        Amount/mo
+      </Text>
+      <Text w={48} fz="sm" fw={500} ta="right">
+        Token
+      </Text>
+    </Group>
+  );
+};
+
+const LeaderRow = ({
+  pfpUrl,
+  place,
+  flowRate,
+}: {
+  pfpUrl: string;
+  place: number;
+  flowRate: bigint;
+}) => {
+  return (
+    <Group justify="space-between">
+      <Box w={50} ta="left">
+        {place}
+      </Box>
+      <Avatar size={32} radius="xl" src={pfpUrl} />
+      <Box w={75} ta="right">
+        {flowratePerSecondToMonth(flowRate)}
+      </Box>
+      <Box w={32} ta="left">
+        <Avatar src={beamrTokenLogo} size={24} />
+      </Box>
     </Group>
   );
 };
