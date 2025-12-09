@@ -19,7 +19,7 @@ import { BeamrNav } from '../components/svg/BeamrNav';
 import { useEffect, useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { IconTransfer } from '../components/svg/IconTransfer';
-import { Radio, TrendingUp } from 'lucide-react';
+import { Bolt, CircleAlert, Radio, TrendingUp, Zap } from 'lucide-react';
 
 import { DancingText } from '../components/DancingText';
 import { TableHeader, TableRow } from '../components/Home/TableItems';
@@ -30,6 +30,7 @@ import { useCTA } from '../hooks/useCTA';
 import { Address, isAddress } from 'viem';
 import { multiConnect } from '../utils/interactions';
 import { useAccount, useWalletClient } from 'wagmi';
+import classes from '../styles/effects.module.css';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
@@ -110,7 +111,7 @@ export const Home = () => {
         fit="contain"
       />
       <SwapModal opened={opened} onClose={close} />
-      <BalanceDisplay openSwap={open} />
+      <BalanceDisplay openSwap={open} setTab={setTab} />
       <Card>
         <SegmentedControl
           w="100%"
@@ -132,7 +133,13 @@ export const Home = () => {
   );
 };
 
-const BalanceDisplay = ({ openSwap }: { openSwap: () => void }) => {
+const BalanceDisplay = ({
+  openSwap,
+  setTab,
+}: {
+  openSwap: () => void;
+  setTab: (tab: string) => void;
+}) => {
   const { colors } = useMantineTheme();
   const { userSubscription, userBalance, userBalanceFetchedAt } = useUser();
 
@@ -177,6 +184,24 @@ const BalanceDisplay = ({ openSwap }: { openSwap: () => void }) => {
 
     return total;
   }, [userSubscription?.outgoing]);
+
+  const amtConnected = useMemo(() => {
+    if (!userSubscription) {
+      return 0;
+    }
+
+    let total = 0;
+
+    userSubscription.incoming.forEach((item) => {
+      if (item.isReceiverConnected) {
+        total += 1;
+      }
+    });
+    return total;
+  }, [userSubscription]);
+
+  const hasUnconnected =
+    amtConnected < (userSubscription?.incoming.length || 0);
 
   const totalIncomingPerMonth = totalIncomingFlowRate
     ? flowratePerSecondToMonth(totalIncomingFlowRate)
@@ -260,17 +285,37 @@ const BalanceDisplay = ({ openSwap }: { openSwap: () => void }) => {
         <Text fz="sm">{totalIncomingPerMonth}</Text>
         <Text fz="sm">{totalOutgoingPerMonth}</Text>
       </Group>
-      <Group gap={'xs'} mt="sm">
-        <Text
-          fz="sm"
-          component={Link}
-          td="underline"
-          c={colors.gray[3]}
-          to="/connections"
-        >
-          Manage Connections
-        </Text>
-        <Radio size={16} color={colors.gray[3]} />
+      <Group
+        gap={'xs'}
+        mt="md"
+        style={{
+          cursor: 'pointer',
+        }}
+        onClick={() => setTab('Receiving')}
+        justify="space-between"
+      >
+        <Group gap={4} className={hasUnconnected ? classes.glow : undefined}>
+          {hasUnconnected && (
+            <CircleAlert size={14} style={{ transform: 'translateY(-1px)' }} />
+          )}
+          <Text
+            fz="sm"
+            td="underline"
+            c={hasUnconnected ? colors.gray[0] : colors.gray[3]}
+          >
+            {hasUnconnected ? 'Unconnected streams.' : 'All connected'}
+          </Text>
+        </Group>
+        <Group gap={4}>
+          <Text fz="sm">{amtConnected}/250</Text>
+          <Zap
+            size={16}
+            color={colors.gray[3]}
+            style={{
+              transform: 'translateY(-1px)',
+            }}
+          />
+        </Group>
       </Group>
     </Card>
   );
