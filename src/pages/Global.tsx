@@ -27,6 +27,7 @@ import {
 import { useUser } from '../hooks/useUser';
 import { useCTA } from '../hooks/useCTA';
 import { useNavigate } from 'react-router-dom';
+import { Ribbon, Trophy, TrophyIcon } from 'lucide-react';
 
 type BeamsData = GlobalMostRecentSubscription['Beam'];
 
@@ -148,6 +149,7 @@ const Leader = ({
               flowRate={BigInt(pool.flowRate)}
               pfpUrl={pool.pfpUrl}
               place={leaderboardData.indexOf(pool) + 1}
+              displayName={pool.displayName}
             />
           );
         })}
@@ -270,38 +272,62 @@ const GlobalHeader = () => {
 const LeaderHeader = () => {
   const { colors } = useMantineTheme();
   return (
-    <Group justify="space-between" c={colors.gray[0]} mb="12px">
-      <Text w={50} fz="sm" fw={500} ta="left">
-        Place
-      </Text>
-      <Text w={32} fz="sm" fw={500} ta="left">
-        User
-      </Text>
-      <Text w={75} fz="sm" fw={500} ta="right">
-        Amount/mo
-      </Text>
-      <Text w={48} fz="sm" fw={500} ta="right">
-        Token
+    <Group mb={12} gap={'sm'}>
+      <Trophy size={16} color={colors.gray[3]} />
+      <Text c={colors.gray[3]} fz="sm">
+        Top Beamrs on the App by flow rate
       </Text>
     </Group>
+    // <Group c={colors.gray[0]} mb="12px">
+    //   <Text w={32} fz="sm" fw={500} ta="left" mr={'auto'}>
+    //     User
+    //   </Text>
+    //   <Text w={120} fz="sm" fw={500} ta="left">
+    //     Amount/mo
+    //   </Text>
+    //   {/* <Text w={48} fz="sm" fw={500} ta="right">
+    //     Token
+    //   </Text> */}
+    // </Group>
   );
 };
+
+const TROPHY_COLORS = ['#D4AF37', '#BFC1C2', '#A97142'];
 
 const LeaderRow = ({
   pfpUrl,
   place,
   flowRate,
+  displayName,
 }: {
   pfpUrl: string;
   place: number;
   flowRate: bigint;
+  displayName: string;
 }) => {
+  const { colors } = useMantineTheme();
   return (
-    <Group justify="space-between">
-      <Box w={50} ta="left">
-        {place}
+    <Group gap={0}>
+      <Box w={20} mr={4}>
+        {place >= 4 && (
+          <Box ta="left" c={colors.gray[5]}>
+            {place}
+          </Box>
+        )}
+        {place < 4 && (
+          <Trophy
+            size={16}
+            strokeWidth={3}
+            color={TROPHY_COLORS[place - 1]}
+            style={{ transform: 'translate(-2px, 2px)' }}
+          />
+        )}
       </Box>
-      <Avatar size={32} radius="xl" src={pfpUrl} />
+      <Avatar size={32} radius="xl" src={pfpUrl} mr="sm" />
+      <Text w={75} lineClamp={1} mr="auto">
+        {displayName}
+      </Text>
+      {/* </Group> */}
       <Box w={75} ta="right">
         {flowratePerSecondToMonth(flowRate)}
       </Box>
