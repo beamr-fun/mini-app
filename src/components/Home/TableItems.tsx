@@ -1,7 +1,7 @@
 import { Avatar, Box, Group, Text, useMantineTheme } from '@mantine/core';
 import { flowratePerSecondToMonth } from '../../utils/common';
 import beamrTokenLogo from '../../assets/beamrTokenLogo.png';
-import { Check, Radio } from 'lucide-react';
+import { Check, ZapIcon, ZapOff } from 'lucide-react';
 import classes from '../../styles/effects.module.css';
 
 export const TableRow = ({
@@ -12,7 +12,9 @@ export const TableRow = ({
   isConnected,
   connectOnClick,
   isConnectSelected,
+  isLoadingConnect,
 }: {
+  isLoadingConnect?: boolean;
   sending?: boolean;
   pfpUrl: string;
   flowRate: bigint;
@@ -36,14 +38,24 @@ export const TableRow = ({
           w={24}
           style={{
             transform: 'translateY(2px)',
-            cursor: isConnected ? 'default' : 'pointer',
+            cursor: isConnected
+              ? 'default'
+              : isLoadingConnect
+                ? 'not-allowed'
+                : 'pointer',
           }}
-          onClick={isConnected ? undefined : connectOnClick}
+          onClick={isConnected || isLoadingConnect ? undefined : connectOnClick}
         >
           {isConnected ? (
             <Check size={16} />
+          ) : isConnectSelected ? (
+            <ZapIcon
+              size={16}
+              color={isConnectSelected ? colors.blue[5] : colors.gray[1]}
+              className={isConnectSelected ? undefined : classes.glow}
+            />
           ) : (
-            <Radio
+            <ZapOff
               size={16}
               color={isConnectSelected ? colors.blue[5] : colors.gray[1]}
               className={isConnectSelected ? undefined : classes.glow}

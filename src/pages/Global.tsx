@@ -27,7 +27,6 @@ import {
 import { useUser } from '../hooks/useUser';
 import { useCTA } from '../hooks/useCTA';
 import { useNavigate } from 'react-router-dom';
-import { tryDoubleConnect } from '../utils/interactions';
 
 type BeamsData = GlobalMostRecentSubscription['Beam'];
 

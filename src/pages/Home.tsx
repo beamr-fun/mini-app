@@ -27,17 +27,29 @@ import { useDisclosure } from '@mantine/hooks';
 import { SwapUI } from '../components/SwapUI';
 import { Link } from 'react-router-dom';
 import { useCTA } from '../hooks/useCTA';
+import { Address, isAddress } from 'viem';
+import { multiConnect } from '../utils/interactions';
+import { useAccount, useWalletClient } from 'wagmi';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
   const [opened, { open, close }] = useDisclosure(false);
+  const { data: walletClient } = useWalletClient();
+  const { address } = useAccount();
+  const [isLoadingConnect, setIsLoadingConnect] = useState(false);
 
-  const [poolsToConnect, setPoolsToConnect] = useState<string[]>([]);
+  const [poolsToConnect, setPoolsToConnect] = useState<Address[]>([]);
 
   const { setCTA } = useCTA();
 
   const handleConnectStage = (poolId: string) => {
+    if (!address || !walletClient) return;
+
     let newPools = [...poolsToConnect];
+
+    if (poolId === undefined) return;
+
+    if (!isAddress(poolId)) return;
 
     if (poolsToConnect.includes(poolId)) {
       newPools = newPools.filter((id) => id !== poolId);
@@ -51,7 +63,29 @@ export const Home = () => {
       setCTA({
         label: `Connect to ${newPools.length} Pool${newPools.length + 1 > 1 ? 's' : ''}`,
         onClick: () => {
-          console.log('Connecting to pools:', newPools);
+          setIsLoadingConnect(true);
+          multiConnect({
+            poolIds: newPools,
+            walletClient,
+            userAddress: address,
+            onLoading: () => {
+              setCTA({
+                label: 'Connecting...',
+                onClick: () => {},
+                disabled: true,
+              });
+            },
+            onSuccess: () => {
+              setIsLoadingConnect(false);
+              setCTA(null);
+              setPoolsToConnect([]);
+            },
+            onError: () => {
+              setIsLoadingConnect(false);
+              setCTA(null);
+              setPoolsToConnect([]);
+            },
+          });
         },
       });
     }
@@ -89,6 +123,7 @@ export const Home = () => {
           <Receiving
             onConnectClick={handleConnectStage}
             poolsToConnect={poolsToConnect}
+            isLoadingConnect={isLoadingConnect}
           />
         )}
       </Card>
@@ -294,7 +329,9 @@ const Sending = () => {
 const Receiving = ({
   onConnectClick,
   poolsToConnect,
+  isLoadingConnect,
 }: {
+  isLoadingConnect: boolean;
   poolsToConnect: string[];
   onConnectClick: (poolId: string) => void;
 }) => {
@@ -336,6 +373,7 @@ const Receiving = ({
             <TableRow
               sending={false}
               key={item.id}
+              isLoadingConnect={isLoadingConnect}
               flowRate={beamFlowRate}
               percentage={percentage}
               pfpUrl={item.from?.profile?.pfp_url || ''}

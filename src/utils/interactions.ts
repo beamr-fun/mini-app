@@ -5,6 +5,7 @@ import { ADDR } from '../const/addresses';
 import { SuperfluidAbi } from '../abi/Superfluid';
 import { baseSepolia } from 'viem/chains';
 import { publicClient } from './connect';
+import { startTxPoll } from './poll';
 
 export const distributeFlow = async ({
   args: { poolAddress, user, flowRate },
@@ -212,54 +213,55 @@ const calcFlowRateAndFee = (
   };
 };
 
-export const tryDoubleConnect = async () =>
-  // walletClient: any,
-  // address?: Address
-  {
-    console.log('fred');
-    const USER_ADDRESS = '0xA55905B9053BB0710432ae15Ed863F97B109393B';
-    // if (!walletClient || !address) {
-    //   console.log('Wallet client or address not available');
-    //   return;
-    // }
+export const multiConnect = async ({
+  poolIds,
+  walletClient,
+  userAddress,
+  onLoading,
+  onError,
+  onSuccess,
+}: {
+  poolIds: Address[];
+  walletClient: any;
+  userAddress: Address;
+  onLoading: () => void;
+  onSuccess: (txHash: string) => void;
+  onError: (errMsg: string) => void;
+}) => {
+  onLoading();
+  try {
+    const operations = poolIds.map((poolAddress) => ({
+      operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
+      target: gdaAddress[baseSepolia.id],
+      data: encodeFunctionData({
+        abi: gdaAbi,
+        functionName: 'connectPool',
+        args: [poolAddress, '0x'],
+      }),
+      userData: '0x',
+    }));
 
-    try {
-      // flow rate, 30 token per month
+    console.log('operations', operations);
 
-      const POOL_ADDRESS_1 = '0xC3521d2beC7A254495B2A5ed541efc69f6464Fb1';
-      const POOL_ADDRESS_2 = '0x07C6aCc49EA7395f1917A6b60B87593B579398e3';
+    const hash = await walletClient.writeContract({
+      abi: SuperfluidAbi,
+      functionName: 'batchCall',
+      address: ADDR.SUPER_FLUID,
+      args: [operations],
+    });
 
-      const operations = [
-        prepareOperation({
-          operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
-          target: gdaAddress[baseSepolia.id],
-          data: encodeFunctionData({
-            abi: gdaAbi,
-            functionName: 'connectPool',
-            args: [POOL_ADDRESS_1, '0x'],
-          }),
-          userData: '0x',
-        }),
-        prepareOperation({
-          operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
-          target: gdaAddress[baseSepolia.id],
-          data: encodeFunctionData({
-            abi: gdaAbi,
-            functionName: 'connectPool',
-            args: [POOL_ADDRESS_2, '0x'],
-          }),
-          userData: '0x',
-        }),
-      ];
-
-      const hash = await publicClient.simulateContract({
-        abi: SuperfluidAbi,
-        functionName: 'batchCall',
-        address: ADDR.SUPER_FLUID,
-        account: USER_ADDRESS,
-        args: [operations],
-      });
-    } catch (error) {
-      console.error('Error in tryDoubleDistribute:', error);
+    if (!hash) {
+      onError('Failed to get transaction hash');
+      throw new Error('Failed to get transaction hash');
     }
-  };
+
+    startTxPoll({
+      id: hash,
+      onSuccess: () => onSuccess(hash),
+      onError: () => onError('Poll failed'),
+    });
+  } catch (error) {
+    console.error('Error in multiConnect:', error);
+    onError((error as Error).message);
+  }
+};
