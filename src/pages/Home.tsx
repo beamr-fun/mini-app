@@ -10,6 +10,7 @@ import {
   SegmentedControl,
   Stack,
   Text,
+  Tooltip,
   useMantineTheme,
 } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
@@ -285,37 +286,51 @@ const BalanceDisplay = ({
         <Text fz="sm">{totalIncomingPerMonth}</Text>
         <Text fz="sm">{totalOutgoingPerMonth}</Text>
       </Group>
-      <Group
-        gap={'xs'}
-        mt="md"
-        style={{
-          cursor: 'pointer',
-        }}
-        onClick={() => setTab('Receiving')}
-        justify="space-between"
-      >
-        <Group gap={4} className={hasUnconnected ? classes.glow : undefined}>
-          {hasUnconnected && (
-            <CircleAlert size={14} style={{ transform: 'translateY(-1px)' }} />
-          )}
-          <Text
-            fz="sm"
-            td="underline"
-            c={hasUnconnected ? colors.gray[0] : colors.gray[3]}
-          >
-            {hasUnconnected ? 'Unconnected streams.' : 'All connected'}
-          </Text>
-        </Group>
-        <Group gap={4}>
-          <Text fz="sm">{amtConnected}/250</Text>
-          <Zap
-            size={16}
-            color={colors.gray[3]}
+      <Group gap={'xs'} mt="md" justify="space-between">
+        <Tooltip
+          w={300}
+          multiline
+          label="Connect to Beams in order to stream to your wallet."
+        >
+          <Group
+            gap={4}
+            className={hasUnconnected ? classes.glow : undefined}
+            onClick={() => setTab('Receiving')}
             style={{
-              transform: 'translateY(-1px)',
+              cursor: 'pointer',
             }}
-          />
-        </Group>
+          >
+            {hasUnconnected && (
+              <CircleAlert
+                size={14}
+                style={{ transform: 'translateY(-1px)' }}
+              />
+            )}
+            <Text
+              fz="sm"
+              td="underline"
+              c={hasUnconnected ? colors.gray[0] : colors.gray[3]}
+            >
+              {hasUnconnected ? 'Unconnected streams.' : 'All connected'}
+            </Text>
+          </Group>
+        </Tooltip>
+        <Tooltip
+          w={250}
+          multiline
+          label={`Max 250 connections per user. You are connected to ${amtConnected} beams.`}
+        >
+          <Group gap={4}>
+            <Text fz="sm">{amtConnected}/250</Text>
+            <Zap
+              size={16}
+              color={colors.gray[3]}
+              style={{
+                transform: 'translateY(-1px)',
+              }}
+            />
+          </Group>
+        </Tooltip>
       </Group>
     </Card>
   );
