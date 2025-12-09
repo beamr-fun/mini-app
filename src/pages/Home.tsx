@@ -98,6 +98,7 @@ export const Home = () => {
       setCTA(null);
     };
   }, []);
+
   return (
     <PageLayout>
       <Image
@@ -374,6 +375,7 @@ const Receiving = ({
               sending={false}
               key={item.id}
               isLoadingConnect={isLoadingConnect}
+              isConnected={item.isReceiverConnected}
               flowRate={beamFlowRate}
               percentage={percentage}
               pfpUrl={item.from?.profile?.pfp_url || ''}

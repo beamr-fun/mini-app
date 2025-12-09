@@ -194,25 +194,6 @@ export const transfer = async ({
 //   console.log('Transaction receipt:', receipt);
 // };
 
-const calcFlowRateAndFee = (
-  totalFlowRate: bigint
-): { userFlow: bigint; feeFlow: bigint } => {
-  const SCALE = BigInt(10000);
-  const HALF_SCALE = SCALE / BigInt(2);
-  const USER_BASIS_POINTS = BigInt(9500); // 95% to user
-
-  const numerator = totalFlowRate * USER_BASIS_POINTS;
-
-  const userPoolFlowRateRounded = (numerator + HALF_SCALE) / SCALE;
-
-  const feeFlowRate = totalFlowRate - userPoolFlowRateRounded;
-
-  return {
-    userFlow: userPoolFlowRateRounded,
-    feeFlow: feeFlowRate,
-  };
-};
-
 export const multiConnect = async ({
   poolIds,
   walletClient,
@@ -229,19 +210,20 @@ export const multiConnect = async ({
   onError: (errMsg: string) => void;
 }) => {
   onLoading();
-  try {
-    const operations = poolIds.map((poolAddress) => ({
-      operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
-      target: gdaAddress[baseSepolia.id],
-      data: encodeFunctionData({
-        abi: gdaAbi,
-        functionName: 'connectPool',
-        args: [poolAddress, '0x'],
-      }),
-      userData: '0x',
-    }));
 
-    console.log('operations', operations);
+  try {
+    const operations = poolIds.map((poolAddress) =>
+      prepareOperation({
+        operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
+        target: gdaAddress[baseSepolia.id],
+        data: encodeFunctionData({
+          abi: gdaAbi,
+          functionName: 'connectPool',
+          args: [poolAddress, '0x'],
+        }),
+        userData: '0x',
+      })
+    );
 
     const hash = await walletClient.writeContract({
       abi: SuperfluidAbi,
@@ -255,11 +237,7 @@ export const multiConnect = async ({
       throw new Error('Failed to get transaction hash');
     }
 
-    startTxPoll({
-      id: hash,
-      onSuccess: () => onSuccess(hash),
-      onError: () => onError('Poll failed'),
-    });
+    onSuccess(hash);
   } catch (error) {
     console.error('Error in multiConnect:', error);
     onError((error as Error).message);
