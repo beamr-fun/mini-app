@@ -315,11 +315,11 @@ const LeaderRow = ({
           </Box>
         )}
         {place < 4 && (
-          <Trophy
+          <Ribbon
             size={16}
-            strokeWidth={3}
+            strokeWidth={2}
             color={TROPHY_COLORS[place - 1]}
-            style={{ transform: 'translate(-2px, 2px)' }}
+            style={{ transform: 'translate(-3px, 3px)' }}
           />
         )}
       </Box>
@@ -328,7 +328,7 @@ const LeaderRow = ({
         {displayName}
       </Text>
       {/* </Group> */}
-      <Box w={75} ta="right">
+      <Box w={75} ta="right" mr="8">
         {flowratePerSecondToMonth(flowRate)}
       </Box>
       <Box w={32} ta="left">
