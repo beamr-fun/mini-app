@@ -1,7 +1,7 @@
 subscription GlobalMostRecent {
   Beam(
     order_by: { lastUpdated: desc }
-    limit: 30
+    limit: 20
     where: { beamPool: { active: { _eq: true } } }
   ) {
     id
@@ -39,7 +39,7 @@ subscription GlobalMostRecent {
 subscription GlobalTop {
   BeamPool(
     order_by: { flowRate: desc_nulls_last }
-    limit: 50
+    limit: 20
     where: { active: { _eq: true } }
   ) {
     id

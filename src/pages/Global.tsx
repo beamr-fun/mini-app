@@ -2,16 +2,12 @@ import {
   Avatar,
   AvatarGroup,
   Box,
-  Button,
   Card,
-  Collapse,
   Flex,
   Group,
   Image,
   Loader,
-  Paper,
   SegmentedControl,
-  Spoiler,
   Stack,
   Text,
   useMantineTheme,
@@ -31,13 +27,7 @@ import {
 import { useUser } from '../hooks/useUser';
 import { useCTA } from '../hooks/useCTA';
 import { useNavigate } from 'react-router-dom';
-import {
-  AlertCircle,
-  ChevronDown,
-  ChevronUp,
-  Ribbon,
-  Trophy,
-} from 'lucide-react';
+import { Ribbon, Trophy } from 'lucide-react';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 
 type BeamsData = GlobalMostRecentSubscription['Beam'];
@@ -326,17 +316,6 @@ const LeaderHeader = () => {
         Top Beamrs on the App by flow rate
       </Text>
     </Group>
-    // <Group c={colors.gray[0]} mb="12px">
-    //   <Text w={32} fz="sm" fw={500} ta="left" mr={'auto'}>
-    //     User
-    //   </Text>
-    //   <Text w={120} fz="sm" fw={500} ta="left">
-    //     Amount/mo
-    //   </Text>
-    //   {/* <Text w={48} fz="sm" fw={500} ta="right">
-    //     Token
-    //   </Text> */}
-    // </Group>
   );
 };
 
