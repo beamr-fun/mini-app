@@ -30,6 +30,7 @@ import { useNavigate } from 'react-router-dom';
 import { Ribbon, Trophy } from 'lucide-react';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 
+//
 type BeamsData = GlobalMostRecentSubscription['Beam'];
 
 type LeaderPool = {
