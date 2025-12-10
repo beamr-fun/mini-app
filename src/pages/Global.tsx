@@ -150,6 +150,15 @@ const Leader = ({
     );
   }
 
+  if (error) {
+    return (
+      <ErrorDisplay
+        title="Error Loading Leaderboard"
+        description={error.message}
+      />
+    );
+  }
+
   if (leaderboardData.length === 0) {
     return (
       <Stack gap="sm" px="xs">
