@@ -4,10 +4,14 @@ import {
   Box,
   Button,
   Card,
+  Collapse,
   Flex,
   Group,
   Image,
+  Loader,
+  Paper,
   SegmentedControl,
+  Spoiler,
   Stack,
   Text,
   useMantineTheme,
@@ -27,7 +31,14 @@ import {
 import { useUser } from '../hooks/useUser';
 import { useCTA } from '../hooks/useCTA';
 import { useNavigate } from 'react-router-dom';
-import { Ribbon, Trophy, TrophyIcon } from 'lucide-react';
+import {
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  Ribbon,
+  Trophy,
+} from 'lucide-react';
+import { ErrorDisplay } from '../components/ErrorDisplay';
 
 type BeamsData = GlobalMostRecentSubscription['Beam'];
 
@@ -46,11 +57,17 @@ export const Global = () => {
   const { hasPool } = useUser();
   const navigate = useNavigate();
 
-  const { data: recentRaw, isLoading: isLoadingRecent } =
-    useGqlSub<GlobalMostRecentSubscription>(GlobalMostRecentDocument, {});
+  const {
+    data: recentRaw,
+    isLoading: isLoadingRecent,
+    error: recentError,
+  } = useGqlSub<GlobalMostRecentSubscription>(GlobalMostRecentDocument, {});
 
-  const { data: leaderRaw, isLoading: isLoadingLeader } =
-    useGqlSub<GlobalTopSubscription>(GlobalTopDocument, {});
+  const {
+    data: leaderRaw,
+    isLoading: isLoadingLeader,
+    error: leaderError,
+  } = useGqlSub<GlobalTopSubscription>(GlobalTopDocument, {});
 
   const recentBeams = recentRaw?.Beam || [];
   const leaderboardData = useMemo(() => {
@@ -96,12 +113,17 @@ export const Global = () => {
           mb="md"
         />
         {tab === 'Recent' && (
-          <Recent beams={recentBeams} isLoading={isLoadingRecent} />
+          <Recent
+            beams={recentBeams}
+            isLoading={isLoadingRecent}
+            error={recentError}
+          />
         )}
         {tab === 'Leaderboard' && (
           <Leader
             leaderboardData={leaderboardData}
             isLoading={isLoadingLeader}
+            error={leaderError}
           />
         )}
       </Card>
@@ -112,16 +134,20 @@ export const Global = () => {
 const Leader = ({
   leaderboardData,
   isLoading,
+  error,
 }: {
   leaderboardData: LeaderPool[];
   isLoading: boolean;
+  error: Error | null;
 }) => {
   const { colors } = useMantineTheme();
 
   if (isLoading) {
-    // create loading UI later
-    // theoretically, we shouldn't see this anyways
-    return null;
+    return (
+      <Group justify="center" h={350}>
+        <Loader color="var(--glass-thick)" />
+      </Group>
+    );
   }
 
   if (leaderboardData.length === 0) {
@@ -161,16 +187,29 @@ const Leader = ({
 const Recent = ({
   beams,
   isLoading,
+  error,
 }: {
   beams: BeamsData;
   isLoading: boolean;
+  error: Error | null;
 }) => {
   const { colors } = useMantineTheme();
 
   if (isLoading) {
-    // create loading UI later
-    // theoretically, we shouldn't see this anyways
-    return null;
+    return (
+      <Group justify="center" h={350}>
+        <Loader color="var(--glass-thick)" />
+      </Group>
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorDisplay
+        title="Error Loading Recent Beams"
+        description={error.message}
+      />
+    );
   }
 
   if (beams.length === 0) {

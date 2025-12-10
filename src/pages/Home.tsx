@@ -20,13 +20,12 @@ import { BeamrNav } from '../components/svg/BeamrNav';
 import { useEffect, useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { IconTransfer } from '../components/svg/IconTransfer';
-import { Bolt, CircleAlert, Radio, TrendingUp, Zap } from 'lucide-react';
+import { Bolt, CircleAlert, TrendingUp, Zap } from 'lucide-react';
 
 import { DancingText } from '../components/DancingText';
 import { TableHeader, TableRow } from '../components/Home/TableItems';
 import { useDisclosure } from '@mantine/hooks';
 import { SwapUI } from '../components/SwapUI';
-import { Link } from 'react-router-dom';
 import { useCTA } from '../hooks/useCTA';
 import { Address, isAddress } from 'viem';
 import { multiConnect } from '../utils/interactions';
