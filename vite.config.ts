@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: [
-      'establishing-dallas-rrp-amendment.trycloudflare.com',
+      'tourist-districts-resist-tall.trycloudflare.com',
       'https://mini-app-production-96b0.up.railway.app',
     ],
   },

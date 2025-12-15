@@ -6,7 +6,7 @@ import { Address } from 'viem';
 
 import { useAccount } from 'wagmi';
 import { AuthResponse } from '../types/sharedTypes';
-import { APIHeaders } from '../utils/api';
+import { APIHeaders, fetchProfiles } from '../utils/api';
 import {
   LoggedInUserDocument,
   LoggedInUserSubscription,
@@ -86,6 +86,46 @@ const login = async () => {
   };
 };
 
+const userProfileTransform = async (
+  data: LoggedInUserSubscription,
+  getHeaders: () => Promise<APIHeaders | false>
+) => {
+  if (
+    !data.User_by_pk ||
+    (!data.User_by_pk.incoming && !data.User_by_pk.outgoing) ||
+    (data.User_by_pk.incoming.length === 0 &&
+      data.User_by_pk.outgoing.length === 0)
+  ) {
+    return null;
+  }
+
+  const fromFids =
+    data.User_by_pk?.incoming.map((b) => b.from?.fid?.toString()) || [];
+  const toFids =
+    data.User_by_pk?.outgoing.map((b) => b.to?.fid?.toString()) || [];
+
+  const uniqueFids = [...new Set([...fromFids, ...toFids])].filter(
+    Boolean
+  ) as string[];
+
+  const headers = await getHeaders();
+
+  if (!headers) {
+    console.error('Headers not found');
+    return null;
+  }
+
+  const profiles = await fetchProfiles(uniqueFids, headers);
+
+  const fidLookup: Record<string, boolean> = {};
+
+  uniqueFids.forEach((fid) => {
+    fidLookup[fid as string] = true;
+  });
+
+  return { ...data, different: true };
+};
+
 export const UserProvider = ({
   children,
 }: {
@@ -118,52 +158,6 @@ export const UserProvider = ({
     enabled: !!address && !IS_TESTING,
   });
 
-  const {
-    data: userSubRes,
-    isLoading: isLoadingSub,
-    error: userSubError,
-  } = useGqlSub<LoggedInUserSubscription>(LoggedInUserDocument, {
-    variables: { id: apiData?.user?.fid?.toString() || '' },
-    enabled: !!apiData?.user?.fid && !IS_TESTING,
-  });
-
-  const userSubscription = useMemo(() => {
-    if (!userSubRes) {
-      return undefined;
-    }
-
-    if (!userSubRes.User_by_pk) {
-      return undefined;
-    }
-
-    return userSubRes.User_by_pk;
-  }, [userSubRes]);
-
-  console.log('userSubscription', userSubscription);
-
-  useEffect(() => {
-    if (startingRoute) return;
-    if (!apiData) return;
-
-    if (isLoadingSub) return;
-
-    if (!userSubscription) {
-      setHasPool(false);
-      setStartingRoute('/global');
-    } else {
-      if (userSubscription.pools.length > 0) {
-        setHasPool(true);
-        setStartingRoute('/home');
-      } else {
-        setHasPool(false);
-        setIncomingOnly(true);
-        setStartingRoute('/global');
-      }
-    }
-
-    sdk.actions.ready();
-  }, [isLoadingSub, userSubscription, apiData]);
-
   const getAuthHeaders = async () => {
     if (!apiData || !apiData?.user || !apiData?.jwt || !apiData?.token) {
       await refetch();
@@ -194,6 +188,56 @@ export const UserProvider = ({
       authorization: `Bearer ${apiData.token}`,
     };
   };
+
+  const {
+    data: userSubRes,
+    isLoading: isLoadingSub,
+    error: userSubError,
+  } = useGqlSub<
+    LoggedInUserSubscription,
+    (LoggedInUserSubscription & { different: boolean }) | null
+  >(LoggedInUserDocument, {
+    variables: { id: apiData?.user?.fid },
+    enabled: !!apiData?.user?.fid && !IS_TESTING,
+    transform: async (data) => {
+      return userProfileTransform(data, getAuthHeaders);
+    },
+  });
+
+  const userSubscription = useMemo(() => {
+    if (!userSubRes) {
+      return undefined;
+    }
+
+    if (!userSubRes.User_by_pk) {
+      return undefined;
+    }
+
+    return userSubRes.User_by_pk;
+  }, [userSubRes]);
+
+  useEffect(() => {
+    if (startingRoute) return;
+    if (!apiData) return;
+
+    if (isLoadingSub) return;
+
+    if (!userSubscription) {
+      setHasPool(false);
+      setStartingRoute('/global');
+    } else {
+      if (userSubscription.pools.length > 0) {
+        setHasPool(true);
+        setStartingRoute('/home');
+      } else {
+        setHasPool(false);
+        setIncomingOnly(true);
+        setStartingRoute('/global');
+      }
+    }
+
+    sdk.actions.ready();
+  }, [isLoadingSub, userSubscription, apiData]);
 
   return (
     <UserContext.Provider

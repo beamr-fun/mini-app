@@ -20,13 +20,13 @@ subscription LoggedInUser($id: String!) {
       from {
         fid
         id
-        profile {
-          id
-          pfp_url
-          display_name
-          username
-          id
-        }
+        # profile {
+        #   id
+        #   pfp_url
+        #   display_name
+        #   username
+        #   id
+        # }
       }
     }
     outgoing(
@@ -43,13 +43,13 @@ subscription LoggedInUser($id: String!) {
       to {
         id
         fid
-        profile {
-          id
-          display_name
-          username
-          pfp_url
-          id
-        }
+        # profile {
+        #   id
+        #   display_name
+        #   username
+        #   pfp_url
+        #   id
+        # }
       }
     }
   }

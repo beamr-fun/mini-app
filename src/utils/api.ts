@@ -23,6 +23,36 @@ export const fetchBesties = async (fid: number, apiHeaders: APIHeaders) => {
   return data.besties as User[];
 };
 
+export const fetchProfiles = async (fids: string[], apiHeaders: APIHeaders) => {
+  if (!fids || !Array.isArray(fids)) {
+    throw new Error('FIDs must be provided as an array');
+  }
+
+  if (fids.length === 0) {
+    throw new Error('No FIDs provided to fetch profiles');
+  }
+
+  const res = await fetch(
+    `${keys.apiUrl}/v1/user/profiles?fids=${fids.join(',')}`,
+    {
+      method: 'GET',
+      headers: apiHeaders,
+    }
+  );
+
+  console.log('res', res);
+
+  const data = await res.json();
+
+  console.log('data', data);
+
+  if (!res.ok) {
+    throw new Error(data?.error || 'Failed to fetch profiles');
+  }
+
+  return data.users as User[];
+};
+
 export const fetchUserFollowing = async (
   fid: number,
   apiHeaders: APIHeaders

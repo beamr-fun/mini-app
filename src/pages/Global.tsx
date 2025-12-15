@@ -29,9 +29,16 @@ import { useCTA } from '../hooks/useCTA';
 import { useNavigate } from 'react-router-dom';
 import { Ribbon, Trophy } from 'lucide-react';
 import { ErrorDisplay } from '../components/ErrorDisplay';
+import { APIHeaders, fetchProfiles } from '../utils/api';
+import { User } from '@neynar/nodejs-sdk/build/api';
+import {
+  globalLeaderTransform,
+  globalRecentTransform,
+  LeaderPoolRaw,
+  RecentBeam,
+} from '../transforms/global';
 
 //
-type BeamsData = GlobalMostRecentSubscription['Beam'];
 
 type LeaderPool = {
   pfpUrl: string;
@@ -45,26 +52,37 @@ type LeaderPool = {
 
 export const Global = () => {
   const [tab, setTab] = useState('Recent');
-  const { hasPool } = useUser();
+  const { hasPool, getAuthHeaders } = useUser();
+
   const navigate = useNavigate();
 
   const {
-    data: recentRaw,
+    data: recentBeams,
     isLoading: isLoadingRecent,
     error: recentError,
-  } = useGqlSub<GlobalMostRecentSubscription>(GlobalMostRecentDocument, {});
+  } = useGqlSub<GlobalMostRecentSubscription, RecentBeam[]>(
+    GlobalMostRecentDocument,
+    {
+      transform: (data) => globalRecentTransform(data, getAuthHeaders),
+    }
+  );
 
   const {
     data: leaderRaw,
     isLoading: isLoadingLeader,
     error: leaderError,
-  } = useGqlSub<GlobalTopSubscription>(GlobalTopDocument, {});
+  } = useGqlSub<GlobalTopSubscription, LeaderPoolRaw[]>(GlobalTopDocument, {
+    transform: async (data) => {
+      return globalLeaderTransform(data, getAuthHeaders);
+    },
+  });
 
-  const recentBeams = recentRaw?.Beam || [];
   const leaderboardData = useMemo(() => {
-    if (!leaderRaw?.BeamPool) return [];
+    if (!leaderRaw) return [];
 
-    return leaderRaw.BeamPool.map((pool) => {
+    console.log('leaderRaw', leaderRaw);
+
+    return leaderRaw.map((pool) => {
       return {
         pfpUrl: pool.creatorAccount?.user?.profile?.pfp_url || '',
         username: pool.creatorAccount?.user?.profile?.username || 'Unknown',
@@ -105,7 +123,7 @@ export const Global = () => {
         />
         {tab === 'Recent' && (
           <Recent
-            beams={recentBeams}
+            beams={recentBeams || []}
             isLoading={isLoadingRecent}
             error={recentError}
           />
@@ -189,7 +207,7 @@ const Recent = ({
   isLoading,
   error,
 }: {
-  beams: BeamsData;
+  beams: RecentBeam[];
   isLoading: boolean;
   error: Error | null;
 }) => {

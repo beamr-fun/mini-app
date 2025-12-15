@@ -1,19 +1,33 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { print } from 'graphql';
 import { wsClient } from '../utils/envio';
 
-interface useGqlSubOptions {
+// 1. Unified Options Interface
+// We default TResult to TData. If transform is used, TResult can be inferred or specified.
+interface UseGqlSubOptions<TData, TResult = TData> {
   variables?: Record<string, any>;
   enabled?: boolean;
+  transform?: (data: TData) => Promise<TResult> | TResult;
 }
 
-export function useGqlSub<T>(
+// 2. Single Function Signature
+export function useGqlSub<TData = any, TResult = TData>(
   query: any,
-  { variables, enabled = true }: useGqlSubOptions = {}
+  options: UseGqlSubOptions<TData, TResult> = {}
 ) {
-  const [data, setData] = useState<T | null>(null);
+  const { variables, enabled = true, transform } = options;
+
+  // State is typed as TResult (which defaults to TData if no transform is involved)
+  const [data, setData] = useState<TResult | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const transformRef = useRef(transform);
+  const requestKeyRef = useRef(0);
+
+  useEffect(() => {
+    transformRef.current = transform;
+  }, [transform]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -25,13 +39,34 @@ export function useGqlSub<T>(
       setIsLoading(true);
 
       try {
-        dispose = wsClient.subscribe<T>(
+        dispose = wsClient.subscribe<TData>(
           { query: print(query), variables },
           {
-            next: (res) => {
+            next: async (res) => {
               if (!mounted) return;
-              setData(res.data as T);
-              setIsLoading(false);
+              const currentRequestKey = ++requestKeyRef.current;
+              const rawData = res.data;
+
+              if (transformRef.current && rawData) {
+                try {
+                  const result = await transformRef.current(rawData);
+                  if (!mounted || currentRequestKey !== requestKeyRef.current)
+                    return;
+                  setData(result);
+                  setIsLoading(false);
+                } catch (err) {
+                  if (!mounted || currentRequestKey !== requestKeyRef.current)
+                    return;
+                  setError(err as Error);
+                  setIsLoading(false);
+                }
+              } else {
+                // Cast rawData to TResult.
+                // If TResult is different from TData but no transform was provided,
+                // this is logically impossible in TS usage unless forced, so this cast is safe.
+                setData(rawData as unknown as TResult);
+                setIsLoading(false);
+              }
             },
             error: (err: any) => {
               if (!mounted) return;
