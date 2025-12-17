@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Box,
+  Button,
   Card,
   Flex,
   Group,
@@ -31,6 +32,7 @@ import { Address, isAddress } from 'viem';
 import { multiConnect } from '../utils/interactions';
 import { useAccount, useWalletClient } from 'wagmi';
 import classes from '../styles/effects.module.css';
+import { notifications } from '@mantine/notifications';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');

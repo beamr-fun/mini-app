@@ -1,10 +1,10 @@
 import { createContext, ReactNode, useState } from 'react';
 
 export type CTAProps = {
-  label: string;
-  onClick: () => void;
+  label?: string;
+  onClick?: () => void;
   disabled?: boolean;
-  enables?: boolean;
+  enabled?: boolean;
 };
 
 type CTAContextType = {

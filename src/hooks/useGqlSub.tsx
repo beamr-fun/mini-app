@@ -20,7 +20,7 @@ export function useGqlSub<TData = any, TResult = TData>(
   // State is typed as TResult (which defaults to TData if no transform is involved)
   const [data, setData] = useState<TResult | null>(null);
   const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const transformRef = useRef(transform);
   const requestKeyRef = useRef(0);
@@ -44,7 +44,9 @@ export function useGqlSub<TData = any, TResult = TData>(
           {
             next: async (res) => {
               if (!mounted) return;
+
               const currentRequestKey = ++requestKeyRef.current;
+
               const rawData = res.data;
 
               if (transformRef.current && rawData) {
@@ -69,9 +71,22 @@ export function useGqlSub<TData = any, TResult = TData>(
               }
             },
             error: (err: any) => {
+              console.log('Error fired');
+
+              console.log('err', err);
               if (!mounted) return;
-              setError(err);
-              setIsLoading(false);
+
+              if (Array.isArray(err) && err?.length > 0) {
+                const cleanError = new Error(err?.[0]?.message);
+                // @ts-ignore - attaching extra info for your UI
+                cleanError.code = err[0].extensions?.code;
+                setError(cleanError);
+                setIsLoading(false);
+                return;
+              } else {
+                setError(Error(err.message || 'Subscription error'));
+                setIsLoading(false);
+              }
             },
             complete: () => {},
           }

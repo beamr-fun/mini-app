@@ -162,7 +162,7 @@ export const UserProvider = ({
   } = useGqlSub<LoggedInUserSubscription, UserTransformed | null>(
     LoggedInUserDocument,
     {
-      variables: { id: apiData?.user?.fid?.toString() || '' },
+      variables: { id: apiData?.user?.fid.toString() || '' },
       enabled: !!apiData?.user?.fid && !IS_TESTING,
       transform: async (data) => {
         return userProfileTransform(data, getAuthHeaders);
@@ -172,21 +172,32 @@ export const UserProvider = ({
 
   useEffect(() => {
     if (startingRoute) return;
-    if (!apiData) return;
-
-    if (isLoadingSub) return;
-
-    if (!userSubscription) {
+    if (userSubError || apiError) {
       setHasPool(false);
       setStartingRoute('/global');
+      sdk.actions.ready();
+      return;
+    }
+    if (isLoadingSub || !apiData) return;
+
+    const currentSub = userSubscription;
+
+    console.log('IN USE EFFECT', { currentSub });
+    if (!currentSub) {
+      setHasPool(false);
+      setStartingRoute('/global');
+
+      console.log('1');
     } else {
-      if (userSubscription.pools.length > 0) {
+      if (currentSub.pools.length > 0) {
         setHasPool(true);
         setStartingRoute('/home');
+        console.log('2');
       } else {
         setHasPool(false);
         setIncomingOnly(true);
         setStartingRoute('/global');
+        console.log('3');
       }
     }
 

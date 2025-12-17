@@ -52,7 +52,9 @@ type LeaderPool = {
 
 export const Global = () => {
   const [tab, setTab] = useState('Recent');
-  const { hasPool, getAuthHeaders } = useUser();
+  const { getAuthHeaders, hasPool, apiError, userSubError } = useUser();
+
+  const highlevelError = apiError || userSubError;
 
   const navigate = useNavigate();
 
@@ -80,8 +82,6 @@ export const Global = () => {
   const leaderboardData = useMemo(() => {
     if (!leaderRaw) return [];
 
-    console.log('leaderRaw', leaderRaw);
-
     return leaderRaw.map((pool) => {
       return {
         pfpUrl: pool.creatorAccount?.user?.profile?.pfp_url || '',
@@ -96,11 +96,32 @@ export const Global = () => {
     });
   }, [leaderRaw]);
 
-  useCTA(
-    hasPool
-      ? undefined
-      : { label: 'Start Beaming', onClick: () => navigate('/create-pool/1') }
-  );
+  const shouldRenderCTA = !hasPool && !highlevelError;
+
+  useCTA({
+    label: shouldRenderCTA ? 'Start Beaming' : undefined,
+    onClick: shouldRenderCTA ? () => navigate('/create-pool/1') : undefined,
+    extraDeps: [shouldRenderCTA],
+  });
+
+  if (highlevelError) {
+    return (
+      <PageLayout>
+        <Image
+          src={beamrLogo}
+          alt="Beamr Logo"
+          width={80}
+          height={80}
+          mb="xl"
+          fit="contain"
+        />
+        <ErrorDisplay
+          title="Error Loading Global Data"
+          description={highlevelError.message || 'Subscription Error'}
+        />
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>

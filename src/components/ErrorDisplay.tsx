@@ -23,7 +23,7 @@ export const ErrorDisplay = ({
 
       <Spoiler
         expanded={collapseOpened}
-        maxHeight={12}
+        maxHeight={18}
         showLabel={null}
         hideLabel={null}
         onExpandedChange={() => setCollapseOpened(!collapseOpened)}
