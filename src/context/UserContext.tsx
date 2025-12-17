@@ -158,34 +158,39 @@ export const UserProvider = ({
     enabled: !!address && !IS_TESTING,
   });
 
-  const getAuthHeaders = async () => {
-    if (!apiData || !apiData?.user || !apiData?.jwt || !apiData?.token) {
-      await refetch();
+  const getAuthHeaders = async (): Promise<APIHeaders | false> => {
+    const BUFFER = 10 * 1000; // 6 seconds buffer
+    // Helper to validate a given data object
+    const isValid = (data: typeof apiData) => {
+      return (
+        data &&
+        data.user &&
+        data.jwt &&
+        data.token &&
+        data.jwt.exp * 1000 > Date.now() + BUFFER // Check expiry
+      );
+    };
 
-      if (!apiData || !apiData?.jwt || !apiData?.user || !apiData?.token) {
-        return false;
-      }
+    // CURRENT state (captured in closure)
+    if (isValid(apiData)) {
       return {
         'Content-Type': 'application/json',
-        authorization: `Bearer ${apiData.token}`,
+        authorization: `Bearer ${apiData!.token}`,
       };
     }
 
-    if (apiData.jwt.exp * 1000 < Date.now()) {
-      await refetch();
+    // If invalid or expired, force a refresh
+    // This gives us the FRESH data immediately.
+    const { data: newData, isError } = await refetch();
 
-      if (!apiData || !apiData?.jwt || !apiData?.user || !apiData?.token) {
-        return false;
-      }
-      return {
-        'Content-Type': 'application/json',
-        authorization: `Bearer ${apiData.token}`,
-      };
+    // 4. Validate the NEW data
+    if (isError || !isValid(newData)) {
+      return false;
     }
 
     return {
       'Content-Type': 'application/json',
-      authorization: `Bearer ${apiData.token}`,
+      authorization: `Bearer ${newData!.token}`,
     };
   };
 

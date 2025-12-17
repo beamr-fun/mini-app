@@ -3,6 +3,7 @@ import { isAddress, parseEventLogs } from 'viem';
 import z from 'zod';
 import { BeamRABI } from '../abi/BeamR';
 import { keys } from './setup';
+import { cacheProfiles, getCachedProfiles } from './cache';
 
 export type APIHeaders = {
   'Content-Type': string;
@@ -24,33 +25,32 @@ export const fetchBesties = async (fid: number, apiHeaders: APIHeaders) => {
 };
 
 export const fetchProfiles = async (fids: string[], apiHeaders: APIHeaders) => {
-  if (!fids || !Array.isArray(fids)) {
-    throw new Error('FIDs must be provided as an array');
-  }
+  if (!fids || !Array.isArray(fids)) throw new Error('Invalid FIDs');
+  const uniqueFids = [...new Set(fids)];
+  if (uniqueFids.length === 0) return [];
 
-  if (fids.length === 0) {
-    throw new Error('No FIDs provided to fetch profiles');
+  const { found, missing } = await getCachedProfiles(uniqueFids);
+
+  if (missing.length === 0) {
+    return found;
   }
 
   const res = await fetch(
-    `${keys.apiUrl}/v1/user/profiles?fids=${fids.join(',')}`,
+    `${keys.apiUrl}/v1/user/profiles?fids=${missing.join(',')}`,
     {
       method: 'GET',
       headers: apiHeaders,
     }
   );
 
-  console.log('res', res);
-
   const data = await res.json();
+  if (!res.ok) throw new Error(data?.error || 'Failed to fetch profiles');
 
-  console.log('data', data);
+  const fetchedUsers = data.users as User[];
 
-  if (!res.ok) {
-    throw new Error(data?.error || 'Failed to fetch profiles');
-  }
+  await cacheProfiles(fetchedUsers);
 
-  return data.users as User[];
+  return [...found, ...fetchedUsers];
 };
 
 export const fetchUserFollowing = async (
