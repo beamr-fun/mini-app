@@ -6,7 +6,7 @@ import { Address } from 'viem';
 
 import { useAccount } from 'wagmi';
 import { AuthResponse } from '../types/sharedTypes';
-import { APIHeaders, fetchProfiles } from '../utils/api';
+import { APIHeaders } from '../utils/api';
 import {
   LoggedInUserDocument,
   LoggedInUserSubscription,
@@ -16,6 +16,7 @@ import { useToken } from '../hooks/useToken';
 import { ADDR } from '../const/addresses';
 import { useGqlSub } from '../hooks/useGqlSub';
 import { User } from '@neynar/nodejs-sdk/build/api';
+import { userProfileTransform, UserTransformed } from '../transforms/user';
 
 type UserSub = LoggedInUserSubscription['User_by_pk'];
 
@@ -84,46 +85,6 @@ const login = async () => {
     context,
     token: token || undefined,
   };
-};
-
-const userProfileTransform = async (
-  data: LoggedInUserSubscription,
-  getHeaders: () => Promise<APIHeaders | false>
-) => {
-  if (
-    !data.User_by_pk ||
-    (!data.User_by_pk.incoming && !data.User_by_pk.outgoing) ||
-    (data.User_by_pk.incoming.length === 0 &&
-      data.User_by_pk.outgoing.length === 0)
-  ) {
-    return null;
-  }
-
-  const fromFids =
-    data.User_by_pk?.incoming.map((b) => b.from?.fid?.toString()) || [];
-  const toFids =
-    data.User_by_pk?.outgoing.map((b) => b.to?.fid?.toString()) || [];
-
-  const uniqueFids = [...new Set([...fromFids, ...toFids])].filter(
-    Boolean
-  ) as string[];
-
-  const headers = await getHeaders();
-
-  if (!headers) {
-    console.error('Headers not found');
-    return null;
-  }
-
-  const profiles = await fetchProfiles(uniqueFids, headers);
-
-  const fidLookup: Record<string, boolean> = {};
-
-  uniqueFids.forEach((fid) => {
-    fidLookup[fid as string] = true;
-  });
-
-  return { ...data, different: true };
 };
 
 export const UserProvider = ({
@@ -195,30 +156,19 @@ export const UserProvider = ({
   };
 
   const {
-    data: userSubRes,
+    data: userSubscription,
     isLoading: isLoadingSub,
     error: userSubError,
-  } = useGqlSub<LoggedInUserSubscription>(LoggedInUserDocument, {
-    variables: { id: apiData?.user?.fid?.toString() || '' },
-    enabled: !!apiData?.user?.fid && !IS_TESTING,
-    transform: async (data) => {
-      return userProfileTransform(data, getAuthHeaders);
-    },
-  });
-
-  console.log('userSubError', userSubError);
-
-  const userSubscription = useMemo(() => {
-    if (!userSubRes) {
-      return undefined;
+  } = useGqlSub<LoggedInUserSubscription, UserTransformed | null>(
+    LoggedInUserDocument,
+    {
+      variables: { id: apiData?.user?.fid?.toString() || '' },
+      enabled: !!apiData?.user?.fid && !IS_TESTING,
+      transform: async (data) => {
+        return userProfileTransform(data, getAuthHeaders);
+      },
     }
-
-    if (!userSubRes.User_by_pk) {
-      return undefined;
-    }
-
-    return userSubRes.User_by_pk;
-  }, [userSubRes]);
+  );
 
   useEffect(() => {
     if (startingRoute) return;
