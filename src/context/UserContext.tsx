@@ -198,16 +198,15 @@ export const UserProvider = ({
     data: userSubRes,
     isLoading: isLoadingSub,
     error: userSubError,
-  } = useGqlSub<
-    LoggedInUserSubscription,
-    (LoggedInUserSubscription & { different: boolean }) | null
-  >(LoggedInUserDocument, {
-    variables: { id: apiData?.user?.fid },
+  } = useGqlSub<LoggedInUserSubscription>(LoggedInUserDocument, {
+    variables: { id: apiData?.user?.fid?.toString() || '' },
     enabled: !!apiData?.user?.fid && !IS_TESTING,
     transform: async (data) => {
       return userProfileTransform(data, getAuthHeaders);
     },
   });
+
+  console.log('userSubError', userSubError);
 
   const userSubscription = useMemo(() => {
     if (!userSubRes) {

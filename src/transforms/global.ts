@@ -46,8 +46,6 @@ export const globalRecentTransform = async (
 
   const apiHeaders = await getAuthHeaders();
 
-  console.log('apiHeaders', apiHeaders);
-
   if (!apiHeaders) {
     throw new Error('Headers Not Found');
   }
