@@ -11,79 +11,92 @@ export type APIHeaders = {
 };
 
 export const fetchBesties = async (fid: number, apiHeaders: APIHeaders) => {
-  const res = await fetch(`${keys.apiUrl}/v1/user/besties/${fid}`, {
-    headers: apiHeaders,
-  });
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/besties/${fid}`, {
+      headers: apiHeaders,
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (!res.ok) {
-    throw new Error(data?.error || 'Failed to fetch besties');
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to fetch besties');
+    }
+
+    return data.besties as User[];
+  } catch (error) {
+    throw Error;
   }
-
-  return data.besties as User[];
 };
 
 export const fetchProfiles = async (fids: string[], apiHeaders: APIHeaders) => {
-  if (!fids || !Array.isArray(fids)) throw new Error('Invalid FIDs');
-  const uniqueFids = [...new Set(fids)];
-  if (uniqueFids.length === 0) return [];
+  try {
+    if (!fids || !Array.isArray(fids)) throw new Error('Invalid FIDs');
+    const uniqueFids = [...new Set(fids)];
+    if (uniqueFids.length === 0) return [];
 
-  const { found, missing } = await getCachedProfiles(uniqueFids);
+    const { found, missing } = await getCachedProfiles(uniqueFids);
 
-  if (missing.length === 0) {
-    return found;
-  }
-
-  const res = await fetch(
-    `${keys.apiUrl}/v1/user/profiles?fids=${missing.join(',')}`,
-    {
-      method: 'GET',
-      headers: apiHeaders,
+    if (missing.length === 0) {
+      return found;
     }
-  );
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || 'Failed to fetch profiles');
+    const res = await fetch(
+      `${keys.apiUrl}/v1/user/profiles?fids=${missing.join(',')}`,
+      {
+        method: 'GET',
+        headers: apiHeaders,
+      }
+    );
 
-  const fetchedUsers = data.users as User[];
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to fetch profiles');
+    }
 
-  await cacheProfiles(fetchedUsers);
+    const fetchedUsers = data.users as User[];
 
-  return [...found, ...fetchedUsers];
+    await cacheProfiles(fetchedUsers);
+
+    return [...found, ...fetchedUsers];
+  } catch (error) {
+    throw Error;
+  }
 };
 
 export const fetchUserFollowing = async (
   fid: number,
   apiHeaders: APIHeaders
 ) => {
-  const cached = sessionStorage.getItem(`userFollowing_${fid}`);
+  try {
+    const cached = sessionStorage.getItem(`userFollowing_${fid}`);
 
-  if (cached) {
-    console.log('cached', JSON.parse(cached));
-    return JSON.parse(cached) as Follower[];
+    if (cached) {
+      return JSON.parse(cached) as Follower[];
+    }
+
+    const res = await fetch(`${keys.apiUrl}/v1/user/following/${fid}/all`, {
+      headers: apiHeaders,
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to fetch user following');
+    }
+
+    const following = data.following.flat() as Follower[];
+
+    const withPrimaryAddresses = following.filter(
+      (f) => f.user.verified_addresses.primary.eth_address
+    );
+
+    sessionStorage.setItem(
+      `userFollowing_${fid}`,
+      JSON.stringify(withPrimaryAddresses)
+    );
+
+    return withPrimaryAddresses;
+  } catch (error) {
+    throw Error;
   }
-
-  const res = await fetch(`${keys.apiUrl}/v1/user/following/${fid}/all`, {
-    headers: apiHeaders,
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data?.error || 'Failed to fetch user following');
-  }
-
-  const following = data.following.flat() as Follower[];
-
-  const withPrimaryAddresses = following.filter(
-    (f) => f.user.verified_addresses.primary.eth_address
-  );
-
-  sessionStorage.setItem(
-    `userFollowing_${fid}`,
-    JSON.stringify(withPrimaryAddresses)
-  );
-
-  return withPrimaryAddresses;
 };
 
 const createPoolSchema = z.object({
@@ -142,7 +155,7 @@ export const createPool = async ({
 
     if (!json.hash) {
       console.error('No transaction hash in response', json);
-      return;
+      throw new Error('No transaction hash returned from pool creation');
     }
 
     if (typeof publicClient?.waitForTransactionReceipt !== 'function') {
@@ -154,7 +167,7 @@ export const createPool = async ({
     });
 
     if (receipt.status !== 'success') {
-      console.error('Transaction failed', receipt);
+      throw new Error('Transaction failed');
       return;
     }
 
@@ -173,12 +186,12 @@ export const createPool = async ({
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    onSuccess(poolAddress);
+    onSuccess(poolAddress as string);
 
-    return poolAddress;
+    return poolAddress as string;
   } catch (error) {
     onError((error as Error).message);
-    console.error('Error creating pool', error);
+    throw Error;
   }
 };
 
@@ -231,7 +244,7 @@ export const completePool = async ({
 
     return true;
   } catch (error) {
-    console.error('Error completing pool', error);
     onError((error as Error).message);
+    throw Error;
   }
 };

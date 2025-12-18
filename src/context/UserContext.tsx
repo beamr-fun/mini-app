@@ -24,7 +24,7 @@ type UserContextType = {
   user?: User;
   address?: Address;
   jwtPayload?: JWTPayload;
-  userSubscription?: UserSub;
+  userSubscription?: UserTransformed | null;
   token?: string;
   getAuthHeaders: () => Promise<APIHeaders | false>;
   startingRoute?: string;

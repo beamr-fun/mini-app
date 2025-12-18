@@ -1,7 +1,6 @@
 import {
   ActionIcon,
   Box,
-  Button,
   Card,
   Flex,
   Group,
@@ -21,7 +20,7 @@ import { BeamrNav } from '../components/svg/BeamrNav';
 import { useEffect, useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { IconTransfer } from '../components/svg/IconTransfer';
-import { Bolt, CircleAlert, TrendingUp, Zap } from 'lucide-react';
+import { CircleAlert, TrendingUp, Zap } from 'lucide-react';
 
 import { DancingText } from '../components/DancingText';
 import { TableHeader, TableRow } from '../components/Home/TableItems';
@@ -83,10 +82,15 @@ export const Home = () => {
               setCTA(null);
               setPoolsToConnect([]);
             },
-            onError: () => {
+            onError: (errMsg: string) => {
               setIsLoadingConnect(false);
               setCTA(null);
               setPoolsToConnect([]);
+              notifications.show({
+                title: 'Error',
+                message: errMsg || 'Failed to connect to pools.',
+                color: 'red',
+              });
             },
           });
         },
@@ -112,6 +116,7 @@ export const Home = () => {
         mb="xl"
         fit="contain"
       />
+
       <SwapModal opened={opened} onClose={close} />
       <BalanceDisplay openSwap={open} setTab={setTab} />
       <Card>

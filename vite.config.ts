@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: [
-      'tourist-districts-resist-tall.trycloudflare.com',
+      'https://gaps-copper-articles-arabia.trycloudflare.com',
       'https://mini-app-production-96b0.up.railway.app',
     ],
   },

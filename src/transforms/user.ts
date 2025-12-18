@@ -9,25 +9,50 @@ type BasicProfile = {
   display_name: string | null;
 };
 
-export type UserTransformed = LoggedInUserSubscription['User_by_pk'] & {
-  incoming: NonNullable<LoggedInUserSubscription['User_by_pk']>['incoming'] &
-    {
-      from: {
-        id: string;
-        fid: number;
-        profile: BasicProfile;
-      } | null;
-    }[];
-  outgoing: NonNullable<LoggedInUserSubscription['User_by_pk']>['outgoing'] &
-    {
-      to: {
-        id: string;
-        fid: number;
-        profile: BasicProfile;
-      } | null;
-    }[];
-};
+export type UserTransformed = {
+  __typename?: 'User';
+  id: string;
+  pools: {
+    __typename?: 'BeamPool';
+    id: string;
+  }[];
 
+  incoming: {
+    __typename?: 'Beam';
+    id: string;
+    units: any;
+    isReceiverConnected: boolean;
+    lastUpdated: number;
+    beamPool?: {
+      __typename?: 'BeamPool';
+      flowRate: any;
+      totalUnits: any;
+      id: string;
+    };
+    from: {
+      id: string;
+      fid: number;
+      profile: BasicProfile;
+    };
+  }[];
+
+  outgoing: {
+    __typename?: 'Beam';
+    id: string;
+    units: any;
+    beamPool?: {
+      __typename?: 'BeamPool';
+      flowRate: any;
+      totalUnits: any;
+      id: string;
+    } | null;
+    to: {
+      id: string;
+      fid: number;
+      profile: BasicProfile;
+    };
+  }[];
+};
 export const userProfileTransform = async (
   data: LoggedInUserSubscription,
   getHeaders: () => Promise<APIHeaders | false>

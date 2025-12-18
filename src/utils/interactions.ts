@@ -34,9 +34,8 @@ export const distributeFlow = async ({
     }
 
     const userFlowRate = (flowRate * 95n) / 100n; // 95% to user
-    console.log('userFlowRate', userFlowRate);
+
     const feeFlowRate = flowRate - userFlowRate; // 5% fee
-    console.log('flowRate', flowRate);
 
     const operations = [
       prepareOperation({

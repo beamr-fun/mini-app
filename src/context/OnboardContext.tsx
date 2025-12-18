@@ -9,6 +9,7 @@ import { useUser } from '../hooks/useUser';
 import { completePool, createPool, fetchBesties } from '../utils/api';
 import { distributeFlow } from '../utils/interactions';
 import { startTxPoll } from '../utils/poll';
+import { notifications } from '@mantine/notifications';
 
 type CreationSteps = {
   createPool: boolean;
@@ -30,6 +31,7 @@ type OnboardContextType = {
   form?: UseFormReturnType<OnboardFormValues>;
   balance?: bigint;
   besties?: User[] | null;
+  bestiesError: Error | null;
   creationSteps: CreationSteps;
   poolId?: Address;
   errMsg?: string;
@@ -41,6 +43,7 @@ export const OnboardContext = React.createContext<OnboardContextType>({
   budget: 0,
   preferredAddress: '',
   errMsg: undefined,
+  bestiesError: null,
   creationSteps: {
     createPool: false,
     distributeFlow: false,
@@ -65,8 +68,8 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
 
   const {
     data: besties,
-    error: followingError,
-    isLoading: isLoadingFollowing,
+    error: bestiesError,
+    isLoading: isLoadingBesties,
   } = useQuery({
     queryKey: ['userFollowing', user?.fid],
     queryFn: async () => {
@@ -101,12 +104,24 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     args: [form.values.preferredAddress as `0x${string}`],
   });
 
+  const handleError = (error: unknown, defaultMessage: string) => {
+    console.error(defaultMessage, error);
+    notifications.show({
+      title: 'Error',
+      message: error instanceof Error ? error.message : defaultMessage,
+      color: 'red',
+    });
+  };
+
   const handlePoolCreate = useCallback(async () => {
     // handle errors later
-    if (!user || !form || !address) return;
-
-    console.log('*********');
-    console.log('selectedFriends', form.values.selectedFriends);
+    if (!user || !form || !address) {
+      handleError(
+        new Error('Missing user, form, or address'),
+        'Cannot create pool'
+      );
+      return;
+    }
 
     // call API to create pool
     try {
@@ -115,14 +130,13 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
 
       const apiHeaders = await getAuthHeaders();
 
-      const poolAddress = await createPool({
+      await createPool({
         onSuccess(poolAddress) {
           setPoolAddress(poolAddress as Address);
           setCreationSteps((prev) => ({ ...prev, createPool: true }));
         },
         onError(errorMsg) {
-          console.log('Errored out here');
-          throw new Error(errorMsg);
+          handleError(errorMsg, 'Error creating pool');
         },
         apiHeaders,
         publicClient,
@@ -135,14 +149,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
           selectedFriends: form.values.selectedFriends,
         },
       });
-
-      if (!poolAddress) {
-        throw new Error('Pool address not returned from createPool');
-      }
-
-      if (!publicClient) {
-        throw new Error('Public client not available');
-      }
     } catch (error) {
       console.error('Error in pool creation process:', error);
       setErrorMsg((error as Error).message);
@@ -157,21 +163,30 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   ]);
 
   const handleDistributeFlow = async () => {
-    if (!address || !poolAddress || !walletClient || !user) return;
+    if (!address || !poolAddress || !walletClient || !user) {
+      handleError(
+        new Error('Missing address, poolAddress, walletClient, or user'),
+        'Cannot distribute flow'
+      );
+      return;
+    }
 
     const flowRate =
       parseEther(form.values.budget.toString()) / 30n / 24n / 60n / 60n; // budget per month to flow rate per second
 
     await distributeFlow({
       onError(errMsg) {
-        throw new Error(errMsg);
+        handleError(errMsg, 'Error distributing flow');
       },
       onSuccess(txHash) {
         setCreationSteps((prev) => ({ ...prev, distributeFlow: true }));
         startTxPoll({
           id: txHash,
           onError() {
-            throw new Error('Transaction indexing failed');
+            handleError(
+              new Error('Transaction indexing failed'),
+              'Error indexing transaction'
+            );
           },
           onSuccess() {
             setCreationSteps((prev) => ({ ...prev, indexTransaction: true }));
@@ -202,7 +217,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         setCreationSteps((prev) => ({ ...prev, completePool: true }));
       },
       onError(errorMsg) {
-        throw new Error(errorMsg);
+        handleError(new Error(errorMsg), 'Error completing pool');
       },
     });
   };
@@ -215,6 +230,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         form: form,
         balance: userBalance,
         besties,
+        bestiesError,
         selectedFriends: form.values.selectedFriends,
         creationSteps: creationSteps,
         handlePoolCreate: handlePoolCreate,
