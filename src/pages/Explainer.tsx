@@ -18,8 +18,7 @@ import { Tag } from '../components/Tag';
 import { PageTitle } from '../components/PageTitle';
 import { PageLayout } from '../layouts/PageLayout';
 import { useCTA } from '../hooks/useCTA';
-
-// fetchTx('0xa3b4296ceba4d6b658f11fd1b6592399cea0eef5c2c767e5bf8d9f6cf2345bc3');
+import Diagram from '../components/Diagram';
 
 export const Explainer = () => {
   const navigate = useNavigate();
@@ -53,43 +52,7 @@ export const Explainer = () => {
           <Text fz={'lg'} fw={500} mb="md" c={'var(--mantine-color-gray-0)'}>
             Beamr Tipping Pool
           </Text>
-          <Group gap={70} justify="center" mb="md">
-            <Flex direction="column" align="center" gap={4} pos="relative">
-              <Avatar size={28} src={jordAvatar} />
-              <Arrow />
-              <Avatar size={28} src={gravenAvatar} />
-              <Tag pos="absolute" top={'38%'} right="34px">
-                100%
-              </Tag>
-            </Flex>
-
-            <Flex direction="column" align="center" pos="relative">
-              <Avatar size={28} src={jordAvatar} />
-              <Box
-                pos="absolute"
-                style={{
-                  transform: 'Rotate(-25deg) Translate(13px,6px)',
-                  top: 28,
-                }}
-              >
-                <Arrow />
-              </Box>
-              <Box style={{ transform: 'Rotate(25deg) Translate(-13px,6px)' }}>
-                <Arrow />
-              </Box>
-              <Tag pos="absolute" top={'38%'} right="-20px">
-                50%
-              </Tag>
-              <Tag pos="absolute" top={'38%'} right="74px">
-                50%
-              </Tag>
-
-              <Group gap={32}>
-                <Avatar size={28} src={gravenAvatar} />
-                <Avatar size={28} src={stefanoAvatar} />
-              </Group>
-            </Flex>
-          </Group>
+          <Diagram />
           <Text mb={'md'}>
             The Beamr Tipping Pool aims to be the first of many token streaming
             features offered through this platform.
