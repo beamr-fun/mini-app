@@ -60,7 +60,6 @@ export type BeamPool = {
   active: Scalars['Boolean'];
   adjustmentFlowRate: Scalars['numeric'];
   adjustmentMember: Scalars['String'];
-  allRecipients: Array<Scalars['String']>;
   beamCount: Scalars['Int'];
   /** An object relationship */
   beamR?: Maybe<BeamrGlobal>;
@@ -157,7 +156,6 @@ export type BeamPool_Bool_Exp = {
   active?: InputMaybe<Boolean_Comparison_Exp>;
   adjustmentFlowRate?: InputMaybe<Numeric_Comparison_Exp>;
   adjustmentMember?: InputMaybe<String_Comparison_Exp>;
-  allRecipients?: InputMaybe<String_Array_Comparison_Exp>;
   beamCount?: InputMaybe<Int_Comparison_Exp>;
   beamR?: InputMaybe<BeamrGlobal_Bool_Exp>;
   beamR_id?: InputMaybe<String_Comparison_Exp>;
@@ -186,7 +184,6 @@ export type BeamPool_Bool_Exp = {
 export type BeamPool_Max_Order_By = {
   adjustmentFlowRate?: InputMaybe<Order_By>;
   adjustmentMember?: InputMaybe<Order_By>;
-  allRecipients?: InputMaybe<Order_By>;
   beamCount?: InputMaybe<Order_By>;
   beamR_id?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
@@ -206,7 +203,6 @@ export type BeamPool_Max_Order_By = {
 export type BeamPool_Min_Order_By = {
   adjustmentFlowRate?: InputMaybe<Order_By>;
   adjustmentMember?: InputMaybe<Order_By>;
-  allRecipients?: InputMaybe<Order_By>;
   beamCount?: InputMaybe<Order_By>;
   beamR_id?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
@@ -227,7 +223,6 @@ export type BeamPool_Order_By = {
   active?: InputMaybe<Order_By>;
   adjustmentFlowRate?: InputMaybe<Order_By>;
   adjustmentMember?: InputMaybe<Order_By>;
-  allRecipients?: InputMaybe<Order_By>;
   beamCount?: InputMaybe<Order_By>;
   beamR?: InputMaybe<BeamrGlobal_Order_By>;
   beamR_id?: InputMaybe<Order_By>;
@@ -260,8 +255,6 @@ export enum BeamPool_Select_Column {
   AdjustmentFlowRate = 'adjustmentFlowRate',
   /** column name */
   AdjustmentMember = 'adjustmentMember',
-  /** column name */
-  AllRecipients = 'allRecipients',
   /** column name */
   BeamCount = 'beamCount',
   /** column name */
@@ -333,7 +326,6 @@ export type BeamPool_Stream_Cursor_Value_Input = {
   active?: InputMaybe<Scalars['Boolean']>;
   adjustmentFlowRate?: InputMaybe<Scalars['numeric']>;
   adjustmentMember?: InputMaybe<Scalars['String']>;
-  allRecipients?: InputMaybe<Array<Scalars['String']>>;
   beamCount?: InputMaybe<Scalars['Int']>;
   beamR_id?: InputMaybe<Scalars['String']>;
   chainId?: InputMaybe<Scalars['Int']>;
@@ -3535,15 +3527,15 @@ export type LoggedInUserSubscriptionVariables = Exact<{
 
 export type LoggedInUserSubscription = { __typename?: 'subscription_root', User_by_pk?: { __typename?: 'User', id: string, pools: Array<{ __typename?: 'BeamPool', id: string }>, incoming: Array<{ __typename?: 'Beam', id: string, units: any, isReceiverConnected: boolean, lastUpdated: number, beamPool?: { __typename?: 'BeamPool', flowRate: any, totalUnits: any, id: string } | null, from?: { __typename?: 'User', fid: number, id: string } | null }>, outgoing: Array<{ __typename?: 'Beam', units: any, id: string, beamPool?: { __typename?: 'BeamPool', flowRate: any, totalUnits: any, id: string } | null, to?: { __typename?: 'User', id: string, fid: number } | null }> } | null };
 
-export type GetTxByIdSubscriptionVariables = Exact<{
+export type GetTxByIdQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
 
 
-export type GetTxByIdSubscription = { __typename?: 'subscription_root', TX_by_pk?: { __typename?: 'TX', id: string } | null };
+export type GetTxByIdQuery = { __typename?: 'query_root', TX_by_pk?: { __typename?: 'TX', id: string } | null };
 
 
 export const GlobalMostRecentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GlobalMostRecent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Beam"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"lastUpdated"},"value":{"kind":"EnumValue","value":"desc"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"20"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"units"}},{"kind":"Field","name":{"kind":"Name","value":"lastUpdated"}},{"kind":"Field","name":{"kind":"Name","value":"beamPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}}]}},{"kind":"Field","name":{"kind":"Name","value":"from"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"to"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<GlobalMostRecentSubscription, GlobalMostRecentSubscriptionVariables>;
 export const GlobalTopDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GlobalTop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"BeamPool"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"flowRate"},"value":{"kind":"EnumValue","value":"desc_nulls_last"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"20"}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"creatorAccount"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GlobalTopSubscription, GlobalTopSubscriptionVariables>;
 export const LoggedInUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"LoggedInUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"User_by_pk"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pools"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"incoming"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"lastUpdated"},"value":{"kind":"EnumValue","value":"desc"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"beamPool"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"units"}},{"kind":"Field","name":{"kind":"Name","value":"isReceiverConnected"}},{"kind":"Field","name":{"kind":"Name","value":"lastUpdated"}},{"kind":"Field","name":{"kind":"Name","value":"beamPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"from"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"outgoing"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"lastUpdated"},"value":{"kind":"EnumValue","value":"desc"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"beamPool"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"units"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"beamPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"to"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fid"}}]}}]}}]}}]}}]} as unknown as DocumentNode<LoggedInUserSubscription, LoggedInUserSubscriptionVariables>;
-export const GetTxByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GetTxById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"TX_by_pk"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<GetTxByIdSubscription, GetTxByIdSubscriptionVariables>;
+export const GetTxByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTxById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"TX_by_pk"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<GetTxByIdQuery, GetTxByIdQueryVariables>;

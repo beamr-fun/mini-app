@@ -1,43 +1,37 @@
-import { keys } from './setup';
+import { GetTxByIdDocument } from '../generated/graphql';
+import { gqlClient } from './envio';
+import { isDev } from './setup';
 
-export async function fetchTx(id: string) {
-  const res = await fetch(
-    `${keys.indexerUrl.includes('localhost') ? 'http' : 'https'}://${keys.indexerUrl}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `
-        query ($id: String!) {
-          TX_by_pk(id: $id) {
-            id
-          }
-        }
-      `,
-        variables: { id },
-      }),
+export const fetchTx = async (id: string) => {
+  try {
+    const res = await gqlClient.request(GetTxByIdDocument, { id });
+
+    if (!res.TX_by_pk) {
+      throw new Error('Transaction not found');
     }
-  );
 
-  if (!res.ok) throw new Error(`GraphQL error: ${res.statusText}`);
-
-  const json = await res.json();
-
-  console.log('json', json);
-  if (json.errors) throw new Error(json.errors[0].message);
-
-  return json.data.TX_by_pk;
-}
+    return res.TX_by_pk?.id;
+  } catch (error) {
+    console.log('error', error);
+  }
+};
 
 export const startTxPoll = async ({
   id,
   onSuccess,
   onError,
+  onTimeout,
 }: {
   id: string;
   onSuccess: () => void;
   onError: () => void;
+  onTimeout: () => void;
 }) => {
+  if (isDev) {
+    console.log('Dev mode: skipping tx poll');
+    onSuccess();
+    return;
+  }
   let tries = 0;
   const interval = setInterval(async () => {
     try {
@@ -47,13 +41,14 @@ export const startTxPoll = async ({
         onSuccess();
       } else if (tries >= 20) {
         clearInterval(interval);
-        onError();
+        onTimeout();
       } else {
         tries++;
         console.log('tries', tries);
       }
     } catch (error) {
       console.error('Error fetching tx:', error);
+      tries++;
       if (tries >= 20) {
         clearInterval(interval);
         onError();
@@ -61,3 +56,5 @@ export const startTxPoll = async ({
     }
   }, 500);
 };
+
+fetchTx('example-tx-id');

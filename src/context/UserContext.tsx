@@ -182,22 +182,17 @@ export const UserProvider = ({
 
     const currentSub = userSubscription;
 
-    console.log('IN USE EFFECT', { currentSub });
     if (!currentSub) {
       setHasPool(false);
       setStartingRoute('/global');
-
-      console.log('1');
     } else {
       if (currentSub.pools.length > 0) {
         setHasPool(true);
         setStartingRoute('/home');
-        console.log('2');
       } else {
         setHasPool(false);
         setIncomingOnly(true);
         setStartingRoute('/global');
-        console.log('3');
       }
     }
 

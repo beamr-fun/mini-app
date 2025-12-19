@@ -12,10 +12,10 @@ import { startTxPoll } from '../utils/poll';
 import { notifications } from '@mantine/notifications';
 
 type CreationSteps = {
-  createPool: boolean;
-  distributeFlow: boolean;
-  completePool: boolean;
-  indexTransaction: boolean;
+  createPool: 'idle' | 'error' | 'success';
+  distributeFlow: 'idle' | 'requesting' | 'error' | 'success';
+  completePool: 'idle' | 'error' | 'success';
+  indexTransaction: 'idle' | 'error' | 'success' | 'timeout';
 };
 
 type OnboardFormValues = {
@@ -45,19 +45,19 @@ export const OnboardContext = React.createContext<OnboardContextType>({
   errMsg: undefined,
   bestiesError: null,
   creationSteps: {
-    createPool: false,
-    distributeFlow: false,
-    completePool: false,
-    indexTransaction: false,
+    createPool: 'idle',
+    distributeFlow: 'idle',
+    completePool: 'idle',
+    indexTransaction: 'idle',
   },
 });
 
 export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   const [creationSteps, setCreationSteps] = React.useState<CreationSteps>({
-    createPool: false,
-    distributeFlow: false,
-    completePool: false,
-    indexTransaction: false,
+    createPool: 'idle',
+    distributeFlow: 'idle',
+    completePool: 'idle',
+    indexTransaction: 'idle',
   });
   const [errorMsg, setErrorMsg] = React.useState<string | undefined>();
   const [poolAddress, setPoolAddress] = React.useState<Address | undefined>();
@@ -69,7 +69,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   const {
     data: besties,
     error: bestiesError,
-    isLoading: isLoadingBesties,
+    // isLoading: isLoadingBesties,
   } = useQuery({
     queryKey: ['userFollowing', user?.fid],
     queryFn: async () => {
@@ -105,12 +105,25 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const handleError = (error: unknown, defaultMessage: string) => {
-    console.error(defaultMessage, error);
+    let errMsg;
+
+    if (error instanceof Error) {
+      errMsg = error.message;
+    } else if (typeof error === 'string') {
+      errMsg = error;
+    } else {
+      errMsg = defaultMessage;
+    }
+
+    console.error(errMsg);
+
     notifications.show({
       title: 'Error',
-      message: error instanceof Error ? error.message : defaultMessage,
+      message: errMsg,
       color: 'red',
     });
+
+    setErrorMsg(errMsg);
   };
 
   const handlePoolCreate = useCallback(async () => {
@@ -133,10 +146,11 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       await createPool({
         onSuccess(poolAddress) {
           setPoolAddress(poolAddress as Address);
-          setCreationSteps((prev) => ({ ...prev, createPool: true }));
+          setCreationSteps((prev) => ({ ...prev, createPool: 'success' }));
         },
         onError(errorMsg) {
           handleError(errorMsg, 'Error creating pool');
+          setCreationSteps((prev) => ({ ...prev, createPool: 'error' }));
         },
         apiHeaders,
         publicClient,
@@ -149,9 +163,9 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
           selectedFriends: form.values.selectedFriends,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in pool creation process:', error);
-      setErrorMsg((error as Error).message);
+      handleError(error?.message, 'Error in pool creation process');
     }
   }, [
     user,
@@ -179,17 +193,30 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         handleError(errMsg, 'Error distributing flow');
       },
       onSuccess(txHash) {
-        setCreationSteps((prev) => ({ ...prev, distributeFlow: true }));
+        setCreationSteps((prev) => ({ ...prev, distributeFlow: 'success' }));
         startTxPoll({
           id: txHash,
+          onTimeout() {
+            setCreationSteps((prev) => ({
+              ...prev,
+              indexTransaction: 'timeout',
+            }));
+          },
           onError() {
             handleError(
               new Error('Transaction indexing failed'),
               'Error indexing transaction'
             );
+            setCreationSteps((prev) => ({
+              ...prev,
+              indexTransaction: 'error',
+            }));
           },
           onSuccess() {
-            setCreationSteps((prev) => ({ ...prev, indexTransaction: true }));
+            setCreationSteps((prev) => ({
+              ...prev,
+              indexTransaction: 'success',
+            }));
           },
         });
       },
@@ -214,10 +241,12 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       args: completeArgs,
       apiHeaders: freshApiHeaders,
       onSuccess() {
-        setCreationSteps((prev) => ({ ...prev, completePool: true }));
+        setCreationSteps((prev) => ({ ...prev, completePool: 'success' }));
       },
       onError(errorMsg) {
         handleError(new Error(errorMsg), 'Error completing pool');
+        setCreationSteps((prev) => ({ ...prev, completePool: 'error' }));
+        setErrorMsg(errorMsg || 'Error Completing Pool');
       },
     });
   };

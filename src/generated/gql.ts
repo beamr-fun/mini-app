@@ -15,7 +15,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 const documents = {
     "subscription GlobalMostRecent {\n  Beam(order_by: {lastUpdated: desc}, limit: 20) {\n    id\n    units\n    lastUpdated\n    beamPool {\n      flowRate\n      totalUnits\n    }\n    from {\n      fid\n      id\n    }\n    to {\n      fid\n      id\n    }\n  }\n}\n\nsubscription GlobalTop {\n  BeamPool(\n    order_by: {flowRate: desc_nulls_last}\n    limit: 20\n    where: {active: {_eq: true}}\n  ) {\n    id\n    flowRate\n    totalUnits\n    creatorAccount {\n      user {\n        fid\n      }\n    }\n  }\n}": types.GlobalMostRecentDocument,
     "subscription LoggedInUser($id: String!) {\n  User_by_pk(id: $id) {\n    id\n    pools {\n      id\n    }\n    incoming(\n      order_by: {lastUpdated: desc}\n      where: {beamPool: {active: {_eq: true}}}\n    ) {\n      id\n      units\n      isReceiverConnected\n      lastUpdated\n      beamPool {\n        flowRate\n        totalUnits\n        id\n      }\n      from {\n        fid\n        id\n      }\n    }\n    outgoing(\n      order_by: {lastUpdated: desc}\n      where: {beamPool: {active: {_eq: true}}}\n    ) {\n      units\n      id\n      beamPool {\n        flowRate\n        totalUnits\n        id\n      }\n      to {\n        id\n        fid\n      }\n    }\n  }\n}": types.LoggedInUserDocument,
-    "subscription GetTxById($id: String!) {\n  TX_by_pk(id: $id) {\n    id\n  }\n}": types.GetTxByIdDocument,
+    "query GetTxById($id: String!) {\n  TX_by_pk(id: $id) {\n    id\n  }\n}": types.GetTxByIdDocument,
 };
 
 /**
@@ -43,7 +43,7 @@ export function gql(source: "subscription LoggedInUser($id: String!) {\n  User_b
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "subscription GetTxById($id: String!) {\n  TX_by_pk(id: $id) {\n    id\n  }\n}"): (typeof documents)["subscription GetTxById($id: String!) {\n  TX_by_pk(id: $id) {\n    id\n  }\n}"];
+export function gql(source: "query GetTxById($id: String!) {\n  TX_by_pk(id: $id) {\n    id\n  }\n}"): (typeof documents)["query GetTxById($id: String!) {\n  TX_by_pk(id: $id) {\n    id\n  }\n}"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};
