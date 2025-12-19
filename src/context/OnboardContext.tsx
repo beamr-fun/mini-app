@@ -10,6 +10,7 @@ import { completePool, createPool, fetchBesties } from '../utils/api';
 import { distributeFlow } from '../utils/interactions';
 import { startTxPoll } from '../utils/poll';
 import { notifications } from '@mantine/notifications';
+import { charLimit } from '../utils/common';
 
 type CreationSteps = {
   createPool: 'loading' | 'error' | 'success';
@@ -117,7 +118,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
 
     notifications.show({
       title: 'Error',
-      message: errMsg,
+      message: charLimit(errMsg, 56),
       color: 'red',
     });
 

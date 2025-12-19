@@ -1,5 +1,4 @@
 import { Box, Flex, Group, ScrollArea } from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
 import { Header } from '../components/Header';
 import classes from '../styles/layout.module.css';
 import { Nav } from './Nav';
