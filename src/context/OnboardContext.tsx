@@ -12,10 +12,10 @@ import { startTxPoll } from '../utils/poll';
 import { notifications } from '@mantine/notifications';
 
 type CreationSteps = {
-  createPool: 'idle' | 'error' | 'success';
-  distributeFlow: 'idle' | 'requesting' | 'error' | 'success';
-  completePool: 'idle' | 'error' | 'success';
-  indexTransaction: 'idle' | 'error' | 'success' | 'timeout';
+  createPool: 'loading' | 'error' | 'success';
+  distributeFlow: 'loading' | 'requesting' | 'error' | 'success';
+  completePool: 'loading' | 'error' | 'success';
+  indexTransaction: 'loading' | 'error' | 'success' | 'timeout';
 };
 
 type OnboardFormValues = {
@@ -45,19 +45,19 @@ export const OnboardContext = React.createContext<OnboardContextType>({
   errMsg: undefined,
   bestiesError: null,
   creationSteps: {
-    createPool: 'idle',
-    distributeFlow: 'idle',
-    completePool: 'idle',
-    indexTransaction: 'idle',
+    createPool: 'loading',
+    distributeFlow: 'loading',
+    completePool: 'loading',
+    indexTransaction: 'loading',
   },
 });
 
 export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   const [creationSteps, setCreationSteps] = React.useState<CreationSteps>({
-    createPool: 'idle',
-    distributeFlow: 'idle',
-    completePool: 'idle',
-    indexTransaction: 'idle',
+    createPool: 'loading',
+    distributeFlow: 'loading',
+    completePool: 'loading',
+    indexTransaction: 'loading',
   });
   const [errorMsg, setErrorMsg] = React.useState<string | undefined>();
   const [poolAddress, setPoolAddress] = React.useState<Address | undefined>();

@@ -10,7 +10,7 @@ import {
 import { useOnboard } from '../hooks/useOnboard';
 import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../layouts/PageLayout';
-import { CheckCheck } from 'lucide-react';
+import { CheckCheck, ChevronRight, InfoIcon } from 'lucide-react';
 import { useCTA } from '../hooks/useCTA';
 
 export const CreateConfirm = () => {
@@ -45,6 +45,36 @@ export const CreateConfirm = () => {
     disabled: !distributeReady && !allStepsComplete,
   });
 
+  const createDescription =
+    creationSteps.createPool === 'loading'
+      ? 'Creating your pool'
+      : creationSteps.createPool === 'error'
+        ? 'Pool creation failed. Please try again.'
+        : 'Pool Created';
+
+  const distributeDescription =
+    creationSteps.distributeFlow === 'loading'
+      ? 'Awaiting pool creation'
+      : creationSteps.distributeFlow === 'requesting'
+        ? 'Please initiate wallet transaction'
+        : creationSteps.distributeFlow === 'error'
+          ? 'Flow distribution failed. Please try again.'
+          : 'Flow Distributed';
+
+  const completeDescription =
+    creationSteps.completePool === 'loading'
+      ? 'Awaiting flow distribution'
+      : creationSteps.completePool === 'error'
+        ? 'Pool confirmation failed. Please try again.'
+        : 'Pool Confirmed';
+
+  const indexDescription =
+    creationSteps.indexTransaction === 'loading'
+      ? 'Awaiting pool confirmation'
+      : creationSteps.indexTransaction === 'error'
+        ? 'Indexing timed out. Pool still created successfully.'
+        : 'Indexed Successfully';
+
   return (
     <PageLayout title="Complete">
       <Text mb="xs">Congrats! Your Beamr Tipping Pool is being created.</Text>
@@ -55,23 +85,23 @@ export const CreateConfirm = () => {
         <Stack mb="xl" gap="xl">
           <LoaderStep
             title={'Creating Pool'}
-            description={'Deploying your pool.'}
-            complete={creationSteps.createPool}
+            description={createDescription}
+            status={creationSteps.createPool}
           />
           <LoaderStep
             title={'Distributing Budget'}
-            description={'Requesting funds from your wallet'}
-            complete={creationSteps.distributeFlow}
+            description={distributeDescription}
+            status={creationSteps.distributeFlow}
           />
           <LoaderStep
             title={'Confirming Pool'}
-            description={'Registering your pool with Beamr.'}
-            complete={creationSteps.completePool}
+            description={completeDescription}
+            status={creationSteps.completePool}
           />
           <LoaderStep
             title={'Indexing'}
-            description={'Discovering your pool onchain.'}
-            complete={creationSteps.indexTransaction}
+            description={indexDescription}
+            status={creationSteps.indexTransaction}
           />
         </Stack>
       </Card>
@@ -80,34 +110,53 @@ export const CreateConfirm = () => {
 };
 
 const LoaderStep = ({
-  complete,
+  status,
   title,
   description,
 }: {
-  complete: boolean;
+  status: 'loading' | 'error' | 'success' | 'requesting' | 'timeout';
   title: string;
   description: string;
 }) => {
   const { colors } = useMantineTheme();
+
+  const Icon =
+    status === 'success' ? (
+      <CheckCheck
+        size={28}
+        strokeWidth={2}
+        style={{
+          stroke: 'url(#beamr-gradient)',
+          fill: 'none',
+        }}
+      />
+    ) : status === 'requesting' ? (
+      <ChevronRight
+        size={28}
+        strokeWidth={2}
+        style={{
+          stroke: 'url(#beamr-gradient)',
+          fill: 'none',
+        }}
+      />
+    ) : status === 'error' ? (
+      <InfoIcon size={28} color={colors.red[5]} />
+    ) : status === 'timeout' ? (
+      <InfoIcon size={28} color={colors.yellow[5]} />
+    ) : (
+      <Loader size={28} color={'var(--glass-thick)'} />
+    );
+
   return (
     <Group align="flex-start" gap="md" wrap="nowrap">
-      {complete ? (
-        <CheckCheck
-          size={28}
-          strokeWidth={2}
-          style={{
-            stroke: 'url(#beamr-gradient)',
-            fill: 'none',
-          }}
-        />
-      ) : (
-        <Loader size={28} color={'var(--glass-thick)'} />
-      )}
+      {Icon}
       <Box>
         <Text fz={'lg'} fw={500} mb={2}>
           {title}
         </Text>
-        <Text c={colors.gray[3]}>{description}</Text>
+        <Text c={colors.gray[3]} mb="md">
+          {description}
+        </Text>
       </Box>
     </Group>
   );
