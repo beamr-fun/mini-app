@@ -18,8 +18,6 @@ import { useGqlSub } from '../hooks/useGqlSub';
 import { User } from '@neynar/nodejs-sdk/build/api';
 import { userProfileTransform, UserTransformed } from '../transforms/user';
 
-type UserSub = LoggedInUserSubscription['User_by_pk'];
-
 type UserContextType = {
   user?: User;
   address?: Address;
@@ -97,7 +95,7 @@ export const UserProvider = ({
 
   const [startingRoute, setStartingRoute] = useState<string | undefined>();
   const [hasPool, setHasPool] = useState<boolean>(false);
-  const [incomingOnly, setIncomingOnly] = useState<boolean>(false);
+  const [incomingOnly, setIncomingOnly] = useState<boolean>(true);
 
   const { data } = useToken({
     userAddress: address,
@@ -191,7 +189,7 @@ export const UserProvider = ({
         setStartingRoute('/home');
       } else {
         setHasPool(false);
-        setIncomingOnly(true);
+        // setIncomingOnly(true);
         setStartingRoute('/global');
       }
     }

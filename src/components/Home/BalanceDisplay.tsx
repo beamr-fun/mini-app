@@ -14,7 +14,7 @@ import { BeamrNav } from '../svg/BeamrNav';
 import { DancingText } from '../DancingText';
 import { IconTransfer } from '../svg/IconTransfer';
 import { CircleAlert, TrendingUp, Zap } from 'lucide-react';
-import classes from '../styles/effects.module.css';
+import classes from '../../styles/effects.module.css';
 
 export const BalanceDisplay = ({
   openSwap,
@@ -168,52 +168,54 @@ export const BalanceDisplay = ({
         <Text fz="sm">{totalIncomingPerMonth}</Text>
         <Text fz="sm">{totalOutgoingPerMonth}</Text>
       </Group>
-      <Group gap={'xs'} mt="md" justify="space-between">
-        <Tooltip
-          w={300}
-          multiline
-          label="Connect to Beams in order to stream to your wallet."
-        >
-          <Group
-            gap={4}
-            className={hasUnconnected ? classes.glow : undefined}
-            onClick={() => setTab('Receiving')}
-            style={{
-              cursor: 'pointer',
-            }}
+      {userSubscription?.incoming && userSubscription?.incoming?.length > 0 && (
+        <Group gap={'xs'} mt="md" justify="space-between">
+          <Tooltip
+            w={300}
+            multiline
+            label="Connect to Beams in order to stream to your wallet."
           >
-            {hasUnconnected && (
-              <CircleAlert
-                size={14}
-                style={{ transform: 'translateY(-1px)' }}
-              />
-            )}
-            <Text
-              fz="sm"
-              td="underline"
-              c={hasUnconnected ? colors.gray[0] : colors.gray[3]}
-            >
-              {hasUnconnected ? 'Unconnected streams.' : 'All connected'}
-            </Text>
-          </Group>
-        </Tooltip>
-        <Tooltip
-          w={250}
-          multiline
-          label={`Max 250 connections per user. You are connected to ${amtConnected} beams.`}
-        >
-          <Group gap={4}>
-            <Text fz="sm">{amtConnected}/250</Text>
-            <Zap
-              size={16}
-              color={colors.gray[3]}
+            <Group
+              gap={4}
+              className={hasUnconnected ? classes.glow : undefined}
+              onClick={() => setTab('Receiving')}
               style={{
-                transform: 'translateY(-1px)',
+                cursor: 'pointer',
               }}
-            />
-          </Group>
-        </Tooltip>
-      </Group>
+            >
+              {hasUnconnected && (
+                <CircleAlert
+                  size={14}
+                  style={{ transform: 'translateY(-1px)' }}
+                />
+              )}
+              <Text
+                fz="sm"
+                td="underline"
+                c={hasUnconnected ? colors.gray[0] : colors.gray[3]}
+              >
+                {hasUnconnected ? 'Unconnected streams.' : 'All connected'}
+              </Text>
+            </Group>
+          </Tooltip>
+          <Tooltip
+            w={250}
+            multiline
+            label={`Max 250 connections per user. You are connected to ${amtConnected} beams.`}
+          >
+            <Group gap={4}>
+              <Text fz="sm">{amtConnected}/250</Text>
+              <Zap
+                size={16}
+                color={colors.gray[3]}
+                style={{
+                  transform: 'translateY(-1px)',
+                }}
+              />
+            </Group>
+          </Tooltip>
+        </Group>
+      )}
     </Card>
   );
 };

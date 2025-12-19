@@ -13,6 +13,9 @@ import { Sending } from '../components/Home/Sending';
 import { Receiving } from '../components/Home/Receiving';
 import { SwapModal } from '../components/Home/SwapModal';
 import { BalanceDisplay } from '../components/Home/BalanceDisplay';
+import { useUser } from '../hooks/useUser';
+import { useNavigate } from 'react-router-dom';
+import { charLimit } from '../utils/common';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
@@ -23,7 +26,22 @@ export const Home = () => {
 
   const [poolsToConnect, setPoolsToConnect] = useState<Address[]>([]);
 
-  const { setCTA } = useCTA();
+  const { incomingOnly } = useUser();
+  const navigate = useNavigate();
+
+  const { setCTA, cta } = useCTA();
+
+  useCTA(
+    cta || {
+      label:
+        incomingOnly && !poolsToConnect.length ? 'Start Beaming' : undefined,
+      onClick:
+        incomingOnly && !poolsToConnect.length
+          ? () => navigate('/create-pool/1')
+          : undefined,
+      extraDeps: [incomingOnly, poolsToConnect.length],
+    }
+  );
 
   const handleConnectStage = (poolId: string) => {
     if (!address || !walletClient) return;
@@ -40,8 +58,15 @@ export const Home = () => {
       newPools.push(poolId);
     }
 
+    const EMPTY = {
+      label: '',
+      onClick: undefined,
+      disabled: true,
+      extraDeps: [incomingOnly, poolsToConnect.length],
+    };
+
     if (newPools.length === 0) {
-      setCTA(null);
+      setCTA(EMPTY);
     } else {
       setCTA({
         label: `Connect to ${newPools.length} Pool${newPools.length + 1 > 1 ? 's' : ''}`,
@@ -56,30 +81,57 @@ export const Home = () => {
                 label: 'Connecting...',
                 onClick: () => {},
                 disabled: true,
+                extraDeps: [incomingOnly, poolsToConnect.length],
               });
             },
             onSuccess: () => {
               setIsLoadingConnect(false);
-              setCTA(null);
+              setCTA(EMPTY);
               setPoolsToConnect([]);
             },
             onError: (errMsg: string) => {
               setIsLoadingConnect(false);
-              setCTA(null);
+              setCTA(EMPTY);
               setPoolsToConnect([]);
               notifications.show({
                 title: 'Error',
-                message: errMsg || 'Failed to connect to pools.',
+                message: charLimit(errMsg, 56) || 'Failed to connect to pools.',
                 color: 'red',
               });
             },
           });
         },
+        extraDeps: [incomingOnly, poolsToConnect.length],
       });
     }
 
     setPoolsToConnect(newPools);
   };
+
+  if (incomingOnly) {
+    return (
+      <PageLayout>
+        <Image
+          src={beamrLogo}
+          alt="Beamr Logo"
+          width={80}
+          height={80}
+          mb="xl"
+          fit="contain"
+        />
+
+        <SwapModal opened={opened} onClose={close} />
+        <BalanceDisplay openSwap={open} setTab={setTab} />
+        <Card>
+          <Receiving
+            onConnectClick={handleConnectStage}
+            poolsToConnect={poolsToConnect}
+            isLoadingConnect={isLoadingConnect}
+          />
+        </Card>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout>

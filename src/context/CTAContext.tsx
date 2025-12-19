@@ -5,6 +5,7 @@ export type CTAProps = {
   onClick?: () => void;
   disabled?: boolean;
   enabled?: boolean;
+  extraDeps?: any[];
 };
 
 type CTAContextType = {

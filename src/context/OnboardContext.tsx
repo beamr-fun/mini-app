@@ -115,8 +115,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       errMsg = defaultMessage;
     }
 
-    console.error(errMsg);
-
     notifications.show({
       title: 'Error',
       message: errMsg,
@@ -136,7 +134,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    // call API to create pool
     try {
       const flowRate =
         parseEther(form.values.budget.toString()) / 30n / 24n / 60n / 60n; // budget per month to flow rate per second
