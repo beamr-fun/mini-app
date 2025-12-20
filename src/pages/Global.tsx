@@ -37,6 +37,7 @@ import {
   LeaderPoolRaw,
   RecentBeam,
 } from '../transforms/global';
+import { BeamrHeadline } from '../components/BeamrHeadline';
 
 //
 
@@ -107,14 +108,7 @@ export const Global = () => {
   if (highlevelError) {
     return (
       <PageLayout>
-        <Image
-          src={beamrLogo}
-          alt="Beamr Logo"
-          width={80}
-          height={80}
-          mb="xl"
-          fit="contain"
-        />
+        <BeamrHeadline />
         <ErrorDisplay
           title="Error Loading Global Data"
           description={highlevelError.message || 'Subscription Error'}
@@ -125,15 +119,7 @@ export const Global = () => {
 
   return (
     <PageLayout>
-      <Image
-        src={beamrLogo}
-        alt="Beamr Logo"
-        width={80}
-        height={80}
-        mb="xl"
-        fit="contain"
-      />
-
+      <BeamrHeadline />
       <Card>
         <SegmentedControl
           w="100%"

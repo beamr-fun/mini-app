@@ -16,6 +16,7 @@ import { BalanceDisplay } from '../components/Home/BalanceDisplay';
 import { useUser } from '../hooks/useUser';
 import { useNavigate } from 'react-router-dom';
 import { charLimit } from '../utils/common';
+import { BeamrHeadline } from '../components/BeamrHeadline';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
@@ -111,15 +112,7 @@ export const Home = () => {
   if (incomingOnly) {
     return (
       <PageLayout>
-        <Image
-          src={beamrLogo}
-          alt="Beamr Logo"
-          width={80}
-          height={80}
-          mb="xl"
-          fit="contain"
-        />
-
+        <BeamrHeadline />
         <SwapModal opened={opened} onClose={close} />
         <BalanceDisplay openSwap={open} setTab={setTab} />
         <Card>
@@ -135,18 +128,7 @@ export const Home = () => {
 
   return (
     <PageLayout>
-      <Group justify="center">
-        <Box w={80} h={80} mb="xl">
-          <Image
-            src={beamrLogo}
-            alt="Beamr Logo"
-            w={'100%'}
-            h={'100%'}
-            fit="contain"
-          />
-        </Box>
-      </Group>
-
+      <BeamrHeadline />
       <SwapModal opened={opened} onClose={close} />
       <BalanceDisplay openSwap={open} setTab={setTab} />
       <Card>
