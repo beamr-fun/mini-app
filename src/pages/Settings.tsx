@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActionIcon,
   Avatar,
@@ -28,17 +28,30 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useUser } from '../hooks/useUser';
-import { fetchUserPrefs, updatePoolPrefs, Weightings } from '../utils/api';
+import {
+  deleteUserSub,
+  fetchIsUserSubbed,
+  fetchUserPrefs,
+  updatePoolPrefs,
+  Weightings,
+} from '../utils/api';
 import { notifications } from '@mantine/notifications';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { flowratePerSecondToMonth } from '../utils/common';
-import { formatUnits } from 'viem';
+import { Address, formatUnits, parseEther } from 'viem';
+import { distributeFlow } from '../utils/interactions';
+import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
+import { th } from 'zod/v4/locales';
 
 export const Settings = () => {
   const { colors } = useMantineTheme();
 
   const { user, getAuthHeaders, userSubscription, isLoadingSub } = useUser();
   const [loadingPrefs, setLoadingPrefs] = React.useState(false);
+
+  const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
 
   const {
     data: userPrefs,
@@ -74,23 +87,33 @@ export const Settings = () => {
       return [];
     }
 
-    return userSubscription.pools.map((pool) => {
-      const prefs = userPrefs.pools.find(
-        (p) => p.poolAddress.toLowerCase() === pool.id.toLowerCase()
-      );
+    return userSubscription.pools
+      .map((pool) => {
+        const prefs = userPrefs.pools.find(
+          (p) => p.poolAddress.toLowerCase() === pool.id.toLowerCase()
+        );
 
-      if (!prefs) return null;
+        if (!prefs) return null;
 
-      return {
-        id: pool.id,
-        creatorAddress: prefs.creatorAddress,
-        weightings: prefs.weightings,
-        name: pool.metadata.name,
-        lastUpdated: prefs.updatedAt,
-        poolAddress: prefs.poolAddress,
-        flowRate: pool.flowRate,
-      };
-    });
+        return {
+          id: pool.id,
+          creatorAddress: prefs.creatorAddress,
+          weightings: prefs.weightings,
+          name: pool.metadata.name,
+          lastUpdated: prefs.updatedAt,
+          poolAddress: prefs.poolAddress,
+          flowRate: pool.flowRate,
+        };
+      })
+      .filter((pool) => pool !== null) as {
+      id: string;
+      creatorAddress: string;
+      weightings: Weightings;
+      name: string;
+      lastUpdated: string;
+      poolAddress: string;
+      flowRate: string;
+    }[];
   }, [userPrefs, userSubscription]);
 
   const handleUpdatePrefs = async (
@@ -98,6 +121,10 @@ export const Settings = () => {
     weightings: Weightings
   ) => {
     try {
+      if (!user || !address || !walletClient) {
+        throw new Error('User address or client not found');
+      }
+
       setLoadingPrefs(true);
 
       const headers = await getAuthHeaders();
@@ -130,6 +157,69 @@ export const Settings = () => {
     }
   };
 
+  const handleDistributeFlow = async (poolAddress: string, monthly: string) => {
+    console.log('poolAddress', poolAddress);
+    console.log('monthly', monthly);
+    try {
+      if (!address || !walletClient || !publicClient) {
+        throw new Error('Missing required parameters for flow distribution');
+      }
+
+      if (!pools) {
+        throw new Error('No pools available for flow distribution');
+      }
+
+      const headers = await getAuthHeaders();
+
+      if (!headers) {
+        throw new Error('Failed to get auth headers');
+      }
+
+      setLoadingPrefs(true);
+      const flowRate = parseEther(monthly) / 30n / 24n / 60n / 60n;
+
+      const allOtherPools = pools.filter(
+        (pool) => pool.poolAddress !== poolAddress
+      );
+
+      const noOtherPoolWithFlow = allOtherPools.every(
+        (pool) => BigInt(pool.flowRate) === 0n
+      );
+
+      await distributeFlow({
+        enableZeroFlowRate: true,
+        onError(errorMsg) {
+          throw new Error('Error in flow distribution call');
+        },
+        onSuccess() {
+          setTimeout(() => {
+            setLoadingPrefs(false);
+            if (noOtherPoolWithFlow) {
+              deleteUserSub(headers);
+            }
+          }, 2000);
+        },
+        args: {
+          poolAddress: poolAddress as Address,
+          flowRate: flowRate,
+          user: address as Address,
+        },
+
+        publicClient,
+        walletClient,
+      });
+    } catch (error) {
+      console.error('Failed to distribute flow', error);
+
+      notifications.show({
+        color: 'red',
+        title: 'Error',
+        message: 'Failed to distribute flow',
+      });
+      setLoadingPrefs(false);
+    }
+  };
+
   if (isLoadingPrefs || isLoadingSub) {
     return (
       <Group justify="center" h={350}>
@@ -157,6 +247,7 @@ export const Settings = () => {
                   {...pool}
                   updatePrefs={handleUpdatePrefs}
                   loadingUpdate={loadingPrefs}
+                  handleDistributeFlow={handleDistributeFlow}
                 />
               );
             })}
@@ -191,6 +282,7 @@ const PoolCard = ({
   updatePrefs,
   poolAddress,
   loadingUpdate,
+  handleDistributeFlow,
 }: {
   id: string;
   creatorAddress: string;
@@ -206,6 +298,7 @@ const PoolCard = ({
   flowRate: string;
   updatePrefs: (poolAddress: string, weightings: Weightings) => Promise<void>;
   loadingUpdate?: boolean;
+  handleDistributeFlow: (poolAddress: string, monthly: string) => Promise<void>;
 }) => {
   const { colors } = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(false);
@@ -256,16 +349,24 @@ const PoolCard = ({
           <NumberInput
             label="Monthly Budget"
             thousandSeparator
+            valueIsNumericString
             leftSectionWidth={45}
             leftSection={<Avatar src={beamrTokenLogo} size={24} />}
             description={'Amount streaming per month'}
             value={monthly}
+            onChange={(val) => setMonthly(val.toString())}
+            disabled={loadingUpdate}
           />
 
           <Text fw={500}></Text>
         </Group>
         <Group gap="xs">
-          <Button size="xs" disabled={monthlyDiff}>
+          <Button
+            size="xs"
+            disabled={monthlyDiff || loadingUpdate}
+            onClick={() => handleDistributeFlow(poolAddress, monthly)}
+            loading={loadingUpdate}
+          >
             Adjust Flow
           </Button>
           <Button
@@ -289,22 +390,26 @@ const PoolCard = ({
           <TextInput
             leftSection={<Heart size={20} color={colors.red[7]} />}
             value={weightingState.like}
+            disabled={loadingUpdate}
             onChange={(e) => handleChangeWeighting('like', e.target.value)}
           />
           <TextInput
             leftSection={<RefreshCcw size={20} color={colors.green[7]} />}
             value={weightingState.recast}
+            disabled={loadingUpdate}
             onChange={(e) => handleChangeWeighting('recast', e.target.value)}
           />
           <TextInput
             leftSection={<Users size={20} color={colors.purple[7]} />}
             value={weightingState.follow}
+            disabled={loadingUpdate}
             onChange={(e) => handleChangeWeighting('follow', e.target.value)}
           />
           <TextInput
             leftSection={
               <MessageSquareReply size={20} color={colors.yellow[7]} />
             }
+            disabled={loadingUpdate}
             value={weightingState.comment}
             onChange={(e) => handleChangeWeighting('comment', e.target.value)}
           />
@@ -312,7 +417,7 @@ const PoolCard = ({
         <Button
           size="xs"
           mb={'sm'}
-          disabled={prefsDiff}
+          disabled={prefsDiff || loadingUpdate}
           onClick={() => updatePrefs(poolAddress, weightingState)}
           loading={loadingUpdate}
         >

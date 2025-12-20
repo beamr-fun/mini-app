@@ -142,6 +142,24 @@ export const fetchUserFollowing = async (
   }
 };
 
+export const fetchIsUserSubbed = async (apiHeaders: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/hook`, {
+      headers: apiHeaders,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to check subscription status');
+    }
+
+    return data;
+  } catch (error) {
+    throw Error;
+  }
+};
+
 const createPoolSchema = z.object({
   creatorAddress: z
     .string()
@@ -324,6 +342,25 @@ export const updatePoolPrefs = async ({
     }
 
     return data.success as boolean;
+  } catch (error) {
+    throw Error;
+  }
+};
+
+export const deleteUserSub = async (apiHeaders: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/hook`, {
+      method: 'DELETE',
+      headers: apiHeaders,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to delete user subscription');
+    }
+
+    return data;
   } catch (error) {
     throw Error;
   }

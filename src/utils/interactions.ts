@@ -11,6 +11,7 @@ export const distributeFlow = async ({
   publicClient,
   onSuccess,
   onError,
+  enableZeroFlowRate = false,
 }: {
   onSuccess: (txHash: string) => void;
   onError: (errMsg: string) => void;
@@ -21,6 +22,7 @@ export const distributeFlow = async ({
   };
   walletClient: any;
   publicClient: any;
+  enableZeroFlowRate?: boolean;
 }) => {
   try {
     if (!walletClient || typeof walletClient.writeContract !== 'function') {
@@ -33,9 +35,15 @@ export const distributeFlow = async ({
       throw new Error('Public client is not available');
     }
 
-    const userFlowRate = (flowRate * 95n) / 100n; // 95% to user
+    if (flowRate === 0n && !enableZeroFlowRate) {
+      throw new Error(
+        'Flow rate cannot be zero, unless enableZeroFlowRate is true'
+      );
+    }
 
-    const feeFlowRate = flowRate - userFlowRate; // 5% fee
+    const userFlowRate = flowRate === 0n ? 0n : (flowRate * 95n) / 100n; // 95% to user
+
+    const feeFlowRate = flowRate === 0n ? 0n : flowRate - userFlowRate; // 5% fee
 
     const operations = [
       prepareOperation({
