@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { PageLayout } from '../layouts/PageLayout';
 import {
   ActionIcon,
@@ -26,10 +26,42 @@ import {
   Speech,
   Users,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { useUser } from '../hooks/useUser';
+import { completePool, fetchUserPrefs } from '../utils/api';
+import { notifications } from '@mantine/notifications';
 
 export const Settings = () => {
   const { colors } = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(false);
+  const { user, getAuthHeaders, userSubscription } = useUser();
+
+  const {
+    data: userPrefs,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['user-prefs', user?.fid],
+    queryFn: async () => {
+      const headers = await getAuthHeaders();
+
+      if (!headers) {
+        notifications.show({
+          color: 'red',
+          title: 'Error',
+          message: 'Failed to get headers',
+        });
+
+        return;
+      }
+
+      return fetchUserPrefs(user!.fid, headers);
+    },
+    enabled: !!user?.fid,
+  });
+
+  console.log('userPrefs', userPrefs);
+
   return (
     <PageLayout title="Settings">
       <Stack>

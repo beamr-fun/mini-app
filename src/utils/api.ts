@@ -10,6 +10,45 @@ export type APIHeaders = {
   authorization: string;
 };
 
+type PoolPrefs = {
+  poolAddress: string;
+  creatorAddress: string;
+  weightings: {
+    recast: string;
+    like: string;
+    comment: string;
+    follow: string;
+  };
+};
+
+export type UserPrefs = {
+  fid: number;
+  preferredAddress: string;
+  pools: PoolPrefs[];
+};
+
+export const fetchUserPrefs = async (fid: number, apiHeaders: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/prefs/${fid}`, {
+      headers: apiHeaders,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(`${res.status}: Failed to fetch user preferences`);
+    }
+
+    if (!data.prefs) {
+      throw new Error('No preferences found for user');
+    }
+
+    return data.prefs as UserPrefs;
+  } catch (error) {
+    throw Error;
+  }
+};
+
 export const fetchBesties = async (fid: number, apiHeaders: APIHeaders) => {
   try {
     const res = await fetch(`${keys.apiUrl}/v1/user/besties/${fid}`, {
