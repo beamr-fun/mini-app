@@ -10,17 +10,19 @@ export type APIHeaders = {
   authorization: string;
 };
 
+export type Weightings = {
+  recast: string;
+  like: string;
+  comment: string;
+  follow: string;
+};
+
 type PoolPrefs = {
   poolAddress: string;
   creatorAddress: string;
   createdAt: string;
   updatedAt: string;
-  weightings: {
-    recast: string;
-    like: string;
-    comment: string;
-    follow: string;
-  };
+  weightings: Weightings;
 };
 
 export type UserPrefs = {
@@ -286,6 +288,43 @@ export const completePool = async ({
     return true;
   } catch (error) {
     onError((error as Error).message);
+    throw Error;
+  }
+};
+
+export const updatePoolPrefs = async ({
+  poolAddress,
+  weightings,
+  headers,
+}: {
+  poolAddress: string;
+  weightings: Weightings;
+  headers: APIHeaders;
+}) => {
+  try {
+    if (!isAddress(poolAddress)) {
+      throw new Error('Invalid pool address');
+    }
+
+    const res = await fetch(`${keys.apiUrl}/v1/pool/pool-prefs`, {
+      method: 'PUT',
+      body: JSON.stringify({ poolAddress, weightings }),
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data?.error || 'Failed to update pool preferences');
+    }
+
+    const data = await res.json();
+
+    if (!data?.success && typeof data.success !== 'boolean') {
+      throw new Error('Invalid response from server');
+    }
+
+    return data.success as boolean;
+  } catch (error) {
     throw Error;
   }
 };

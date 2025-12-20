@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo } from 'react';
-import { PageLayout } from '../layouts/PageLayout';
 import {
   ActionIcon,
   Avatar,
@@ -28,7 +27,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useUser } from '../hooks/useUser';
-import { completePool, fetchUserPrefs } from '../utils/api';
+import { fetchUserPrefs, updatePoolPrefs, Weightings } from '../utils/api';
 import { notifications } from '@mantine/notifications';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { flowratePerSecondToMonth } from '../utils/common';
@@ -37,6 +36,7 @@ export const Settings = () => {
   const { colors } = useMantineTheme();
 
   const { user, getAuthHeaders, userSubscription, isLoadingSub } = useUser();
+  const [loadingPrefs, setLoadingPrefs] = React.useState(false);
 
   const {
     data: userPrefs,
@@ -90,6 +90,41 @@ export const Settings = () => {
     });
   }, [userPrefs, userSubscription]);
 
+  const handleUpdatePrefs = async (
+    poolAddress: string,
+    weightings: Weightings
+  ) => {
+    try {
+      setLoadingPrefs(true);
+
+      const headers = await getAuthHeaders();
+
+      if (!headers) {
+        return;
+      }
+
+      const res = await updatePoolPrefs({
+        poolAddress,
+        weightings,
+        headers,
+      });
+
+      if (!res) {
+        throw new Error('Failed to update pool preferences');
+      }
+    } catch (error) {
+      console.error('Failed to update pool preferences', error);
+
+      notifications.show({
+        color: 'red',
+        title: 'Error',
+        message: 'Failed to update pool preferences',
+      });
+    } finally {
+      setLoadingPrefs(false);
+    }
+  };
+
   if (isLoadingPrefs || isLoadingSub) {
     return (
       <Group justify="center" h={350}>
@@ -111,7 +146,14 @@ export const Settings = () => {
           <Stack gap="md">
             {pools.map((pool) => {
               if (!pool) return null;
-              return <PoolCard key={pool.id} {...pool} />;
+              return (
+                <PoolCard
+                  key={pool.id}
+                  {...pool}
+                  updatePrefs={handleUpdatePrefs}
+                  loadingUpdate={loadingPrefs}
+                />
+              );
             })}
           </Stack>
         ) : (
@@ -141,6 +183,9 @@ const PoolCard = ({
   lastUpdated,
   name,
   weightings,
+  updatePrefs,
+  poolAddress,
+  loadingUpdate,
 }: {
   id: string;
   creatorAddress: string;
@@ -154,13 +199,16 @@ const PoolCard = ({
   lastUpdated: string;
   poolAddress: string;
   flowRate: string;
+  updatePrefs: (poolAddress: string, weightings: Weightings) => Promise<void>;
+  loadingUpdate?: boolean;
 }) => {
   const { colors } = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(false);
-  const [weightingState, setWeightingState] = React.useState(weightings);
+  const [weightingState, setWeightingState] =
+    React.useState<Weightings>(weightings);
 
   const handleChangeWeighting = (
-    weightType: 'recast' | 'like' | 'comment' | 'follow',
+    weightType: keyof Weightings,
     value: string
   ) => {
     setWeightingState((prev) => ({
@@ -227,7 +275,13 @@ const PoolCard = ({
             onChange={(e) => handleChangeWeighting('comment', e.target.value)}
           />
         </Stack>
-        <Button size="xs" mb={'sm'} disabled={hasDiff}>
+        <Button
+          size="xs"
+          mb={'sm'}
+          disabled={hasDiff}
+          onClick={() => updatePrefs(poolAddress, weightingState)}
+          loading={loadingUpdate}
+        >
           Save
         </Button>
       </Collapse>
