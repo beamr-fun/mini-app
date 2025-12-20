@@ -25,7 +25,7 @@ export const ADDR_PROD: Addresses = {
   GDA_FORWARDER: '0x',
   SUPER_FLUID: '0x',
   GDA: '0x',
-  COLLECTOR_POOL: '0x',
+  COLLECTOR_POOL: '0x179847eb81ee1ad9f598d104d92d797200300517',
 } as const;
 
 export const ADDR = isTestnet ? ADDR_DEV : ADDR_PROD;

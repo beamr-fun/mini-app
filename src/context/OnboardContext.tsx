@@ -65,7 +65,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
 
-  const { user, address, getAuthHeaders } = useUser();
+  const { user, address, getAuthHeaders, setIncomingOnly } = useUser();
 
   const {
     data: besties,
@@ -240,6 +240,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       apiHeaders: freshApiHeaders,
       onSuccess() {
         setCreationSteps((prev) => ({ ...prev, completePool: 'success' }));
+        setIncomingOnly(false);
       },
       onError(errorMsg) {
         handleError(new Error(errorMsg), 'Error completing pool');

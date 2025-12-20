@@ -1,4 +1,4 @@
-import { Card, Image, SegmentedControl } from '@mantine/core';
+import { Box, Card, Group, Image, SegmentedControl } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
 import beamrLogo from '../assets/beamrLogo.png';
 import { useState } from 'react';
@@ -135,14 +135,17 @@ export const Home = () => {
 
   return (
     <PageLayout>
-      <Image
-        src={beamrLogo}
-        alt="Beamr Logo"
-        width={80}
-        height={80}
-        mb="xl"
-        fit="contain"
-      />
+      <Group justify="center">
+        <Box w={80} h={80} mb="xl">
+          <Image
+            src={beamrLogo}
+            alt="Beamr Logo"
+            w={'100%'}
+            h={'100%'}
+            fit="contain"
+          />
+        </Box>
+      </Group>
 
       <SwapModal opened={opened} onClose={close} />
       <BalanceDisplay openSwap={open} setTab={setTab} />

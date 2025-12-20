@@ -30,6 +30,7 @@ type UserContextType = {
   userBalanceFetchedAt?: Date;
   hasPool: boolean;
   incomingOnly: boolean;
+  setIncomingOnly: (only: boolean) => void;
   isLoadingSub: boolean;
   userSubError: Error | null;
   isLoadingAPI: boolean;
@@ -39,6 +40,7 @@ type UserContextType = {
 export const UserContext = createContext<UserContextType>({
   hasPool: false,
   incomingOnly: false,
+  setIncomingOnly: (only: boolean) => {},
   isLoadingSub: false,
   userSubError: null,
   isLoadingAPI: false,
@@ -47,16 +49,19 @@ export const UserContext = createContext<UserContextType>({
 });
 
 const login = async () => {
-  const [tokenRes, context] = await Promise.all([
-    sdk.quickAuth.getToken(),
-    sdk.context,
-  ]);
+  console.log('LOADING PROCESS: START');
+
+  const tokenRes = await sdk.quickAuth.getToken();
+
+  console.log('LOADING PROCESS: TOKEN');
 
   const token = tokenRes?.token || null;
 
   if (!token) {
     throw new Error('No auth token available');
   }
+
+  console.log('LOADING PROCESS: API REQUEST');
 
   const res = await fetch(`${keys.apiUrl}/v1/user/auth`, {
     headers: {
@@ -72,6 +77,8 @@ const login = async () => {
 
   const data = (await res.json()) as AuthResponse;
 
+  console.log('LOADING PROCESS: API RESPONSE');
+
   if (!data.success) {
     console.error('Authentication failed', data);
     throw new Error('Authentication unsuccessful');
@@ -80,7 +87,6 @@ const login = async () => {
   return {
     user: data.user,
     jwt: data.jwtPayload,
-    context,
     token: token || undefined,
   };
 };
@@ -95,7 +101,7 @@ export const UserProvider = ({
 
   const [startingRoute, setStartingRoute] = useState<string | undefined>();
   const [hasPool, setHasPool] = useState<boolean>(false);
-  const [incomingOnly, setIncomingOnly] = useState<boolean>(true);
+  const [incomingOnly, setIncomingOnly] = useState<boolean>(false);
 
   const { data } = useToken({
     userAddress: address,
@@ -163,6 +169,9 @@ export const UserProvider = ({
       variables: { id: apiData?.user?.fid.toString() || '' },
       enabled: !!apiData?.user?.fid && !IS_TESTING,
       transform: async (data) => {
+        if (!userSubscription) {
+          console.log('LOADING PROCESS: SUBSCRIBER RESPONSE');
+        }
         return userProfileTransform(data, getAuthHeaders);
       },
     }
@@ -178,6 +187,8 @@ export const UserProvider = ({
     }
     if (isLoadingSub || !apiData) return;
 
+    console.log('LOADING PROCESS: DATA TRANSFORMED');
+
     const currentSub = userSubscription;
 
     if (!currentSub) {
@@ -189,12 +200,13 @@ export const UserProvider = ({
         setStartingRoute('/home');
       } else {
         setHasPool(false);
-        // setIncomingOnly(true);
+        setIncomingOnly(true);
         setStartingRoute('/global');
       }
     }
 
     sdk.actions.ready();
+    console.log('LOADING COMPLETE: SDK READY');
   }, [isLoadingSub, userSubscription, apiData]);
 
   return (
@@ -211,6 +223,7 @@ export const UserProvider = ({
         userBalanceFetchedAt,
         hasPool,
         incomingOnly,
+        setIncomingOnly,
         isLoadingSub,
         apiError,
         isLoadingAPI,
