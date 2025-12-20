@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActionIcon,
   Avatar,
@@ -9,6 +9,7 @@ import {
   Flex,
   Group,
   Loader,
+  NumberInput,
   Stack,
   Text,
   TextInput,
@@ -31,6 +32,7 @@ import { fetchUserPrefs, updatePoolPrefs, Weightings } from '../utils/api';
 import { notifications } from '@mantine/notifications';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { flowratePerSecondToMonth } from '../utils/common';
+import { formatUnits } from 'viem';
 
 export const Settings = () => {
   const { colors } = useMantineTheme();
@@ -42,6 +44,7 @@ export const Settings = () => {
     data: userPrefs,
     isLoading: isLoadingPrefs,
     error,
+    refetch,
   } = useQuery({
     queryKey: ['user-prefs', user?.fid],
     queryFn: async () => {
@@ -112,6 +115,8 @@ export const Settings = () => {
       if (!res) {
         throw new Error('Failed to update pool preferences');
       }
+
+      await refetch();
     } catch (error) {
       console.error('Failed to update pool preferences', error);
 
@@ -206,6 +211,14 @@ const PoolCard = ({
   const [opened, { toggle }] = useDisclosure(false);
   const [weightingState, setWeightingState] =
     React.useState<Weightings>(weightings);
+  const [monthly, setMonthly] = useState<string>(
+    formatUnits(BigInt(flowratePerSecondToMonth(BigInt(flowRate), false)), 18)
+  );
+
+  const existingMonthly = formatUnits(
+    BigInt(flowratePerSecondToMonth(BigInt(flowRate), false)),
+    18
+  );
 
   const handleChangeWeighting = (
     weightType: keyof Weightings,
@@ -217,11 +230,15 @@ const PoolCard = ({
     }));
   };
 
-  const hasDiff =
+  const prefsDiff =
     weightingState.like === weightings.like &&
     weightingState.recast === weightings.recast &&
     weightingState.comment === weightings.comment &&
     weightingState.follow === weightings.follow;
+
+  const monthlyDiff = monthly === existingMonthly;
+
+  const isZero = monthly === '0';
 
   return (
     <Card>
@@ -236,12 +253,29 @@ const PoolCard = ({
       </Text>
       <Group justify="space-between" mb="lg">
         <Group gap="xs">
-          <Avatar src={beamrTokenLogo} size={24} />
-          <Text fw={500}>{flowratePerSecondToMonth(BigInt(flowRate))}</Text>
+          <NumberInput
+            label="Monthly Budget"
+            thousandSeparator
+            leftSectionWidth={45}
+            leftSection={<Avatar src={beamrTokenLogo} size={24} />}
+            description={'Amount streaming per month'}
+            value={monthly}
+          />
+
+          <Text fw={500}></Text>
         </Group>
         <Group gap="xs">
-          <Button size="xs">Adjust Flow</Button>
-          <Button size="xs" variant="secondary">
+          <Button size="xs" disabled={monthlyDiff}>
+            Adjust Flow
+          </Button>
+          <Button
+            size="xs"
+            variant="danger"
+            disabled={isZero}
+            onClick={() => {
+              setMonthly('0');
+            }}
+          >
             Stop
           </Button>
         </Group>
@@ -278,7 +312,7 @@ const PoolCard = ({
         <Button
           size="xs"
           mb={'sm'}
-          disabled={hasDiff}
+          disabled={prefsDiff}
           onClick={() => updatePrefs(poolAddress, weightingState)}
           loading={loadingUpdate}
         >

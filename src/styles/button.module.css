@@ -60,6 +60,36 @@
   display: none;
 }
 
+.root[data-variant='secondary']:disabled {
+  background: rgba(100, 100, 100, 0.1);
+  border: none;
+
+  color: var(--mantine-color-gray-0);
+  cursor: not-allowed;
+}
+
+.root[data-variant='danger'] {
+  background: transparent;
+  border: rem(1px) solid var(--mantine-color-red-7);
+  transition: border-color 150ms ease-in;
+}
+
+.root[data-variant='danger']:hover {
+  border: rem(1px) solid var(--mantine-color-red-6);
+}
+
+.root[data-variant='danger']:hover::after {
+  display: none;
+}
+
+.root[data-variant='danger']:disabled {
+  background: rgba(100, 100, 100, 0.1);
+  border: none;
+
+  color: var(--mantine-color-gray-0);
+  cursor: not-allowed;
+}
+
 .root[data-size='lg'] {
   width: rem(295px);
   min-height: rem(52px);

@@ -46,9 +46,16 @@ export function formatUnitBalance(
   return formatBalance(formatUnits(units, decimals), displayDecimals);
 }
 
-export const flowratePerSecondToMonth = (flowrate: bigint): string => {
+export const flowratePerSecondToMonth = (
+  flowrate: bigint,
+  formatted = true
+): string => {
   const secondsInMonth = BigInt(60 * 60 * 24 * 30);
   const units = flowrate * secondsInMonth;
+
+  if (!formatted) {
+    return units.toString();
+  }
 
   return `${formatUnitBalance(units, 18, 2)}/mo`;
 };
