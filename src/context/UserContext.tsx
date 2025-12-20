@@ -79,6 +79,8 @@ const login = async () => {
 
   console.log('LOADING PROCESS: API RESPONSE');
 
+  console.log('data?.user.fid', data?.user.fid);
+
   if (!data.success) {
     console.error('Authentication failed', data);
     throw new Error('Authentication unsuccessful');

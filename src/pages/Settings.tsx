@@ -41,7 +41,6 @@ import { flowratePerSecondToMonth } from '../utils/common';
 import { Address, formatUnits, parseEther } from 'viem';
 import { distributeFlow } from '../utils/interactions';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
-import { th } from 'zod/v4/locales';
 
 export const Settings = () => {
   const { colors } = useMantineTheme();
