@@ -18,12 +18,10 @@ import beamrTokenLogo from '../assets/beamrTokenLogo.png';
 import { useDisclosure } from '@mantine/hooks';
 import {
   ChevronDown,
-  ChevronRight,
   ChevronUp,
   Heart,
   MessageSquareReply,
   RefreshCcw,
-  Speech,
   Users,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -60,7 +58,8 @@ export const Settings = () => {
     enabled: !!user?.fid,
   });
 
-  console.log('userPrefs', userPrefs);
+  if (isLoading) {
+  }
 
   return (
     <PageLayout title="Settings">
@@ -77,7 +76,7 @@ export const Settings = () => {
               </Tag>
             </Group>
             <Text c={colors.gray[3]} fz="sm" mb="md">
-              Created Oct 28th
+              Last Updated:
             </Text>
             <Group justify="space-between" mb="lg">
               <Group gap="xs">

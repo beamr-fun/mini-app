@@ -5,6 +5,9 @@ subscription LoggedInUser($id: String!) {
       id
       flowRate
       totalUnits
+      metadata {
+        name
+      }
     }
     incoming(
       order_by: { lastUpdated: desc } # where: { beamPool: { active: { _eq: true } } }
