@@ -14,7 +14,12 @@ export type UserTransformed = {
   id: string;
   pools: {
     __typename?: 'BeamPool';
+    flowRate: string;
+    totalUnits: string;
     id: string;
+    metadata: {
+      name: string;
+    };
   }[];
 
   incoming: {

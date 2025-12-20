@@ -13,6 +13,8 @@ export type APIHeaders = {
 type PoolPrefs = {
   poolAddress: string;
   creatorAddress: string;
+  createdAt: string;
+  updatedAt: string;
   weightings: {
     recast: string;
     like: string;
