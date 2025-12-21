@@ -28,20 +28,25 @@ export const Home = () => {
   const [poolsToConnect, setPoolsToConnect] = useState<Address[]>([]);
 
   const { incomingOnly } = useUser();
+
   const navigate = useNavigate();
 
   const { setCTA, cta } = useCTA();
 
   useCTA(
-    cta || {
-      label:
-        incomingOnly && !poolsToConnect.length ? 'Start Beaming' : undefined,
-      onClick:
-        incomingOnly && !poolsToConnect.length
-          ? () => navigate('/create-pool/1')
-          : undefined,
-      extraDeps: [incomingOnly, poolsToConnect.length],
-    }
+    cta && poolsToConnect.length > 0
+      ? cta
+      : {
+          label:
+            incomingOnly && !poolsToConnect.length
+              ? 'Start Beaming'
+              : undefined,
+          onClick:
+            incomingOnly && !poolsToConnect.length
+              ? () => navigate('/create-pool/1')
+              : undefined,
+          extraDeps: [incomingOnly, poolsToConnect.length],
+        }
   );
 
   const handleConnectStage = (poolId: string) => {

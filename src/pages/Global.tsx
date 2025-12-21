@@ -15,7 +15,7 @@ import {
 import { PageLayout } from '../layouts/PageLayout';
 import beamrLogo from '../assets/beamrLogo.png';
 import beamrTokenLogo from '../assets/beamrTokenLogo.png';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { useGqlSub } from '../hooks/useGqlSub';
 import {
@@ -29,8 +29,6 @@ import { useCTA } from '../hooks/useCTA';
 import { useNavigate } from 'react-router-dom';
 import { Ribbon, Trophy } from 'lucide-react';
 import { ErrorDisplay } from '../components/ErrorDisplay';
-import { APIHeaders, fetchProfiles } from '../utils/api';
-import { User } from '@neynar/nodejs-sdk/build/api';
 import {
   globalLeaderTransform,
   globalRecentTransform,
@@ -99,10 +97,15 @@ export const Global = () => {
 
   const shouldRenderCTA = !hasPool && !highlevelError;
 
+  // useCTA({
+  //   label: shouldRenderCTA ? 'Start Beaming' : undefined,
+  //   onClick: shouldRenderCTA ? () => navigate('/create-pool/1') : undefined,
+  //   extraDeps: [shouldRenderCTA],
+  // });
+
   useCTA({
-    label: shouldRenderCTA ? 'Start Beaming' : undefined,
-    onClick: shouldRenderCTA ? () => navigate('/create-pool/1') : undefined,
-    extraDeps: [shouldRenderCTA],
+    label: 'Start Beaming',
+    onClick: () => navigate('/create-pool/1'),
   });
 
   if (highlevelError) {

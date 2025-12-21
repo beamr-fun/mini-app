@@ -144,7 +144,11 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       await createPool({
         onSuccess(poolAddress) {
           setPoolAddress(poolAddress as Address);
-          setCreationSteps((prev) => ({ ...prev, createPool: 'success' }));
+          setCreationSteps((prev) => ({
+            ...prev,
+            createPool: 'success',
+            distributeFlow: 'requesting',
+          }));
         },
         onError(errorMsg) {
           handleError(errorMsg, 'Error creating pool');

@@ -12,6 +12,8 @@ import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../layouts/PageLayout';
 import { CheckCheck, ChevronRight, InfoIcon } from 'lucide-react';
 import { useCTA } from '../hooks/useCTA';
+import { useEffect } from 'react';
+import classes from '../styles/effects.module.css';
 
 export const CreateConfirm = () => {
   const { creationSteps } = useOnboard();
@@ -19,17 +21,19 @@ export const CreateConfirm = () => {
   const { handleDistributeFlow } = useOnboard();
   const navigate = useNavigate();
 
-  const allStepsComplete = Object.values(creationSteps).every((step) => step);
+  const allStepsComplete = Object.values(creationSteps).every(
+    (step) => step === 'success'
+  );
 
   const distributeReady =
-    creationSteps.createPool &&
-    !creationSteps.distributeFlow &&
-    !creationSteps.completePool &&
-    !creationSteps.indexTransaction;
+    creationSteps.createPool === 'success' &&
+    creationSteps.distributeFlow === 'requesting';
 
-  const awaitingCreate = Object.values(creationSteps).every((step) => !step);
+  const awaitingCreate = Object.values(creationSteps).every(
+    (step) => 'loading' === step
+  );
 
-  useCTA({
+  const { setCTA } = useCTA({
     label: awaitingCreate
       ? 'Creating Pool'
       : distributeReady
@@ -43,7 +47,15 @@ export const CreateConfirm = () => {
           navigate('/home');
         },
     disabled: !distributeReady && !allStepsComplete,
+    extraDeps: [distributeReady, allStepsComplete, creationSteps],
   });
+
+  useEffect(() => {
+    return () => {
+      console.log('What the fuck!');
+      setCTA({ label: undefined });
+    };
+  }, []);
 
   const createDescription =
     creationSteps.createPool === 'loading'
@@ -134,6 +146,7 @@ const LoaderStep = ({
       <ChevronRight
         size={28}
         strokeWidth={2}
+        className={classes.glow}
         style={{
           stroke: 'url(#beamr-gradient)',
           fill: 'none',
