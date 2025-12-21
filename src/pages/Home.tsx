@@ -1,7 +1,7 @@
 import { Box, Card, Group, Image, SegmentedControl } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
 import beamrLogo from '../assets/beamrLogo.png';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { useDisclosure } from '@mantine/hooks';
 import { useCTA } from '../hooks/useCTA';
@@ -27,6 +27,8 @@ export const Home = () => {
 
   const [poolsToConnect, setPoolsToConnect] = useState<Address[]>([]);
 
+  const hasToggledConnect = useRef(false);
+
   const { incomingOnly } = useUser();
 
   const navigate = useNavigate();
@@ -34,7 +36,7 @@ export const Home = () => {
   const { setCTA, cta } = useCTA();
 
   useCTA(
-    cta && poolsToConnect.length > 0
+    cta && hasToggledConnect
       ? cta
       : {
           label:
@@ -112,6 +114,9 @@ export const Home = () => {
     }
 
     setPoolsToConnect(newPools);
+    if (!hasToggledConnect.current) {
+      hasToggledConnect.current = true;
+    }
   };
 
   if (incomingOnly) {
