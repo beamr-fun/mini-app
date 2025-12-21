@@ -14,30 +14,19 @@ import { useMemo, useState } from 'react';
 import { useCTA } from '../hooks/useCTA';
 import { PageLayout } from '../layouts/PageLayout';
 import { useNavigate } from 'react-router-dom';
+import { formatBalance } from '../utils/common';
 
 export const Friends = () => {
   const { budget, besties, form, selectedFriends, handlePoolCreate } =
     useOnboard();
 
-  const [filter, setFilter] = useState('');
   const navigate = useNavigate();
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(event.target.value);
-  };
 
   const filteredFriends = useMemo(() => {
     if (!besties) return [];
 
-    const query = filter.toLowerCase();
-    return besties
-      .filter(
-        (friend) =>
-          friend.username.toLowerCase().includes(query) ||
-          friend.display_name?.toLowerCase().includes(query)
-      )
-      .map((friend) => ({ ...friend, checked: false }));
-  }, [besties, filter]);
+    return besties.map((friend) => ({ ...friend, checked: false }));
+  }, [besties]);
 
   const hasSelected3 =
     (selectedFriends && selectedFriends?.length >= 3) || false;
@@ -54,34 +43,23 @@ export const Friends = () => {
 
   return (
     <PageLayout title="Choose Friends">
-      <Group justify="center" mb={24}>
-        <Group align="end">
-          <Text fz={36}>{budget}/mo</Text>
-          <Text
-            fz={'sm'}
-            variant="label"
-            style={{
-              transform: 'translateY(-9px)',
-            }}
-          >
-            BEAMR
-          </Text>
-        </Group>
-      </Group>
-      <Text mb={'xl'}>Seed your Beamr with 3 of your favorite Casters</Text>
-      <Text fz="lg" mb="md" c={'var(--mantine-color-gray-2)'}>
-        Select 3+ Casters to start Beamin!
+      <Stack mb="md" align="center">
+        <Text fz={36}>{formatBalance(budget)}/mo</Text>
+        <Text
+          fz={'sm'}
+          variant="label"
+          style={{
+            transform: 'translateY(-9px)',
+          }}
+        >
+          BEAMR/mo
+        </Text>
+      </Stack>
+
+      <Text fz="lg" mb="md" ta="center">
+        Add the first recipients to your pool (3+)
       </Text>
       <Card>
-        <TextInput
-          leftSection={<Search size={18} />}
-          mb="sm"
-          variant="search"
-          placeholder="Search by username or display name"
-          onChange={handleSearch}
-          leftSectionWidth={36}
-        />
-
         <Stack gap={6}>
           {filteredFriends.map((friend) => {
             return (
