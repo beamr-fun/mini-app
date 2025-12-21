@@ -1,10 +1,10 @@
-import { Card, SegmentedControl } from '@mantine/core';
+import { Button, Card, SegmentedControl } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
 import { useRef, useState } from 'react';
 
 import { useDisclosure } from '@mantine/hooks';
 import { useCTA } from '../hooks/useCTA';
-import { Address, isAddress } from 'viem';
+import { Address, formatUnits, isAddress, parseUnits } from 'viem';
 import { multiConnect } from '../utils/interactions';
 import { useAccount, useWalletClient } from 'wagmi';
 import { notifications } from '@mantine/notifications';
@@ -16,6 +16,9 @@ import { useUser } from '../hooks/useUser';
 import { useNavigate } from 'react-router-dom';
 import { charLimit } from '../utils/common';
 import { BeamrHeadline } from '../components/BeamrHeadline';
+import { getQuote } from '../utils/api';
+import { ADDR, ADDR_PROD, NATIVE_TOKEN } from '../const/addresses';
+import { base } from 'viem/chains';
 
 export const Home = () => {
   const [tab, setTab] = useState('Sending');
@@ -28,7 +31,7 @@ export const Home = () => {
 
   const hasToggledConnect = useRef(false);
 
-  const { incomingOnly } = useUser();
+  const { incomingOnly, userSubscription } = useUser();
 
   const navigate = useNavigate();
 
@@ -118,6 +121,16 @@ export const Home = () => {
     }
   };
 
+  const test = () => {
+    getQuote({
+      sellToken: NATIVE_TOKEN,
+      buyToken: ADDR_PROD.SUPER_TOKEN,
+      buyAmount: parseUnits('6000000', 18).toString(),
+      taker: address as `0x${string}`,
+      chainId: base.id.toString(),
+    });
+  };
+
   if (incomingOnly) {
     return (
       <PageLayout>
@@ -137,6 +150,7 @@ export const Home = () => {
 
   return (
     <PageLayout>
+      <Button onClick={test}>Test</Button>
       <BeamrHeadline />
       <SwapModal opened={opened} onClose={close} />
       <BalanceDisplay openSwap={open} setTab={setTab} />

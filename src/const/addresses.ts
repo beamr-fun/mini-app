@@ -11,6 +11,8 @@ type Addresses = {
   PRE_BUY_POOL: Address;
 };
 
+export const NATIVE_TOKEN = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+
 export const ADDR_DEV: Addresses = {
   SUPER_TOKEN: '0x19A30530209342cB2D94aD2693983A5cF7B77b79',
   BEAMR: '0x74A7b2e23D690467E26E86220B9B5b081E5282cb',
@@ -22,7 +24,7 @@ export const ADDR_DEV: Addresses = {
 } as const;
 
 export const ADDR_PROD: Addresses = {
-  SUPER_TOKEN: '0x',
+  SUPER_TOKEN: '0x22F1cd353441351911691EE4049c7b773abb1ecF',
   BEAMR: '0x',
   GDA_FORWARDER: '0x',
   SUPER_FLUID: '0x',

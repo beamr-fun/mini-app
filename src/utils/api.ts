@@ -2,8 +2,9 @@ import { Follower, User } from '@neynar/nodejs-sdk/build/api';
 import { isAddress, parseEventLogs } from 'viem';
 import z from 'zod';
 import { BeamRABI } from '../abi/BeamR';
-import { keys } from './setup';
+import { isTestnet, keys } from './setup';
 import { cacheProfiles, getCachedProfiles } from './cache';
+import { QuoteParams, quoteSchema } from '../validation/poolMetadata';
 
 export type APIHeaders = {
   'Content-Type': string;
@@ -358,6 +359,44 @@ export const deleteUserSub = async (apiHeaders: APIHeaders) => {
 
     if (!res.ok) {
       throw new Error(data?.error || 'Failed to delete user subscription');
+    }
+
+    return data;
+  } catch (error) {
+    throw Error;
+  }
+};
+
+export const getQuote = async (params: QuoteParams) => {
+  if (isTestnet) {
+    console.warn(
+      'getQuote is not available on testnet, returning values for base mainnet'
+    );
+  }
+
+  const isValidParams = quoteSchema.safeParse(params);
+
+  if (!isValidParams.success) {
+    throw new Error(`Invalid quote parameters: ${isValidParams.error.message}`);
+  }
+
+  const queryParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      queryParams.append(key, value.toString());
+    }
+  });
+
+  console.log({ buyAmount: params.buyAmount, queryParams });
+
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/swap/quote?${queryParams}`);
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to fetch quote');
     }
 
     return data;
