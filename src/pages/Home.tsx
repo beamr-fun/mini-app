@@ -1,6 +1,5 @@
-import { Box, Card, Group, Image, SegmentedControl } from '@mantine/core';
+import { Card, SegmentedControl } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
-import beamrLogo from '../assets/beamrLogo.png';
 import { useRef, useState } from 'react';
 
 import { useDisclosure } from '@mantine/hooks';

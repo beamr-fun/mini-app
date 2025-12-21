@@ -100,9 +100,9 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     abi: erc20Abi,
     functionName: 'balanceOf',
     query: {
-      enabled: !!form.values.preferredAddress,
+      enabled: !!address,
     },
-    args: [form.values.preferredAddress as `0x${string}`],
+    args: [address as Address],
   });
 
   const handleError = (error: unknown, defaultMessage: string) => {

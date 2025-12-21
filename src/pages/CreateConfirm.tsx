@@ -10,7 +10,7 @@ import {
 import { useOnboard } from '../hooks/useOnboard';
 import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../layouts/PageLayout';
-import { CheckCheck, ChevronRight, InfoIcon } from 'lucide-react';
+import { CheckCheck, ChevronDown, InfoIcon } from 'lucide-react';
 import { useCTA } from '../hooks/useCTA';
 import { useEffect } from 'react';
 import classes from '../styles/effects.module.css';
@@ -143,12 +143,12 @@ const LoaderStep = ({
         }}
       />
     ) : status === 'requesting' ? (
-      <ChevronRight
+      <ChevronDown
         size={28}
         strokeWidth={2}
         className={classes.glow}
         style={{
-          stroke: 'url(#beamr-gradient)',
+          stroke: colors.yellow[5],
           fill: 'none',
         }}
       />
