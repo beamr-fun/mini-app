@@ -56,5 +56,3 @@ export const startTxPoll = async ({
     }
   }, 500);
 };
-
-fetchTx('example-tx-id');

@@ -17,12 +17,17 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { Bold } from '../components/typography';
-import { formatUnitBalance, truncateAddress } from '../utils/common';
+import {
+  charLimit,
+  flowratePerSecondToMonth,
+  formatUnitBalance,
+  truncateAddress,
+} from '../utils/common';
 import { useNavigate } from 'react-router-dom';
 import { useOnboard } from '../hooks/useOnboard';
 import { Tag } from '../components/Tag';
 import { useUser } from '../hooks/useUser';
-import { useAccount } from 'wagmi';
+import { useAccount, useWalletClient } from 'wagmi';
 import { PageLayout } from '../layouts/PageLayout';
 import { useCTA } from '../hooks/useCTA';
 import { IconTransfer } from '../components/svg/IconTransfer';
@@ -30,28 +35,108 @@ import { useDisclosure } from '@mantine/hooks';
 import { SwapUI } from '../components/SwapUI';
 import beamrEcon from '../assets/beamrEcon.png';
 import { Info, PlusIcon } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { multiConnect } from '../utils/interactions';
+import { notifications } from '@mantine/notifications';
+import { Address } from 'viem';
+import { isTestnet } from '../utils/setup';
+import { ADDR } from '../const/addresses';
 
 export const Budget = () => {
   const { user } = useUser();
-  const { balance } = useOnboard();
+  const { balance, refetchBalance, refetchClaimable } = useOnboard();
   const navigate = useNavigate();
-  const { form } = useOnboard();
+  const { form, userClaimable } = useOnboard();
   const { address } = useAccount();
+  const [isLoading, setIsLoading] = useState(false);
   const { colors } = useMantineTheme();
+  const { userSubscription } = useUser();
   const [opened, { open, close }] = useDisclosure(false);
+  const { data: walletClient } = useWalletClient();
 
   useCTA({
     label: 'Set Budget',
     onClick: () => {
       navigate('/create-pool/3');
     },
-    disabled: !form?.values.budget || !form?.values.preferredAddress,
+    disabled: !form?.values.budget,
   });
 
-  console.log('balance', balance);
   if (!form) return null;
 
   const formattedBalance = balance ? formatUnitBalance(balance) : '0';
+
+  const totalIncomingFlowRate = useMemo(() => {
+    if (!userSubscription?.incoming) {
+      return 0n;
+    }
+
+    if (userSubscription.incoming.length === 0) {
+      return 0n;
+    }
+
+    let total = 0n;
+
+    userSubscription.incoming.forEach((item) => {
+      const perUnitFlowRate =
+        BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
+      const beamFlowRate = perUnitFlowRate * BigInt(item.units);
+      total += beamFlowRate;
+    });
+
+    return total;
+  }, [userSubscription?.incoming]);
+
+  const handleConnect = async () => {
+    try {
+      if (!walletClient) throw new Error('Wallet not connected');
+      if (!address) throw new Error('Address not found');
+
+      const beamrPoolIds =
+        (userSubscription?.incoming
+          .map((item) => item.beamPool?.id)
+          .filter(Boolean) as Address[]) || [];
+
+      const poolIds = isTestnet
+        ? beamrPoolIds
+        : [...beamrPoolIds, ADDR.PRE_BUY_POOL];
+
+      multiConnect({
+        poolIds,
+        walletClient,
+        userAddress: address,
+        onLoading: () => {
+          setIsLoading(true);
+        },
+        onSuccess: () => {
+          setIsLoading(false);
+          refetchClaimable?.();
+          refetchBalance?.();
+        },
+        onError: (errorMsg) => {
+          setIsLoading(false);
+          notifications.show({
+            title: 'Error',
+            message: charLimit(errorMsg, 56),
+            color: 'red',
+          });
+        },
+      });
+    } catch (error) {
+      notifications.show({
+        title: 'Error',
+        message: charLimit((error as Error).message, 56),
+        color: 'red',
+      });
+    }
+  };
+
+  const hasIncomingFlow = totalIncomingFlowRate > 0n;
+  const hasClaimable = userClaimable && userClaimable > 0n ? true : false;
+
+  const totalIncomingPerMonth = totalIncomingFlowRate
+    ? flowratePerSecondToMonth(totalIncomingFlowRate)
+    : 0n;
 
   return (
     <PageLayout title="Budget">
@@ -88,7 +173,7 @@ export const Budget = () => {
             >
               <Text c={colors.gray[3]}>Connected</Text>
             </Box>
-            <Text>0x7344...4234d</Text>
+            {address && <Text>{truncateAddress(address)}</Text>}
           </Group>
           <Text c={colors.gray[2]} ta="center" fw={500}>
             $BEAMR
@@ -96,29 +181,38 @@ export const Budget = () => {
           <Text fz={36} ta="center" mb={12}>
             {formattedBalance}
           </Text>
-          <Text ta="center" mb={4}>
-            <Text component="span" c={colors.green[6]} fw={500}>
-              + 122.1k/mo
-            </Text>{' '}
-            (pending connection)
-            <Text component="span" c={colors.green[6]}>
-              *
+          {hasIncomingFlow && (
+            <Text ta="center" mb={4}>
+              <Text component="span" c={colors.green[6]} fw={500}>
+                + {totalIncomingPerMonth}
+              </Text>
+              (pending connection)
+              <Text component="span" c={colors.green[6]}>
+                *
+              </Text>
             </Text>
-          </Text>
-          <Text ta="center">
-            <Text component="span" c={colors.green[6]} fw={500}>
-              + Fair Launch Tokens
-            </Text>{' '}
-            (pending connection)
-          </Text>
-          <Group justify="center" mt={30}>
-            <Button
-              variant="inset"
-              c={colors.green[7]}
-              leftSection={<PlusIcon size={16} />}
-            >
-              Connect
-            </Button>
+          )}
+          {hasClaimable && (
+            <Text ta="center">
+              <Text component="span" c={colors.green[6]} fw={500}>
+                + Fair Launch Tokens
+              </Text>{' '}
+              (pending connection)
+            </Text>
+          )}
+          <Group
+            justify="center"
+            mt={hasClaimable || hasIncomingFlow ? 30 : 16}
+          >
+            {(hasClaimable || hasIncomingFlow) && (
+              <Button
+                variant="inset"
+                c={colors.green[7]}
+                leftSection={<PlusIcon size={16} />}
+              >
+                Connect
+              </Button>
+            )}
             <Button
               variant="inset"
               c={colors.blue[5]}

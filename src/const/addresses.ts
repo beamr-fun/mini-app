@@ -8,6 +8,7 @@ type Addresses = {
   SUPER_FLUID: Address;
   COLLECTOR_POOL: Address;
   GDA: Address;
+  PRE_BUY_POOL: Address;
 };
 
 export const ADDR_DEV: Addresses = {
@@ -17,6 +18,7 @@ export const ADDR_DEV: Addresses = {
   SUPER_FLUID: '0x109412E3C84f0539b43d39dB691B08c90f58dC7c',
   GDA: '0x53F4f44C813Dc380182d0b2b67fe5832A12B97f8',
   COLLECTOR_POOL: '0x91f6999Cf1c917204E305BDeC7704725ad44EB67',
+  PRE_BUY_POOL: '0x',
 } as const;
 
 export const ADDR_PROD: Addresses = {
@@ -26,6 +28,7 @@ export const ADDR_PROD: Addresses = {
   SUPER_FLUID: '0x',
   GDA: '0x',
   COLLECTOR_POOL: '0x179847eb81ee1ad9f598d104d92d797200300517',
+  PRE_BUY_POOL: '0x7De8a3e8379d337a1E8888d0175E1211Fe611c01',
 } as const;
 
 export const ADDR = isTestnet ? ADDR_DEV : ADDR_PROD;

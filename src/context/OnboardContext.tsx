@@ -11,6 +11,7 @@ import { distributeFlow } from '../utils/interactions';
 import { startTxPoll } from '../utils/poll';
 import { notifications } from '@mantine/notifications';
 import { charLimit } from '../utils/common';
+import { getClaimable } from '../utils/reads';
 
 type CreationSteps = {
   createPool: 'loading' | 'error' | 'success';
@@ -21,17 +22,20 @@ type CreationSteps = {
 
 type OnboardFormValues = {
   budget: number;
-  preferredAddress: string;
   selectedFriends: string[];
 };
 
 type OnboardContextType = {
   budget: number;
-  preferredAddress: string;
   selectedFriends?: string[];
   form?: UseFormReturnType<OnboardFormValues>;
   balance?: bigint;
+  userClaimable?: bigint;
+  isLoadingClaimable: boolean;
+  claimableError: Error | null;
   besties?: User[] | null;
+  refetchBalance: () => Promise<void>;
+  refetchClaimable: () => Promise<void>;
   bestiesError: Error | null;
   creationSteps: CreationSteps;
   poolId?: Address;
@@ -42,9 +46,12 @@ type OnboardContextType = {
 
 export const OnboardContext = React.createContext<OnboardContextType>({
   budget: 0,
-  preferredAddress: '',
   errMsg: undefined,
   bestiesError: null,
+  isLoadingClaimable: false,
+  claimableError: null,
+  refetchBalance: async () => {},
+  refetchClaimable: async () => {},
   creationSteps: {
     createPool: 'loading',
     distributeFlow: 'loading',
@@ -86,16 +93,37 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     },
     enabled: !!user?.fid,
   });
+
+  const {
+    data: userClaimable,
+    isLoading: isLoadingClaimable,
+    error: claimableError,
+    refetch: refetchClaimable,
+  } = useQuery({
+    queryKey: ['userClaimable', address],
+    queryFn: async () => {
+      return getClaimable({
+        poolAddress: ADDR.PRE_BUY_POOL,
+        userAddress: address as Address,
+      });
+    },
+    enabled: !!address,
+  });
+
   const form = useForm({
     mode: 'controlled',
     initialValues: {
-      preferredAddress: '',
       budget: 0,
       selectedFriends: [] as string[],
     },
   });
 
-  const { data: userBalance } = useReadContract({
+  const {
+    data: userBalance,
+    isLoading: isLoadingBalance,
+    error: balanceError,
+    refetch: refetchBalance,
+  } = useReadContract({
     address: ADDR.SUPER_TOKEN,
     abi: erc20Abi,
     functionName: 'balanceOf',
@@ -258,8 +286,12 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     <OnboardContext.Provider
       value={{
         budget: form.values.budget,
-        preferredAddress: form.values.preferredAddress,
-        form: form,
+        form,
+        userClaimable,
+        isLoadingClaimable,
+        claimableError,
+        refetchBalance: refetchBalance as any as () => Promise<void>,
+        refetchClaimable: refetchClaimable as any as () => Promise<void>,
         balance: userBalance,
         besties,
         bestiesError,

@@ -46,7 +46,6 @@ const ConditionalRedirect = () => {
 };
 
 export const ClientRoutes = () => {
-  console.log('location', location.pathname);
   return (
     <Routes>
       <Route path="/" element={<ConditionalRedirect />} />
