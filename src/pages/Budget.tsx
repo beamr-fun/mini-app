@@ -1,31 +1,25 @@
 import {
-  ActionIcon,
   Box,
-  Card,
   Group,
   Modal,
   NumberInput,
   Paper,
-  Select,
   Image,
   Stack,
   Text,
   useMantineTheme,
   Button,
-  TextInput,
-  InputLabel,
   Tooltip,
 } from '@mantine/core';
-import { Bold } from '../components/typography';
 import {
   charLimit,
   flowratePerSecondToMonth,
+  formatBalance,
   formatUnitBalance,
   truncateAddress,
 } from '../utils/common';
 import { useNavigate } from 'react-router-dom';
 import { useOnboard } from '../hooks/useOnboard';
-import { Tag } from '../components/Tag';
 import { useUser } from '../hooks/useUser';
 import { useAccount, useWalletClient } from 'wagmi';
 import { PageLayout } from '../layouts/PageLayout';
@@ -38,28 +32,37 @@ import { Info, PlusIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { multiConnect } from '../utils/interactions';
 import { notifications } from '@mantine/notifications';
-import { Address } from 'viem';
+import { Address, formatEther, formatUnits, parseUnits } from 'viem';
 import { isTestnet } from '../utils/setup';
 import { ADDR } from '../const/addresses';
+import { BEAM_MIN } from '../const/params';
 
 export const Budget = () => {
-  const { user } = useUser();
-  const { balance, refetchBalance, refetchClaimable } = useOnboard();
   const navigate = useNavigate();
-  const { form, userClaimable } = useOnboard();
-  const { address } = useAccount();
-  const [isLoading, setIsLoading] = useState(false);
-  const { colors } = useMantineTheme();
+  const {
+    budget,
+    form,
+    userClaimable,
+    balance,
+    refetchBalance,
+    refetchClaimable,
+  } = useOnboard();
   const { userSubscription } = useUser();
+  const { address } = useAccount();
+  const { colors } = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
   const { data: walletClient } = useWalletClient();
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const isValidBudget = budget && BigInt(budget) >= BEAM_MIN;
 
   useCTA({
     label: 'Set Budget',
     onClick: () => {
       navigate('/create-pool/3');
     },
-    disabled: !form?.values.budget,
+    disabled: !isValidBudget || !budget || isLoading,
   });
 
   if (!form) return null;
@@ -138,8 +141,20 @@ export const Budget = () => {
     ? flowratePerSecondToMonth(totalIncomingFlowRate)
     : 0n;
 
+  const isBalanceBelowMonthSpend = () => {
+    if (!isBalanceBelowMonthSpend) return false;
+    if (!balance) return false;
+    const budget = form.values.budget || '0';
+
+    console.log('budget', budget);
+    console.log('balance', balance);
+
+    return balance < parseUnits(budget, 18);
+  };
+
   return (
     <PageLayout title="Budget">
+      <SwapModal opened={opened} onClose={close} />
       <Stack>
         <Paper>
           <Text mb={20}>
@@ -209,6 +224,8 @@ export const Budget = () => {
                 variant="inset"
                 c={colors.green[7]}
                 leftSection={<PlusIcon size={16} />}
+                onClick={handleConnect}
+                disabled={isLoading}
               >
                 Connect
               </Button>
@@ -217,6 +234,8 @@ export const Budget = () => {
               variant="inset"
               c={colors.blue[5]}
               leftSection={<IconTransfer size={14} />}
+              onClick={open}
+              disabled={isLoading}
             >
               Buy
             </Button>
@@ -239,16 +258,47 @@ export const Budget = () => {
             thousandSeparator=","
             rightSection={<Text c={colors.gray[3]}>BEAMR/mo</Text>}
             rightSectionWidth={80}
+            disabled={isLoading}
+            key={form.key('budget')}
+            {...form.getInputProps('budget')}
+            onChange={(value) => {
+              form.setFieldValue('budget', value.toString());
+            }}
           />
           <Text fz={13} c={colors.gray[3]}>
-            (Min. 6M/mo)
+            (Min. {formatBalance(BEAM_MIN.toString())})/mo
           </Text>
           <Group justify="space-between" wrap="nowrap" gap={0} mt={30}>
-            <Button variant="panel">10M/mo</Button>
-            <Button variant="panel">25M/mo</Button>
-            <Button variant="panel">100M/mo</Button>
+            <Button
+              variant="panel"
+              onClick={() => form.setFieldValue('budget', '10000000')}
+              disabled={isLoading}
+            >
+              10M/mo
+            </Button>
+            <Button
+              variant="panel"
+              onClick={() => form.setFieldValue('budget', '25000000')}
+              disabled={isLoading}
+            >
+              25M/mo
+            </Button>
+            <Button
+              variant="panel"
+              onClick={() => form.setFieldValue('budget', '100000000')}
+              disabled={isLoading}
+            >
+              100M/mo
+            </Button>
           </Group>
         </Paper>
+        {isBalanceBelowMonthSpend() && (
+          <Text c={colors.yellow[7]} fz="sm">
+            {
+              'This proposed budget will deplete your token balance in < 1 month. Consider lowering your stream budget or buying more $BEAMR to keep your pool open longer.'
+            }
+          </Text>
+        )}
       </Stack>
     </PageLayout>
     // <PageLayout title="Budget">
@@ -328,8 +378,8 @@ export const Budget = () => {
     //         rightSection={'BEAMR'}
     //         rightSectionWidth={70}
     //         key={form.key('budget')}
-    //         description={'The amount of Beamr you stream to others'}
     //         {...form.getInputProps('budget')}
+    //         description={'The amount of Beamr you stream to others'}
     //       />
     //     </Box>
     //   </Card>

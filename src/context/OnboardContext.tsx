@@ -21,12 +21,12 @@ type CreationSteps = {
 };
 
 type OnboardFormValues = {
-  budget: number;
+  budget: string;
   selectedFriends: string[];
 };
 
 type OnboardContextType = {
-  budget: number;
+  budget: string;
   selectedFriends?: string[];
   form?: UseFormReturnType<OnboardFormValues>;
   balance?: bigint;
@@ -45,7 +45,7 @@ type OnboardContextType = {
 };
 
 export const OnboardContext = React.createContext<OnboardContextType>({
-  budget: 0,
+  budget: '',
   errMsg: undefined,
   bestiesError: null,
   isLoadingClaimable: false,
@@ -113,7 +113,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   const form = useForm({
     mode: 'controlled',
     initialValues: {
-      budget: 0,
+      budget: '',
       selectedFriends: [] as string[],
     },
   });
