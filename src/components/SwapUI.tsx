@@ -9,13 +9,14 @@ import {
   Group,
   useMantineTheme,
 } from '@mantine/core';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, InfoIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { formatUnitBalance } from '../utils/common';
 import { formatUnits, parseUnits } from 'viem';
 import { getQuote } from '../utils/api';
 import { base } from 'viem/chains';
 import { useAccount } from 'wagmi';
+import { BEAM_MIN } from '../const/params';
 
 type SwapToken = {
   balance: bigint;
@@ -73,6 +74,12 @@ export const SwapUI = ({
       ? true
       : false;
 
+  const amountUnderMonthFlow =
+    buyAmount &&
+    parseUnits(buyAmount || '0', 18) < parseUnits(BEAM_MIN.toString(), 18);
+
+  console.log('amountUnderMonthFlow', amountUnderMonthFlow);
+
   return (
     <Box>
       <Flex
@@ -114,12 +121,22 @@ export const SwapUI = ({
         />
       </Flex>
       {amountExceedsBalance && (
-        <p className={classes.error}>{token1.symbol} amount exceeds balance</p>
+        <Group gap={2} m="sm">
+          <InfoIcon size={16} color={colors.red[7]} />
+          <p className={classes.error}>
+            {token1.symbol} amount exceeds balance
+          </p>
+        </Group>
       )}
-      {amountExceedsBalance && (
-        <p className={classes.error}>{token1.symbol} amount exceeds balance</p>
+      {amountUnderMonthFlow && (
+        <Group gap={2} m="sm">
+          <InfoIcon size={16} color={colors.yellow[7]} />
+          <p className={classes.warn}>
+            The minimum pool stream is 6M $BEAMR/mo
+          </p>
+        </Group>
       )}
-      <Group justify="center">
+      <Group justify="center" mt="xl">
         <Button
           size="lg"
           onClick={handleSwap}

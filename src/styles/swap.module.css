@@ -87,5 +87,11 @@
 .error {
   font-size: var(--mantine-font-size-sm);
   color: var(--mantine-color-red-7);
-  margin-top: rem(4px);
+  margin: 0;
+}
+
+.warn {
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-yellow-7);
+  margin: 0;
 }
