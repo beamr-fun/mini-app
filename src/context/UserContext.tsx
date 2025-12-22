@@ -2,9 +2,9 @@ import sdk from '@farcaster/miniapp-sdk';
 import { JWTPayload } from '../types/sharedTypes';
 import { useQuery } from '@tanstack/react-query';
 import { createContext, ReactNode, useEffect, useMemo, useState } from 'react';
-import { Address } from 'viem';
+import { Address, EnsAvatarInvalidMetadataError } from 'viem';
 
-import { useAccount } from 'wagmi';
+import { useAccount, useConnect } from 'wagmi';
 import { AuthResponse } from '../types/sharedTypes';
 import { APIHeaders } from '../utils/api';
 import {
@@ -17,7 +17,8 @@ import { ADDR } from '../const/addresses';
 import { useGqlSub } from '../hooks/useGqlSub';
 import { User } from '@neynar/nodejs-sdk/build/api';
 import { userProfileTransform, UserTransformed } from '../transforms/user';
-import { getEthBalance } from '../utils/reads';
+
+let wakeupCalls = 0;
 
 type UserContextType = {
   user?: User;
@@ -37,6 +38,7 @@ type UserContextType = {
   userSubError: Error | null;
   isLoadingAPI: boolean;
   apiError: Error | null;
+  refetchLogin: () => Promise<void>;
 };
 
 export const UserContext = createContext<UserContextType>({
@@ -49,51 +51,72 @@ export const UserContext = createContext<UserContextType>({
   isLoadingAPI: false,
   apiError: null,
   getAuthHeaders: async () => false,
+  refetchLogin: async () => {},
 });
 
-const login = async () => {
-  console.log('LOADING PROCESS: START');
+const login = async (wakeup: () => void) => {
+  try {
+    console.log('LOADING PROCESS: START');
 
-  const tokenRes = await sdk.quickAuth.getToken();
+    const timerStart = Date.now();
 
-  console.log('LOADING PROCESS: TOKEN');
+    const tokenRes = await sdk.quickAuth.getToken();
 
-  const token = tokenRes?.token || null;
+    console.log('LOADING PROCESS: TOKEN');
 
-  if (!token) {
-    throw new Error('No auth token available');
+    const token = tokenRes?.token || null;
+
+    if (!token) {
+      throw new Error('No auth token available');
+    }
+
+    console.log('LOADING PROCESS: API REQUEST');
+
+    const res = await fetch(`${keys.apiUrl}/v1/user/auth`, {
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok || res.status !== 200) {
+      console.error('Failed to authenticate user', await res.text());
+      throw new Error('Failed to authenticate user');
+    }
+
+    const data = (await res.json()) as AuthResponse;
+
+    console.log('LOADING PROCESS: API RESPONSE');
+
+    const timerStop = Date.now();
+
+    const duration = timerStop - timerStart;
+
+    console.log(`LOADING PROCESS: DURATION ${duration}ms`);
+
+    if (duration > 4000) {
+      console.log('DURATION EXCEEDED THRESHOLD, WAKE UP CALLS: ', wakeupCalls);
+      if (wakeupCalls < 1) {
+        wakeupCalls++;
+        console.log('LOADING PROCESS: INVOKING WAKEUP');
+        wakeup();
+      }
+    }
+
+    if (!data.success) {
+      console.error('Authentication failed', data);
+      throw new Error('Authentication unsuccessful');
+    }
+
+    return {
+      user: data.user,
+      jwt: data.jwtPayload,
+      token: token || undefined,
+    };
+  } catch (error) {
+    console.error('Error during login:', error);
+    throw error;
   }
-
-  console.log('LOADING PROCESS: API REQUEST');
-
-  const res = await fetch(`${keys.apiUrl}/v1/user/auth`, {
-    headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!res.ok || res.status !== 200) {
-    console.error('Failed to authenticate user', await res.text());
-    throw new Error('Failed to authenticate user');
-  }
-
-  const data = (await res.json()) as AuthResponse;
-
-  console.log('LOADING PROCESS: API RESPONSE');
-
-  console.log('data?.user.fid', data?.user.fid);
-
-  if (!data.success) {
-    console.error('Authentication failed', data);
-    throw new Error('Authentication unsuccessful');
-  }
-
-  return {
-    user: data.user,
-    jwt: data.jwtPayload,
-    token: token || undefined,
-  };
 };
 
 export const UserProvider = ({
@@ -103,6 +126,7 @@ export const UserProvider = ({
 }) => {
   const IS_TESTING = false;
   const { address } = useAccount();
+  const { connect, connectors } = useConnect();
 
   const [startingRoute, setStartingRoute] = useState<string | undefined>();
   const [hasPool, setHasPool] = useState<boolean>(false);
@@ -112,6 +136,7 @@ export const UserProvider = ({
     userAddress: address,
     tokenAddress: ADDR.SUPER_TOKEN,
     calls: { balanceOf: true },
+    enabled: !!address,
   });
 
   const userBalance = beamrTokenData?.balanceOf as bigint | undefined;
@@ -121,11 +146,11 @@ export const UserProvider = ({
     data: apiData,
     isLoading: isLoadingAPI,
     error: apiError,
-    refetch,
+    refetch: refetchLogin,
   } = useQuery({
     queryKey: ['user', address],
-    queryFn: () => login(),
-    enabled: !!address && !IS_TESTING,
+    queryFn: () => login(() => connect({ connector: connectors[0] })),
+    enabled: !!address,
   });
 
   const getAuthHeaders = async (): Promise<APIHeaders | false> => {
@@ -151,7 +176,7 @@ export const UserProvider = ({
 
     // If invalid or expired, force a refresh
     // This gives us the FRESH data immediately.
-    const { data: newData, isError } = await refetch();
+    const { data: newData, isError } = await refetchLogin();
 
     // 4. Validate the NEW data
     if (isError || !isValid(newData)) {
@@ -212,7 +237,14 @@ export const UserProvider = ({
 
     sdk.actions.ready();
     console.log('LOADING COMPLETE: SDK READY');
-  }, [isLoadingSub, userSubscription, apiData]);
+  }, [
+    isLoadingSub,
+    userSubscription,
+    apiData,
+    apiError,
+    userSubError,
+    address,
+  ]);
 
   return (
     <UserContext.Provider
@@ -235,6 +267,7 @@ export const UserProvider = ({
         apiError,
         isLoadingAPI,
         userSubError,
+        refetchLogin: refetchLogin as any as () => Promise<void>,
       }}
     >
       {children}

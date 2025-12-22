@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { CreatePool } from './components/Home/CreatePool';
 
 import { Home } from './pages/Home';
@@ -6,39 +6,26 @@ import { Explainer } from './pages/Explainer';
 import { Budget } from './pages/Budget';
 import { Friends } from './pages/Friends';
 import { CreateConfirm } from './pages/CreateConfirm';
-import { Box, Button, Text } from '@mantine/core';
+import { Group } from '@mantine/core';
 import { useUser } from './hooks/useUser';
 import { Global } from './pages/Global';
 import { Settings } from './pages/Settings';
 import { Strategy } from './pages/Strategy';
-import { useConnect, useWalletClient } from 'wagmi';
-import { transfer } from './utils/interactions';
+import { PageLayout } from './layouts/PageLayout';
+import { BeamrHeadline } from './components/BeamrHeadline';
+import { Loader } from 'lucide-react';
 
 const ConditionalRedirect = () => {
   const { startingRoute } = useUser();
-  const { data: walletClient } = useWalletClient();
-  const { connect, connectors } = useConnect();
-  const location = useLocation();
 
   if (startingRoute === '/' || !startingRoute) {
-    // const handleTransfer = () => {
-    //   console.log('walletClient', walletClient);
-    //   if (!walletClient) return;
-
-    //   connect({ connector: connectors[0] });
-
-    //   transfer({
-    //     walletClient,
-    //     amount: BigInt(1000000),
-    //     to: '0xA55905B9053BB0710432ae15Ed863F97B109393B',
-    //   });
-    // };
-
     return (
-      <Box>
-        {/* <Button onClick={handleTransfer}>Transfer</Button> */}
-        <Text>YOU SHOULD NOT SEE THIS</Text>
-      </Box>
+      <PageLayout>
+        <BeamrHeadline />
+        <Group h={200} justify="center" align="center">
+          <Loader size={28} color={'var(--glass-thick)'} />
+        </Group>
+      </PageLayout>
     );
   }
 

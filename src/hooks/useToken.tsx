@@ -26,6 +26,7 @@ type TokenHookProps = {
   calls?: Calls;
   spender?: Address;
   userAddress?: Address;
+  enabled?: boolean;
 };
 
 const getReads = async (args: TokenHookProps) => {
@@ -137,6 +138,7 @@ export const useToken = ({
   spender,
   tokenAddress,
   userAddress,
+  enabled,
   calls = {
     balanceOf: false,
     totalSupply: true,
@@ -149,7 +151,7 @@ export const useToken = ({
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ['token', tokenAddress, Object.keys(calls), spender, userAddress],
     queryFn: () => getReads({ abi, tokenAddress, calls, spender, userAddress }),
-    enabled: !!tokenAddress && !!abi,
+    enabled: !!tokenAddress && !!abi && (enabled ?? true),
   });
 
   return {

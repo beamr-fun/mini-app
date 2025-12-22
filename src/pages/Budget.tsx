@@ -37,6 +37,7 @@ import { isTestnet } from '../utils/setup';
 import { ADDR, ADDR_PROD, NATIVE_TOKEN } from '../const/addresses';
 import { BEAM_MIN } from '../const/params';
 import sdk from '@farcaster/miniapp-sdk';
+import { SwapModal } from '../components/Home/SwapModal';
 
 export const Budget = () => {
   const navigate = useNavigate();
@@ -299,65 +300,5 @@ export const Budget = () => {
         )}
       </Stack>
     </PageLayout>
-  );
-};
-
-const SwapModal = ({
-  opened,
-  onClose,
-}: {
-  opened: boolean;
-  onClose: () => void;
-}) => {
-  const { colors } = useMantineTheme();
-  const { ethBalance, balance } = useOnboard();
-
-  const seeContractAddress = () => {
-    sdk.actions.openUrl(
-      'https://basescan.org/address/0x22f1cd353441351911691ee4049c7b773abb1ecf'
-    );
-  };
-
-  return (
-    <Modal.Root opened={opened} onClose={onClose} fullScreen bg="black">
-      <Modal.Overlay />
-      <Modal.Content>
-        <Modal.Header>
-          <Modal.Title></Modal.Title>
-          <Modal.CloseButton />
-        </Modal.Header>
-        <Modal.Body>
-          <Box mb={24}>
-            <Text fz={'xl'} fw={500} mb={6} c={colors.gray[0]}>
-              Buy $BEAMR
-            </Text>
-            <Group
-              gap={4}
-              td="underline"
-              style={{ cursor: 'pointer' }}
-              onClick={seeContractAddress}
-            >
-              <Text>{truncateAddress(ADDR_PROD.SUPER_TOKEN)}</Text>
-              <ExternalLink size={16} />
-            </Group>
-          </Box>
-          <SwapUI
-            defaultSell={'0.01'}
-            closeSwapModal={onClose}
-            canSwap={false}
-            token1={{
-              balance: ethBalance || 0n,
-              symbol: 'ETH',
-              address: NATIVE_TOKEN,
-            }}
-            token2={{
-              balance: balance || 0n,
-              symbol: 'BEAMR',
-              address: ADDR_PROD.SUPER_TOKEN,
-            }}
-          />
-        </Modal.Body>
-      </Modal.Content>
-    </Modal.Root>
   );
 };
