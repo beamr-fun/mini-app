@@ -36,19 +36,17 @@ export const SwapUI = ({
   token2,
   canSwap = true,
   defaultSell,
-  closeSwapModal,
+  onSuccess,
 }: {
   token1: SwapToken;
   token2: SwapToken;
   canSwap?: boolean;
   defaultSell: string;
-  closeSwapModal?: () => void;
+  onSuccess?: () => void;
 }) => {
   const [switched, setSwitched] = useState(false);
   const [token1Val, setToken1Val] = useState<string>(defaultSell.toString());
   const [debouncedVal] = useDebouncedValue<string>(token1Val, 500);
-
-  const { refetchBalance, refetchEthBalance } = useOnboard();
 
   const { colors } = useMantineTheme();
   const { address } = useAccount();
@@ -106,16 +104,12 @@ export const SwapUI = ({
 
   useEffect(() => {
     if (isSuccess) {
-      setToken1Val('0');
-      refetchBalance();
-      refetchEthBalance?.();
-      closeSwapModal?.();
-
       notifications.show({
         title: 'Transaction Successful',
         message: 'Your swap has been completed successfully.',
         color: 'green',
       });
+      onSuccess?.();
     }
 
     if (isError && error) {

@@ -146,7 +146,7 @@ export const useToken = ({
     allowance: false,
   },
 }: TokenHookProps) => {
-  const { data, error, isLoading } = useQuery({
+  const { data, error, isLoading, refetch } = useQuery({
     queryKey: ['token', tokenAddress, Object.keys(calls), spender, userAddress],
     queryFn: () => getReads({ abi, tokenAddress, calls, spender, userAddress }),
     enabled: !!tokenAddress && !!abi,
@@ -156,5 +156,6 @@ export const useToken = ({
     data,
     error,
     isLoading,
+    refetch,
   };
 };

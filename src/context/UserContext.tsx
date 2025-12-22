@@ -29,6 +29,7 @@ type UserContextType = {
   startingRoute?: string;
   userBalance?: bigint;
   userBalanceFetchedAt?: Date;
+  refetchUserTokenData?: () => Promise<void>;
   hasPool: boolean;
   incomingOnly: boolean;
   setIncomingOnly: (only: boolean) => void;
@@ -42,6 +43,7 @@ export const UserContext = createContext<UserContextType>({
   hasPool: false,
   incomingOnly: false,
   setIncomingOnly: (only: boolean) => {},
+  refetchUserTokenData: async () => {},
   isLoadingSub: false,
   userSubError: null,
   isLoadingAPI: false,
@@ -106,18 +108,10 @@ export const UserProvider = ({
   const [hasPool, setHasPool] = useState<boolean>(false);
   const [incomingOnly, setIncomingOnly] = useState<boolean>(false);
 
-  const { data: beamrTokenData } = useToken({
+  const { data: beamrTokenData, refetch: refetchUserTokenData } = useToken({
     userAddress: address,
     tokenAddress: ADDR.SUPER_TOKEN,
     calls: { balanceOf: true },
-  });
-
-  const { data: ethBalance } = useQuery({
-    queryKey: ['ethBalance', address],
-    queryFn: async () => {
-      getEthBalance(address as Address);
-    },
-    enabled: !!address,
   });
 
   const userBalance = beamrTokenData?.balanceOf as bigint | undefined;
@@ -233,6 +227,8 @@ export const UserProvider = ({
         userBalance,
         userBalanceFetchedAt,
         hasPool,
+        refetchUserTokenData:
+          refetchUserTokenData as any as () => Promise<void>,
         incomingOnly,
         setIncomingOnly,
         isLoadingSub,
