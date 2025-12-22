@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import classes from '../styles/swap.module.css';
-import { useDebouncedValue, useInputState } from '@mantine/hooks';
+import { useDebouncedValue } from '@mantine/hooks';
 import {
   ActionIcon,
   Box,
@@ -37,9 +37,6 @@ export const SwapUI = ({
   const [switched, setSwitched] = useState(false);
   const [token1Val, setToken1Val] = useState<string>(defaultSell.toString());
   const [debouncedVal] = useDebouncedValue<string>(token1Val, 500);
-  // const [token2Val, setToken2Val] = useState<string>('0');
-  const [token1Err, setToken1Err] = useState('');
-  const [token2Err, setToken2Err] = useState('');
 
   const [formError, setFormError] = useState('');
   const { colors } = useMantineTheme();
@@ -48,15 +45,10 @@ export const SwapUI = ({
   const { data: buyAmount, isLoading } = useQuery({
     queryKey: ['user-quote', { sellAmount: debouncedVal }],
     enabled: !!debouncedVal,
-
     queryFn: async () => {
       if (!debouncedVal) return debouncedVal;
 
       if (Number(debouncedVal) === 0) return '0';
-
-      const sellTokenInUnits = parseUnits(debouncedVal, 18);
-
-      console.log('sellTokenInUnits', sellTokenInUnits);
 
       const quote = await getQuote({
         chainId: base.id.toString(),
@@ -66,13 +58,20 @@ export const SwapUI = ({
         taker: address as `0x${string}`,
       });
 
-      return formatUnits(quote.data.buyAmount, 18) as string;
+      console.log({ quote });
+
+      return Number(formatUnits(quote.data.buyAmount, 18)).toFixed(2) as string;
     },
   });
 
   const handleSwap = () => {
     // IF SWITCHED && CAN SWAP, SWAP TOKEN2 TO TOKEN1
   };
+
+  const amountExceedsBalance =
+    token1Val && BigInt(parseUnits(token1Val || '0', 18)) > token1.balance
+      ? true
+      : false;
 
   return (
     <Box>
@@ -88,7 +87,7 @@ export const SwapUI = ({
           onChange={setToken1Val}
           value={token1Val ? token1Val : '0'}
           unit={token1.symbol}
-          error={token1Err}
+          // error={}
         />
         <Box pos="relative">
           {canSwap && (
@@ -110,13 +109,23 @@ export const SwapUI = ({
           onChange={() => {}}
           value={buyAmount || '0'}
           unit={token2.symbol}
-          error={token2Err}
+          // error={token2Err}
           viewOnly={canSwap === false}
         />
       </Flex>
-      {formError && <p className={classes.error}>{formError}</p>}
+      {amountExceedsBalance && (
+        <p className={classes.error}>{token1.symbol} amount exceeds balance</p>
+      )}
+      {amountExceedsBalance && (
+        <p className={classes.error}>{token1.symbol} amount exceeds balance</p>
+      )}
       <Group justify="center">
-        <Button size="lg" onClick={handleSwap} loading={isLoading}>
+        <Button
+          size="lg"
+          onClick={handleSwap}
+          loading={isLoading}
+          disabled={amountExceedsBalance}
+        >
           Buy {switched ? token1.symbol : token2.symbol}
         </Button>
       </Group>

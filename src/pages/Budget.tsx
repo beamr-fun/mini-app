@@ -28,7 +28,7 @@ import { IconTransfer } from '../components/svg/IconTransfer';
 import { useDisclosure } from '@mantine/hooks';
 import { SwapUI } from '../components/SwapUI';
 import beamrEcon from '../assets/beamrEcon.png';
-import { Info, PlusIcon } from 'lucide-react';
+import { ExternalLink, Info, PlusIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { multiConnect } from '../utils/interactions';
 import { notifications } from '@mantine/notifications';
@@ -36,6 +36,7 @@ import { Address, parseUnits } from 'viem';
 import { isTestnet } from '../utils/setup';
 import { ADDR, ADDR_PROD, NATIVE_TOKEN } from '../const/addresses';
 import { BEAM_MIN } from '../const/params';
+import sdk from '@farcaster/miniapp-sdk';
 
 export const Budget = () => {
   const navigate = useNavigate();
@@ -145,9 +146,6 @@ export const Budget = () => {
     if (!isBalanceBelowMonthSpend) return false;
     if (!balance) return false;
     const budget = form.values.budget || '0';
-
-    console.log('budget', budget);
-    console.log('balance', balance);
 
     return balance < parseUnits(budget, 18);
   };
@@ -304,8 +302,6 @@ export const Budget = () => {
   );
 };
 
-const DEFAULT_SELL = parseUnits('0.01', 18);
-
 const SwapModal = ({
   opened,
   onClose,
@@ -315,6 +311,12 @@ const SwapModal = ({
 }) => {
   const { colors } = useMantineTheme();
   const { ethBalance, balance } = useOnboard();
+
+  const seeContractAddress = () => {
+    sdk.actions.openUrl(
+      'https://basescan.org/address/0x22f1cd353441351911691ee4049c7b773abb1ecf'
+    );
+  };
 
   return (
     <Modal.Root opened={opened} onClose={onClose} fullScreen bg="black">
@@ -326,10 +328,18 @@ const SwapModal = ({
         </Modal.Header>
         <Modal.Body>
           <Box mb={24}>
-            <Text fz={'xl'} fw={500} mb={4} c={colors.gray[0]}>
-              Swap Tokens
+            <Text fz={'xl'} fw={500} mb={6} c={colors.gray[0]}>
+              Buy $BEAMR
             </Text>
-            <Text>Add Beamr to your account to unlock full access</Text>
+            <Group
+              gap={4}
+              td="underline"
+              style={{ cursor: 'pointer' }}
+              onClick={seeContractAddress}
+            >
+              <Text>{truncateAddress(ADDR_PROD.SUPER_TOKEN)}</Text>
+              <ExternalLink size={16} />
+            </Group>
           </Box>
           <SwapUI
             defaultSell={'0.01'}
