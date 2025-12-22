@@ -32,7 +32,7 @@ type OnboardContextType = {
   balance?: bigint;
   userClaimable?: bigint;
   ethBalance?: bigint;
-
+  refetchEthBalance?: () => Promise<void>;
   isLoadingClaimable: boolean;
   claimableError: Error | null;
   besties?: User[] | null;
@@ -54,6 +54,7 @@ export const OnboardContext = React.createContext<OnboardContextType>({
   claimableError: null,
   refetchBalance: async () => {},
   refetchClaimable: async () => {},
+  refetchEthBalance: async () => {},
   creationSteps: {
     createPool: 'loading',
     distributeFlow: 'loading',
@@ -135,7 +136,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     args: [address as Address],
   });
 
-  const { data: ethBalance } = useQuery({
+  const { data: ethBalance, refetch: refetchEthBalance } = useQuery({
     queryKey: ['ethBalance', address],
     queryFn: async () => {
       return getEthBalance(address as Address);
@@ -300,6 +301,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         userClaimable,
         ethBalance,
         isLoadingClaimable,
+        refetchEthBalance: refetchEthBalance as any as () => Promise<void>,
         claimableError,
         refetchBalance: refetchBalance as any as () => Promise<void>,
         refetchClaimable: refetchClaimable as any as () => Promise<void>,

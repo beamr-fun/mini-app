@@ -343,6 +343,7 @@ const SwapModal = ({
           </Box>
           <SwapUI
             defaultSell={'0.01'}
+            closeSwapModal={onClose}
             canSwap={false}
             token1={{
               balance: ethBalance || 0n,

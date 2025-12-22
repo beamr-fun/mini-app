@@ -4,7 +4,11 @@ import z from 'zod';
 import { BeamRABI } from '../abi/BeamR';
 import { isTestnet, keys } from './setup';
 import { cacheProfiles, getCachedProfiles } from './cache';
-import { QuoteParams, quoteSchema } from '../validation/poolMetadata';
+import {
+  QuoteRequestParams,
+  quoteRequestSchema,
+  quoteResponseSchema,
+} from '../validation/swap';
 
 export type APIHeaders = {
   'Content-Type': string;
@@ -230,7 +234,6 @@ export const createPool = async ({
 
     if (receipt.status !== 'success') {
       throw new Error('Transaction failed');
-      return;
     }
 
     const decoded = parseEventLogs({
@@ -367,14 +370,14 @@ export const deleteUserSub = async (apiHeaders: APIHeaders) => {
   }
 };
 
-export const getQuote = async (params: QuoteParams) => {
+export const getQuote = async (params: QuoteRequestParams) => {
   if (isTestnet) {
     console.warn(
       'getQuote is not available on testnet, returning values for base mainnet'
     );
   }
 
-  const isValidParams = quoteSchema.safeParse(params);
+  const isValidParams = quoteRequestSchema.safeParse(params);
 
   if (!isValidParams.success) {
     throw new Error(`Invalid quote parameters: ${isValidParams.error.message}`);
@@ -397,9 +400,13 @@ export const getQuote = async (params: QuoteParams) => {
       throw new Error(data?.error || 'Failed to fetch quote');
     }
 
-    console.log('data', data);
+    const validQuote = quoteResponseSchema.safeParse(data);
 
-    return data;
+    if (!validQuote.success) {
+      throw new Error(`Invalid quote response: ${validQuote.error.message}`);
+    }
+
+    return validQuote.data;
   } catch (error) {
     console.error('Error fetching quote:', error);
     throw Error;

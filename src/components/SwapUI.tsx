@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import classes from '../styles/swap.module.css';
 import { useDebouncedValue } from '@mantine/hooks';
 import {
@@ -11,12 +11,19 @@ import {
 } from '@mantine/core';
 import { ArrowDown, InfoIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { formatUnitBalance } from '../utils/common';
+import { charLimit, formatUnitBalance } from '../utils/common';
 import { formatUnits, parseUnits } from 'viem';
 import { getQuote } from '../utils/api';
 import { base } from 'viem/chains';
-import { useAccount } from 'wagmi';
+import {
+  useAccount,
+  useSendTransaction,
+  useWaitForTransactionReceipt,
+} from 'wagmi';
 import { BEAM_MIN } from '../const/params';
+import { QuoteResponse } from '../validation/swap';
+import { notifications } from '@mantine/notifications';
+import { useOnboard } from '../hooks/useOnboard';
 
 type SwapToken = {
   balance: bigint;
@@ -29,27 +36,37 @@ export const SwapUI = ({
   token2,
   canSwap = true,
   defaultSell,
+  closeSwapModal,
 }: {
   token1: SwapToken;
   token2: SwapToken;
   canSwap?: boolean;
   defaultSell: string;
+  closeSwapModal?: () => void;
 }) => {
   const [switched, setSwitched] = useState(false);
   const [token1Val, setToken1Val] = useState<string>(defaultSell.toString());
   const [debouncedVal] = useDebouncedValue<string>(token1Val, 500);
 
-  const [formError, setFormError] = useState('');
+  const { refetchBalance, refetchEthBalance } = useOnboard();
+
   const { colors } = useMantineTheme();
   const { address } = useAccount();
 
-  const { data: buyAmount, isLoading } = useQuery({
+  const { data: zeroXRes, isLoading } = useQuery({
     queryKey: ['user-quote', { sellAmount: debouncedVal }],
     enabled: !!debouncedVal,
-    queryFn: async () => {
-      if (!debouncedVal) return debouncedVal;
+    queryFn: async (): Promise<{
+      quote: QuoteResponse | null;
+      buyAmount: string | null;
+    }> => {
+      if (!debouncedVal)
+        return {
+          quote: null,
+          buyAmount: debouncedVal,
+        };
 
-      if (Number(debouncedVal) === 0) return '0';
+      if (Number(debouncedVal) === 0) return { buyAmount: '0', quote: null };
 
       const quote = await getQuote({
         chainId: base.id.toString(),
@@ -59,14 +76,100 @@ export const SwapUI = ({
         taker: address as `0x${string}`,
       });
 
-      console.log({ quote });
-
-      return Number(formatUnits(quote.data.buyAmount, 18)).toFixed(2) as string;
+      const buyAmount = Number(
+        formatUnits(BigInt(quote.buyAmount), 18)
+      ).toFixed(2);
+      return {
+        quote,
+        buyAmount,
+      };
     },
   });
 
+  const { buyAmount, quote } = zeroXRes || {};
+
+  const {
+    sendTransaction,
+    data: txHash,
+    isPending: isSending,
+    error: sendError,
+  } = useSendTransaction();
+
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    isError,
+    error,
+  } = useWaitForTransactionReceipt({
+    hash: txHash,
+  });
+
+  useEffect(() => {
+    if (isSuccess) {
+      setToken1Val('0');
+      refetchBalance();
+      refetchEthBalance?.();
+      closeSwapModal?.();
+
+      notifications.show({
+        title: 'Transaction Successful',
+        message: 'Your swap has been completed successfully.',
+        color: 'green',
+      });
+    }
+
+    if (isError && error) {
+      console.error('Transaction Error:', error);
+      notifications.show({
+        title: 'Transaction Error',
+        message: charLimit(
+          error?.message || 'An error occurred during the transaction.',
+          56
+        ),
+        color: 'red',
+      });
+    }
+
+    if (error) {
+      console.error('Send Transaction Error:', error);
+      notifications.show({
+        title: 'Transaction Error',
+        message: charLimit(
+          error?.message || 'An error occurred while sending the transaction.',
+          56
+        ),
+        color: 'red',
+      });
+    }
+  }, [isSuccess, isError, error, sendError]);
+
   const handleSwap = () => {
-    // IF SWITCHED && CAN SWAP, SWAP TOKEN2 TO TOKEN1
+    try {
+      if (!quote || !address || !quote.transaction) {
+        throw new Error('Invalid quote or user address.');
+      }
+
+      sendTransaction({
+        to: quote.transaction.to,
+        data: quote.transaction.data,
+        value: quote.transaction.value
+          ? BigInt(quote.transaction.value)
+          : BigInt(0),
+        ...(quote.transaction.gas
+          ? { gas: BigInt(quote.transaction.gas) }
+          : {}),
+      });
+    } catch (error: any) {
+      console.error('Swap Error:', error);
+      notifications.show({
+        title: 'Swap Error',
+        message: charLimit(
+          error?.message || 'An error occurred while processing the swap.',
+          56
+        ),
+        color: 'red',
+      });
+    }
   };
 
   const amountExceedsBalance =
@@ -78,7 +181,23 @@ export const SwapUI = ({
     buyAmount &&
     parseUnits(buyAmount || '0', 18) < parseUnits(BEAM_MIN.toString(), 18);
 
-  console.log('amountUnderMonthFlow', amountUnderMonthFlow);
+  const noBuyAmount = !buyAmount || buyAmount === '0';
+
+  const getButtonText = () => {
+    if (isSending) {
+      return 'Confirming...';
+    }
+
+    if (isConfirming) {
+      return 'Processing...';
+    }
+
+    if (amountExceedsBalance) {
+      return 'Insufficient Balance';
+    }
+
+    return 'Buy BEAMR';
+  };
 
   return (
     <Box>
@@ -141,9 +260,15 @@ export const SwapUI = ({
           size="lg"
           onClick={handleSwap}
           loading={isLoading}
-          disabled={amountExceedsBalance}
+          disabled={
+            amountExceedsBalance ||
+            noBuyAmount ||
+            isLoading ||
+            isSending ||
+            isConfirming
+          }
         >
-          Buy {switched ? token1.symbol : token2.symbol}
+          {getButtonText()}
         </Button>
       </Group>
     </Box>

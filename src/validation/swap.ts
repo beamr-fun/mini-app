@@ -1,30 +1,5 @@
-import { Address, isAddress } from 'viem';
+import { Address, Hex, isAddress } from 'viem';
 import z from 'zod';
-
-export const ONCHAIN_EVENT = 6969420n;
-
-export enum PoolType {
-  Unknown,
-  Tip,
-  Earn,
-}
-
-export const poolMetadataSchema = z.object({
-  creatorFID: z.number().int(),
-  poolType: z.enum(PoolType),
-  displayName: z
-    .string()
-    .min(1, 'Display name must be at least 1 character long'),
-  name: z.string().min(1, 'Pool name must be at least 1 character long'),
-  description: z
-    .string()
-    .min(1, 'Pool description must be at least 1 character long')
-    .optional(),
-  castHash: z.string().optional(),
-  instructions: z.string().optional(),
-});
-
-export type PoolMetadata = z.infer<typeof poolMetadataSchema>;
 
 export const quoteRequestSchema = z.object({
   chainId: z.string().regex(/^\d+$/, {
@@ -48,3 +23,23 @@ export const quoteRequestSchema = z.object({
 });
 
 export type QuoteRequestParams = z.infer<typeof quoteRequestSchema>;
+
+export const quoteResponseSchema = z.object({
+  sellAmount: z.string(),
+  buyAmount: z.string(),
+  transaction: z.object({
+    to: z
+      .string()
+      .refine(isAddress, { message: 'Invalid address' })
+      .transform((val) => val as Address),
+    data: z
+      .string()
+      .regex(/^0x[0-9a-fA-F]*$/, { message: 'Invalid hex data' })
+      .transform((val) => val as Hex),
+    value: z.string(),
+    gas: z.string(),
+    gasPrice: z.string(),
+  }),
+});
+
+export type QuoteResponse = z.infer<typeof quoteResponseSchema>;
