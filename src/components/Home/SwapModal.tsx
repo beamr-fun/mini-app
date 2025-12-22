@@ -1,5 +1,6 @@
 import { Box, Modal, Text, useMantineTheme } from '@mantine/core';
 import { SwapUI } from '../SwapUI';
+import { ADDR_PROD, NATIVE_TOKEN } from '../../const/addresses';
 
 export const SwapModal = ({
   opened,
@@ -25,13 +26,16 @@ export const SwapModal = ({
             <Text>Add Beamr to your account to unlock full access</Text>
           </Box>
           <SwapUI
+            defaultSell={'0.05'}
             token1={{
-              balance: '1000',
-              unit: 'ETH',
+              balance: 100000000000000n,
+              symbol: 'ETH',
+              address: NATIVE_TOKEN,
             }}
             token2={{
-              balance: '0',
-              unit: 'BEAMR',
+              balance: 10000000000000000000n,
+              symbol: 'BEAMR',
+              address: ADDR_PROD.SUPER_TOKEN,
             }}
           />
         </Modal.Body>

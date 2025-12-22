@@ -298,6 +298,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         budget: form.values.budget,
         form,
         userClaimable,
+        ethBalance,
         isLoadingClaimable,
         claimableError,
         refetchBalance: refetchBalance as any as () => Promise<void>,

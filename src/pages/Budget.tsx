@@ -34,7 +34,7 @@ import { multiConnect } from '../utils/interactions';
 import { notifications } from '@mantine/notifications';
 import { Address, parseUnits } from 'viem';
 import { isTestnet } from '../utils/setup';
-import { ADDR } from '../const/addresses';
+import { ADDR, ADDR_PROD, NATIVE_TOKEN } from '../const/addresses';
 import { BEAM_MIN } from '../const/params';
 
 export const Budget = () => {
@@ -304,6 +304,8 @@ export const Budget = () => {
   );
 };
 
+const DEFAULT_SELL = parseUnits('0.01', 18);
+
 const SwapModal = ({
   opened,
   onClose,
@@ -312,6 +314,8 @@ const SwapModal = ({
   onClose: () => void;
 }) => {
   const { colors } = useMantineTheme();
+  const { ethBalance, balance } = useOnboard();
+
   return (
     <Modal.Root opened={opened} onClose={onClose} fullScreen bg="black">
       <Modal.Overlay />
@@ -328,14 +332,17 @@ const SwapModal = ({
             <Text>Add Beamr to your account to unlock full access</Text>
           </Box>
           <SwapUI
+            defaultSell={'0.01'}
             canSwap={false}
             token1={{
-              balance: '1000',
-              unit: 'ETH',
+              balance: ethBalance || 0n,
+              symbol: 'ETH',
+              address: NATIVE_TOKEN,
             }}
             token2={{
-              balance: '0',
-              unit: 'BEAMR',
+              balance: balance || 0n,
+              symbol: 'BEAMR',
+              address: ADDR_PROD.SUPER_TOKEN,
             }}
           />
         </Modal.Body>
