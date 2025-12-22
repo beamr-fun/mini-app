@@ -33,7 +33,7 @@ export const getClaimable = async ({
 export const getEthBalance = async (address: Address): Promise<bigint> => {
   try {
     const balance = await publicClient.getBalance({ address });
-    console.log('balance', balance);
+
     return balance;
   } catch (error) {
     console.error('Error fetching ETH balance:', error);

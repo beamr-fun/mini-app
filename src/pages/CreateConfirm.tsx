@@ -44,18 +44,12 @@ export const CreateConfirm = () => {
           handleDistributeFlow?.();
         }
       : () => {
+          setCTA({});
           navigate('/home');
         },
     disabled: !distributeReady && !allStepsComplete,
     extraDeps: [distributeReady, allStepsComplete, creationSteps],
   });
-
-  useEffect(() => {
-    return () => {
-      console.log('What the fuck!');
-      setCTA({ label: undefined });
-    };
-  }, []);
 
   const createDescription =
     creationSteps.createPool === 'loading'

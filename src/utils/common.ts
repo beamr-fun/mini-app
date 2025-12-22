@@ -1,4 +1,4 @@
-import { formatUnits } from 'viem';
+import { formatUnits, parseUnits } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 export const truncateAddress = (address: string, length = 6): string => {
@@ -48,16 +48,33 @@ export function formatUnitBalance(
 
 export const flowratePerSecondToMonth = (
   flowrate: bigint,
-  formatted = true
+  format?: 'rounded' | 'monthly' | 'raw' | 'parsed',
+  decimals = 18
 ): string => {
   const secondsInMonth = BigInt(60 * 60 * 24 * 30);
   const units = flowrate * secondsInMonth;
 
-  if (!formatted) {
+  if (format === 'raw') {
     return units.toString();
   }
 
-  return `${formatUnitBalance(units, 18, 2)}/mo`;
+  if (format === 'parsed') {
+    return formatUnits(units, decimals);
+  }
+
+  if (format === 'rounded') {
+    const formatted = formatUnits(units, decimals);
+
+    // round to nearest integer
+
+    return Math.round(parseFloat(formatted)).toString();
+  }
+
+  if (!format || format === 'monthly') {
+    return `${formatUnitBalance(units, decimals, 2)}/mo`;
+  }
+
+  return `${formatUnitBalance(units, decimals, 2)}/mo`;
 };
 
 export const flowratePerMonthToSecond = (monthlyAmount: bigint): bigint => {

@@ -157,8 +157,6 @@ export const Settings = () => {
   };
 
   const handleDistributeFlow = async (poolAddress: string, monthly: string) => {
-    console.log('poolAddress', poolAddress);
-    console.log('monthly', monthly);
     try {
       if (!address || !walletClient || !publicClient) {
         throw new Error('Missing required parameters for flow distribution');
@@ -304,13 +302,10 @@ const PoolCard = ({
   const [weightingState, setWeightingState] =
     React.useState<Weightings>(weightings);
   const [monthly, setMonthly] = useState<string>(
-    formatUnits(BigInt(flowratePerSecondToMonth(BigInt(flowRate), false)), 18)
+    flowratePerSecondToMonth(BigInt(flowRate), 'rounded')
   );
 
-  const existingMonthly = formatUnits(
-    BigInt(flowratePerSecondToMonth(BigInt(flowRate), false)),
-    18
-  );
+  const existingMonthly = flowratePerSecondToMonth(BigInt(flowRate), 'rounded');
 
   const handleChangeWeighting = (
     weightType: keyof Weightings,

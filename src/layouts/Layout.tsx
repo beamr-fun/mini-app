@@ -3,8 +3,12 @@ import { Header } from '../components/Header';
 import classes from '../styles/layout.module.css';
 import { Nav } from './Nav';
 import { CTAProvider } from '../context/CTAContext';
+import { useLocation } from 'react-router-dom';
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+
+  const pathname = location.pathname;
   return (
     <CTAProvider>
       <Flex
@@ -23,6 +27,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
 
         <ScrollArea
           id="main-scroll"
+          key={pathname} // Reset scroll position on route change
           classNames={{ root: classes.scrollArea, thumb: classes.scrollThumb }}
         >
           <Box className={classes.contentBox}>

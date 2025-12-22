@@ -83,6 +83,8 @@ export const Budget = () => {
     let total = 0n;
 
     userSubscription.incoming.forEach((item) => {
+      if (item.isReceiverConnected) return;
+
       const perUnitFlowRate =
         BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
       const beamFlowRate = perUnitFlowRate * BigInt(item.units);
@@ -160,12 +162,16 @@ export const Budget = () => {
             Beamr requires users to set a fixed address, so their incoming
             streams can fund their outgoing streams in real-time.
           </Text>
-          <Image
-            src={beamrEcon}
-            alt="Beamr Economy Diagram"
-            mt="md"
-            fit="contain"
-          />
+          <Box w={299} h={236} mt="md">
+            <Image
+              src={beamrEcon}
+              alt="Beamr Economy Diagram"
+              w="100%"
+              h="100%"
+              fit="contain"
+              bg={'var(--glass-light)'}
+            />
+          </Box>
         </Paper>
         <Paper>
           <Text fz={'xl'} c={colors.gray[0]} mb={2}>
@@ -199,11 +205,8 @@ export const Budget = () => {
             <Text ta="center" mb={4}>
               <Text component="span" c={colors.green[6]} fw={500}>
                 + {totalIncomingPerMonth}
-              </Text>
+              </Text>{' '}
               (pending connection)
-              <Text component="span" c={colors.green[6]}>
-                *
-              </Text>
             </Text>
           )}
           {hasClaimable && (
@@ -264,8 +267,11 @@ export const Budget = () => {
               form.setFieldValue('budget', value.toString());
             }}
           />
-          <Text fz={13} c={colors.gray[3]}>
-            (Min. {formatBalance(BEAM_MIN.toString())})/mo
+          <Text
+            fz={13}
+            c={budget && !isValidBudget ? colors.red[7] : colors.gray[3]}
+          >
+            (Min. {formatBalance(BEAM_MIN.toString())}/mo)
           </Text>
           <Group justify="space-between" wrap="nowrap" gap={0} mt={30}>
             <Button
