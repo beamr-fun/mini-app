@@ -1,8 +1,8 @@
 import sdk from '@farcaster/miniapp-sdk';
 import { JWTPayload } from '../types/sharedTypes';
 import { useQuery } from '@tanstack/react-query';
-import { createContext, ReactNode, useEffect, useMemo, useState } from 'react';
-import { Address, EnsAvatarInvalidMetadataError } from 'viem';
+import { createContext, ReactNode, useEffect, useState } from 'react';
+import { Address } from 'viem';
 
 import { useAccount, useConnect } from 'wagmi';
 import { AuthResponse } from '../types/sharedTypes';

@@ -11,10 +11,10 @@ const DEFAULT_NAV_LINKS = [
     link: '/global',
     Icon: Globe,
   },
-  {
-    link: '/strategy',
-    Icon: BeamrNav,
-  },
+  // {
+  //   link: '/strategy',
+  //   Icon: BeamrNav,
+  // },
   {
     link: '/home',
     Icon: User,
