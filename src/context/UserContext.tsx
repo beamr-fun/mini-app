@@ -17,6 +17,7 @@ import { ADDR } from '../const/addresses';
 import { useGqlSub } from '../hooks/useGqlSub';
 import { User } from '@neynar/nodejs-sdk/build/api';
 import { userProfileTransform, UserTransformed } from '../transforms/user';
+import { getEthBalance } from '../utils/reads';
 
 type UserContextType = {
   user?: User;
@@ -105,14 +106,22 @@ export const UserProvider = ({
   const [hasPool, setHasPool] = useState<boolean>(false);
   const [incomingOnly, setIncomingOnly] = useState<boolean>(false);
 
-  const { data } = useToken({
+  const { data: beamrTokenData } = useToken({
     userAddress: address,
     tokenAddress: ADDR.SUPER_TOKEN,
     calls: { balanceOf: true },
   });
 
-  const userBalance = data?.balanceOf as bigint | undefined;
-  const userBalanceFetchedAt = data?.fetchedAt;
+  const { data: ethBalance } = useQuery({
+    queryKey: ['ethBalance', address],
+    queryFn: async () => {
+      getEthBalance(address as Address);
+    },
+    enabled: !!address,
+  });
+
+  const userBalance = beamrTokenData?.balanceOf as bigint | undefined;
+  const userBalanceFetchedAt = beamrTokenData?.fetchedAt;
 
   const {
     data: apiData,

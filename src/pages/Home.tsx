@@ -31,7 +31,7 @@ export const Home = () => {
 
   const hasToggledConnect = useRef(false);
 
-  const { incomingOnly, userSubscription } = useUser();
+  const { incomingOnly } = useUser();
 
   const navigate = useNavigate();
 
@@ -121,15 +121,13 @@ export const Home = () => {
     }
   };
 
-  const test = () => {
-    getQuote({
-      sellToken: NATIVE_TOKEN,
-      buyToken: ADDR_PROD.SUPER_TOKEN,
-      buyAmount: parseUnits('6000000', 18).toString(),
-      taker: address as `0x${string}`,
-      chainId: base.id.toString(),
-    });
-  };
+  // getQuote({
+  //   sellToken: NATIVE_TOKEN,
+  //   buyToken: ADDR_PROD.SUPER_TOKEN,
+  //   sellAmount: parseUnits('0.01', 18).toString(),
+  //   taker: address as `0x${string}`,
+  //   chainId: base.id.toString(),
+  // });
 
   if (incomingOnly) {
     return (
@@ -150,7 +148,6 @@ export const Home = () => {
 
   return (
     <PageLayout>
-      <Button onClick={test}>Test</Button>
       <BeamrHeadline />
       <SwapModal opened={opened} onClose={close} />
       <BalanceDisplay openSwap={open} setTab={setTab} />

@@ -388,8 +388,6 @@ export const getQuote = async (params: QuoteParams) => {
     }
   });
 
-  console.log({ buyAmount: params.buyAmount, queryParams });
-
   try {
     const res = await fetch(`${keys.apiUrl}/v1/swap/quote?${queryParams}`);
 
@@ -399,8 +397,11 @@ export const getQuote = async (params: QuoteParams) => {
       throw new Error(data?.error || 'Failed to fetch quote');
     }
 
+    console.log('data', data);
+
     return data;
   } catch (error) {
+    console.error('Error fetching quote:', error);
     throw Error;
   }
 };

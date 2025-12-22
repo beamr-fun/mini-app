@@ -11,7 +11,7 @@ import { distributeFlow } from '../utils/interactions';
 import { startTxPoll } from '../utils/poll';
 import { notifications } from '@mantine/notifications';
 import { charLimit } from '../utils/common';
-import { getClaimable } from '../utils/reads';
+import { getClaimable, getEthBalance } from '../utils/reads';
 
 type CreationSteps = {
   createPool: 'loading' | 'error' | 'success';
@@ -31,6 +31,8 @@ type OnboardContextType = {
   form?: UseFormReturnType<OnboardFormValues>;
   balance?: bigint;
   userClaimable?: bigint;
+  ethBalance?: bigint;
+
   isLoadingClaimable: boolean;
   claimableError: Error | null;
   besties?: User[] | null;
@@ -131,6 +133,14 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       enabled: !!address,
     },
     args: [address as Address],
+  });
+
+  const { data: ethBalance } = useQuery({
+    queryKey: ['ethBalance', address],
+    queryFn: async () => {
+      return getEthBalance(address as Address);
+    },
+    enabled: !!address,
   });
 
   const handleError = (error: unknown, defaultMessage: string) => {

@@ -38,20 +38,13 @@ export const quoteSchema = z.object({
     .string()
     .refine(isAddress, { message: 'Invalid buy token address' })
     .transform((val) => val as Address),
-  sellAmount: z
-    .string()
-    .regex(/^\d+$/, {
-      message: 'Sell amount must be a valid number string in wei',
-    })
-    .optional(),
-  buyAmount: z
-    .string()
-    .regex(/^\d+$/, {
-      message: 'Buy amount must be a valid number string in wei',
-    })
-    .optional(),
+  sellAmount: z.string().regex(/^\d+$/, {
+    message: 'Sell amount must be a valid number string in wei',
+  }),
   taker: z
     .string()
     .refine(isAddress, { message: 'Invalid taker address' })
     .transform((val) => val as Address),
 });
+
+export type QuoteParams = z.infer<typeof quoteSchema>;
