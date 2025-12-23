@@ -191,7 +191,13 @@ export const Settings = () => {
         onSuccess() {
           setTimeout(() => {
             setLoadingPrefs(false);
-            if (noOtherPoolWithFlow) {
+
+            notifications.show({
+              color: 'green',
+              title: 'Success',
+              message: 'Flow distribution updated successfully',
+            });
+            if (noOtherPoolWithFlow && BigInt(flowRate) === 0n) {
               deleteUserSub(headers);
             }
           }, 2000);
