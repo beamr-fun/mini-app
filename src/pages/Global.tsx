@@ -342,7 +342,7 @@ const LeaderHeader = () => {
     <Group mb={12} gap={'sm'}>
       <Trophy size={16} color={colors.gray[3]} />
       <Text c={colors.gray[3]} fz="sm">
-        Top Beamrs on the App by flow rate
+        Top Beamrs by flow rate
       </Text>
     </Group>
   );
