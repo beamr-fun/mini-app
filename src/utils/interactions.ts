@@ -199,7 +199,7 @@ export const multiConnect = async ({
     const operations = poolIds.map((poolAddress) =>
       prepareOperation({
         operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
-        target: gdaAddress[baseSepolia.id],
+        target: ADDR.GDA,
         data: encodeFunctionData({
           abi: gdaAbi,
           functionName: 'connectPool',
