@@ -44,7 +44,7 @@ export const Friends = () => {
   return (
     <PageLayout title="Seed Pool">
       <Stack mb="md" align="center">
-        <Text fz={36}>{formatBalance(budget)}/mo</Text>
+        <Text fz={36}>{formatBalance(budget)}</Text>
         <Text
           fz={'sm'}
           variant="label"
@@ -56,7 +56,7 @@ export const Friends = () => {
         </Text>
       </Stack>
 
-      <Text fz="lg" mb="md" ta="center">
+      <Text fz="lg" mb="md">
         Add the first recipients to your pool (3+)
       </Text>
       <Card>

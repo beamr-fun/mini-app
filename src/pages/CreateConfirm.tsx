@@ -38,7 +38,7 @@ export const CreateConfirm = () => {
       ? 'Creating Pool'
       : distributeReady
         ? 'Distribute Flow'
-        : 'Start Beaming',
+        : 'View Pool',
     onClick: distributeReady
       ? () => {
           handleDistributeFlow?.();
@@ -82,10 +82,10 @@ export const CreateConfirm = () => {
         : 'Indexed Successfully';
 
   return (
-    <PageLayout title="Complete">
-      <Text mb="xs">Congrats! Your Beamr Tipping Pool is being created.</Text>
+    <PageLayout title="Launching Pool">
+      <Text mb="xs">You're almost there.</Text>
       <Text mb="lg" c={colors.gray[3]} fz="sm">
-        The following steps should only take 5-30s
+        The following steps should only take 5-30s.
       </Text>
       <Card>
         <Stack mb="xl" gap="xl">
