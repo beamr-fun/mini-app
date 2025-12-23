@@ -13,7 +13,7 @@ import { Notifications } from '@mantine/notifications';
 
 const queryClient = new QueryClient();
 
-console.log('CACHE UPDATED');
+console.log('CACHE UPDATED 2');
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
