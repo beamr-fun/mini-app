@@ -38,7 +38,7 @@ export const Home = () => {
   const { setCTA, cta } = useCTA();
 
   useCTA(
-    cta && hasToggledConnect
+    cta && hasToggledConnect.current
       ? cta
       : {
           label:

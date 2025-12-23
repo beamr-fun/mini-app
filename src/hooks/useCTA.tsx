@@ -10,20 +10,12 @@ export const useCTA = (props?: CTAProps) => {
 
   const pathname = location.pathname;
 
-  const lastPathRef = useRef<string>(pathname);
-
   useEffect(() => {
     if (!props) {
       return;
     }
 
-    // if (lastPathRef.current !== pathname) {
-    //   ctx.setCTA(null);
-    //   return;
-    // }
-
     ctx.setCTA(props);
-    lastPathRef.current = pathname;
 
     return () => {
       ctx.setCTA(null);

@@ -12,7 +12,6 @@ import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../layouts/PageLayout';
 import { CheckCheck, ChevronDown, InfoIcon } from 'lucide-react';
 import { useCTA } from '../hooks/useCTA';
-import { useEffect } from 'react';
 import classes from '../styles/effects.module.css';
 
 export const CreateConfirm = () => {
