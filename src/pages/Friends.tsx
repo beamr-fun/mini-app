@@ -9,16 +9,16 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useOnboard } from '../hooks/useOnboard';
-import { Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useCTA } from '../hooks/useCTA';
 import { PageLayout } from '../layouts/PageLayout';
 import { useNavigate } from 'react-router-dom';
 import { formatBalance } from '../utils/common';
 
 export const Friends = () => {
-  const { budget, besties, form, selectedFriends, handlePoolCreate } =
-    useOnboard();
+  const { besties, form, selectedFriends, handlePoolCreate } = useOnboard();
+
+  const budget = form?.values.budget || '0';
 
   const navigate = useNavigate();
 
@@ -42,7 +42,7 @@ export const Friends = () => {
   });
 
   return (
-    <PageLayout title="Choose Friends">
+    <PageLayout title="Seed Pool">
       <Stack mb="md" align="center">
         <Text fz={36}>{formatBalance(budget)}/mo</Text>
         <Text

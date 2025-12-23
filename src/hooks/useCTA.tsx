@@ -17,16 +17,10 @@ export const useCTA = (props?: CTAProps) => {
       return;
     }
 
-    console.log({
-      pathname,
-      label: props.label,
-      lastPathRef: lastPathRef.current,
-    });
-
-    if (lastPathRef.current !== pathname) {
-      ctx.setCTA(null);
-      return;
-    }
+    // if (lastPathRef.current !== pathname) {
+    //   ctx.setCTA(null);
+    //   return;
+    // }
 
     ctx.setCTA(props);
     lastPathRef.current = pathname;

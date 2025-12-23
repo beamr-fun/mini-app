@@ -10,6 +10,7 @@ import {
   useMantineTheme,
   Button,
   Tooltip,
+  TextInput,
 } from '@mantine/core';
 import {
   charLimit,
@@ -65,6 +66,7 @@ export const Budget = () => {
       navigate('/create-pool/3');
     },
     disabled: !isValidBudget || !budget || isLoading,
+    // extraDeps: [budget, isValidBudget, isLoading],
   });
 
   if (!form) return null;
