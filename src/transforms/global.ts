@@ -38,7 +38,10 @@ export const globalRecentTransform = async (
   data: GlobalMostRecentSubscription,
   getAuthHeaders: () => Promise<APIHeaders | false>
 ) => {
-  const fids = data.Beam.map((beam) => [beam.from?.id, beam.to?.id])
+  const fids = data.Beam.map((beam) => [
+    beam.from?.fid.toString(),
+    beam.to?.fid.toString(),
+  ])
     .flat()
     .filter(Boolean) as string[];
 
@@ -59,15 +62,15 @@ export const globalRecentTransform = async (
   });
 
   return data.Beam.map((beam) => {
-    const fromProfile = profileLookup[beam.from?.id || ''] || null;
-    const toProfile = profileLookup[beam.to?.id || ''] || null;
+    const fromProfile = profileLookup[beam.from?.fid || ''] || null;
+    const toProfile = profileLookup[beam.to?.fid || ''] || null;
 
     if (!fromProfile) {
-      throw new Error('Profile not found for fid: ' + beam.from?.id);
+      throw new Error('Profile not found for fid: ' + beam.from?.fid);
     }
 
     if (!toProfile) {
-      throw new Error('Profile not found for fid: ' + beam.to?.id);
+      throw new Error('Profile not found for fid: ' + beam.to?.fid);
     }
 
     return {
@@ -75,7 +78,7 @@ export const globalRecentTransform = async (
       from: {
         ...beam.from,
         profile: {
-          id: beam.from?.id,
+          id: beam.from?.fid.toString(),
           pfp_url: fromProfile.pfp_url,
           username: fromProfile.username,
           display_name: fromProfile.display_name,
@@ -84,7 +87,7 @@ export const globalRecentTransform = async (
       to: {
         ...beam.to,
         profile: {
-          id: beam.to?.id,
+          id: beam.to?.fid.toString(),
           pfp_url: toProfile.pfp_url,
           username: toProfile.username,
           display_name: toProfile.display_name,

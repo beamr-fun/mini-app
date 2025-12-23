@@ -62,6 +62,7 @@ export const userProfileTransform = async (
   data: LoggedInUserSubscription,
   getHeaders: () => Promise<APIHeaders | false>
 ) => {
+  console.log('data', data);
   if (
     !data.User_by_pk ||
     (!data.User_by_pk.incoming && !data.User_by_pk.outgoing) ||

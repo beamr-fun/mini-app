@@ -11,7 +11,7 @@ import {
   LoggedInUserDocument,
   LoggedInUserSubscription,
 } from '../generated/graphql';
-import { keys } from '../utils/setup';
+import { keys, network } from '../utils/setup';
 import { useToken } from '../hooks/useToken';
 import { ADDR } from '../const/addresses';
 import { useGqlSub } from '../hooks/useGqlSub';
@@ -196,7 +196,7 @@ export const UserProvider = ({
   } = useGqlSub<LoggedInUserSubscription, UserTransformed | null>(
     LoggedInUserDocument,
     {
-      variables: { id: apiData?.user?.fid.toString() || '' },
+      variables: { id: `${apiData?.user?.fid.toString()}-${network.id}` || '' },
       enabled: !!apiData?.user?.fid && !IS_TESTING,
       transform: async (data) => {
         if (!userSubscription) {

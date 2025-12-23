@@ -147,11 +147,11 @@ export const Budget = () => {
     ? flowratePerSecondToMonth(totalIncomingFlowRate)
     : 0n;
 
-  const isBalanceBelowMonthSpend = () => {
-    if (!isBalanceBelowMonthSpend) return false;
+  const isBalanceBelowMonthlySpend = () => {
+    if (!form.values.budget || !isValidBudget) return false;
     if (!balance) return false;
-    const budget = form.values.budget || '0';
 
+    const budget = form.values.budget || '0';
     return balance < parseUnits(budget, 18);
   };
 
@@ -299,7 +299,7 @@ export const Budget = () => {
             </Button>
           </Group>
         </Paper>
-        {isBalanceBelowMonthSpend() && (
+        {isBalanceBelowMonthlySpend() && (
           <Text c={colors.yellow[7]} fz="sm">
             {
               'This proposed budget will deplete your token balance in < 1 month. Consider lowering your stream budget or buying more $BEAMR to keep your pool open longer.'
