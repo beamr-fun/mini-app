@@ -197,9 +197,9 @@ export const Settings = () => {
               title: 'Success',
               message: 'Flow distribution updated successfully',
             });
-            if (noOtherPoolWithFlow && BigInt(flowRate) === 0n) {
-              deleteUserSub(headers);
-            }
+            // if (noOtherPoolWithFlow && BigInt(flowRate) === 0n) {
+            //   deleteUserSub(headers);
+            // }
           }, 2000);
         },
         args: {
