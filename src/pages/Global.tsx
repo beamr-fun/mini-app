@@ -97,16 +97,16 @@ export const Global = () => {
 
   const shouldRenderCTA = !hasPool && !highlevelError;
 
-  // useCTA({
-  //   label: shouldRenderCTA ? 'Start Beaming' : undefined,
-  //   onClick: shouldRenderCTA ? () => navigate('/create-pool/1') : undefined,
-  //   extraDeps: [shouldRenderCTA],
-  // });
-
   useCTA({
-    label: 'Start Beaming',
-    onClick: () => navigate('/create-pool/1'),
+    label: shouldRenderCTA ? 'Start Beaming' : undefined,
+    onClick: shouldRenderCTA ? () => navigate('/create-pool/1') : undefined,
+    extraDeps: [shouldRenderCTA],
   });
+
+  // useCTA({
+  //   label: 'Start Beaming',
+  //   onClick: () => navigate('/create-pool/1'),
+  // });
 
   if (highlevelError) {
     return (
