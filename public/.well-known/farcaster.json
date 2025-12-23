@@ -6,7 +6,7 @@
   },
   "frame": {
     "version": "1",
-    "name": "Beamrstaging",
+    "name": "Beamr (Cabal Access)",
     "iconUrl": "https://staging.beamr.fun/images/icon.png",
     "homeUrl": "https://staging.beamr.fun",
     "imageUrl": "https://staging.beamr.fun/images/feed.png",
@@ -25,7 +25,7 @@
       "streaming"
     ],
     "tagline": "Dynamic micro-subscriptions",
-    "ogTitle": "Beamrstaging",
+    "ogTitle": "Beamr",
     "ogDescription": "The easiest way to sustainably reward people who make your feed worth scrolling.",
     "screenshotUrls": [
       "https://staging.beamr.fun/images/feed.png"
