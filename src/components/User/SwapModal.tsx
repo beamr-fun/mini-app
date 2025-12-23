@@ -8,6 +8,7 @@ import { Address } from 'viem';
 import sdk from '@farcaster/miniapp-sdk';
 import { truncateAddress } from '../../utils/common';
 import { ExternalLink } from 'lucide-react';
+import { notifications } from '@mantine/notifications';
 
 export const SwapModal = ({
   opened,
@@ -59,9 +60,10 @@ export const SwapModal = ({
           <SwapUI
             defaultSell={'0.01'}
             onSuccess={() => {
-              refetchEthBalance();
-              refetchUserTokenData?.();
-              close();
+              onClose();
+              setTimeout(async () => {
+                Promise.all([refetchEthBalance(), refetchUserTokenData?.()]);
+              }, 2500);
             }}
             canSwap={false}
             token1={{

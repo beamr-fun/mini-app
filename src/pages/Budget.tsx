@@ -119,8 +119,17 @@ export const Budget = () => {
         },
         onSuccess: () => {
           setIsLoading(false);
-          refetchClaimable?.();
-          refetchBalance?.();
+
+          notifications.show({
+            title: 'Success',
+            message: 'Connected to your pools successfully!',
+            color: 'green',
+          });
+
+          setTimeout(() => {
+            refetchClaimable?.();
+            refetchBalance?.();
+          }, 1000);
         },
         onError: (errorMsg) => {
           setIsLoading(false);

@@ -196,6 +196,7 @@ export const UserProvider = ({
   } = useGqlSub<LoggedInUserSubscription, UserTransformed | null>(
     LoggedInUserDocument,
     {
+      // variables: { id: '11244-8453' },
       variables: { id: `${apiData?.user?.fid.toString()}-${network.id}` || '' },
       enabled: !!apiData?.user?.fid && !IS_TESTING,
       transform: async (data) => {

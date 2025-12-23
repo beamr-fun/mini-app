@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import classes from '../styles/swap.module.css';
 import { useDebouncedValue } from '@mantine/hooks';
 import {
@@ -102,17 +102,24 @@ export const SwapUI = ({
     hash: txHash,
   });
 
+  const hasNotified = useRef(false);
+
   useEffect(() => {
+    if (hasNotified.current === true) return;
     if (isSuccess) {
       notifications.show({
         title: 'Transaction Successful',
         message: 'Your swap has been completed successfully.',
         color: 'green',
       });
+
       onSuccess?.();
+      hasNotified.current = true;
+
+      return;
     }
 
-    if (isError && error) {
+    if (isError || error) {
       console.error('Transaction Error:', error);
       notifications.show({
         title: 'Transaction Error',
@@ -122,18 +129,9 @@ export const SwapUI = ({
         ),
         color: 'red',
       });
-    }
+      hasNotified.current = true;
 
-    if (error) {
-      console.error('Send Transaction Error:', error);
-      notifications.show({
-        title: 'Transaction Error',
-        message: charLimit(
-          error?.message || 'An error occurred while sending the transaction.',
-          56
-        ),
-        color: 'red',
-      });
+      return;
     }
   }, [isSuccess, isError, error, sendError]);
 
