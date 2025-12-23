@@ -5,12 +5,14 @@ subscription LoggedInUser($id: String!) {
       id
       flowRate
       totalUnits
+      active
       metadata {
         name
       }
     }
     incoming(
-      order_by: { lastUpdated: desc } # where: { beamPool: { active: { _eq: true } } }
+      order_by: { lastUpdated: desc }
+      where: { beamPool: { active: { _eq: true } } }
     ) {
       id
       units

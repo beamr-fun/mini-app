@@ -266,8 +266,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  console.log('form.values', form.values);
-
   return (
     <OnboardContext.Provider
       value={{

@@ -16,6 +16,7 @@ export type UserTransformed = {
     __typename?: 'BeamPool';
     flowRate: string;
     totalUnits: string;
+    active: boolean;
     id: string;
     metadata: {
       name: string;

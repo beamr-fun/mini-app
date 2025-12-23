@@ -2,8 +2,8 @@ subscription GlobalMostRecent {
   Beam(
     order_by: { lastUpdated: desc }
     limit: 20
-  ) # where: { beamPool: { active: { _eq: true } } }
-  {
+    where: { beamPool: { active: { _eq: true } } }
+  ) {
     id
     units
     lastUpdated
@@ -14,24 +14,10 @@ subscription GlobalMostRecent {
     from {
       fid
       id
-      # profile {
-      #   id
-      #   pfp_url
-      #   display_name
-      #   username
-      #   id
-      # }
     }
     to {
       fid
       id
-      # profile {
-      #   id
-      #   pfp_url
-      #   display_name
-      #   username
-      #   id
-      # }
     }
   }
 }
