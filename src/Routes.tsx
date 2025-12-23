@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { CreatePool } from './components/Home/CreatePool';
+import { CreatePool } from './components/User/CreatePool';
 
-import { Home } from './pages/Home';
+import { User } from './pages/User';
 import { Explainer } from './pages/Explainer';
 import { Budget } from './pages/Budget';
 import { Friends } from './pages/Friends';
@@ -36,7 +36,7 @@ export const ClientRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<ConditionalRedirect />} />
-      <Route path="/home" element={<Home />} />
+      <Route path="/home" element={<User />} />
       <Route path="/global" element={<Global />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/strategy" element={<Strategy />} />

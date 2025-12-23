@@ -38,7 +38,7 @@ import { isTestnet } from '../utils/setup';
 import { ADDR, ADDR_PROD, NATIVE_TOKEN } from '../const/addresses';
 import { BEAM_MIN } from '../const/params';
 import sdk from '@farcaster/miniapp-sdk';
-import { SwapModal } from '../components/Home/SwapModal';
+import { SwapModal } from '../components/User/SwapModal';
 
 export const Budget = () => {
   const navigate = useNavigate();

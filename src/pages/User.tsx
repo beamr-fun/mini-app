@@ -8,19 +8,16 @@ import { Address, formatUnits, isAddress, parseUnits } from 'viem';
 import { multiConnect } from '../utils/interactions';
 import { useAccount, useWalletClient } from 'wagmi';
 import { notifications } from '@mantine/notifications';
-import { Sending } from '../components/Home/Sending';
-import { Receiving } from '../components/Home/Receiving';
-import { SwapModal } from '../components/Home/SwapModal';
-import { BalanceDisplay } from '../components/Home/BalanceDisplay';
+import { Sending } from '../components/User/Sending';
+import { Receiving } from '../components/User/Receiving';
+import { SwapModal } from '../components/User/SwapModal';
+import { BalanceDisplay } from '../components/User/BalanceDisplay';
 import { useUser } from '../hooks/useUser';
 import { useNavigate } from 'react-router-dom';
 import { charLimit } from '../utils/common';
 import { BeamrHeadline } from '../components/BeamrHeadline';
-import { getQuote } from '../utils/api';
-import { ADDR, ADDR_PROD, NATIVE_TOKEN } from '../const/addresses';
-import { base } from 'viem/chains';
 
-export const Home = () => {
+export const User = () => {
   const [tab, setTab] = useState('Sending');
   const [opened, { open, close }] = useDisclosure(false);
   const { data: walletClient } = useWalletClient();
@@ -120,14 +117,6 @@ export const Home = () => {
       hasToggledConnect.current = true;
     }
   };
-
-  // getQuote({
-  //   sellToken: NATIVE_TOKEN,
-  //   buyToken: ADDR_PROD.SUPER_TOKEN,
-  //   sellAmount: parseUnits('0.01', 18).toString(),
-  //   taker: address as `0x${string}`,
-  //   chainId: base.id.toString(),
-  // });
 
   if (incomingOnly) {
     return (

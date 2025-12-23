@@ -201,10 +201,10 @@ export const BalanceDisplay = ({
           <Tooltip
             w={250}
             multiline
-            label={`Max 250 connections per user. You are connected to ${amtConnected} beams.`}
+            label={`Max 256 connections per user. You are connected to ${amtConnected} beams.`}
           >
             <Group gap={4}>
-              <Text fz="sm">{amtConnected}/250</Text>
+              <Text fz="sm">{amtConnected}/256</Text>
               <Zap
                 size={16}
                 color={colors.gray[3]}
