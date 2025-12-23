@@ -46,11 +46,10 @@ export const Budget = () => {
     budget,
     form,
     userClaimable,
-    balance,
-    refetchBalance,
+
     refetchClaimable,
   } = useOnboard();
-  const { userSubscription } = useUser();
+  const { userSubscription, userBalance, refetchUserTokenData } = useUser();
   const { address } = useAccount();
   const { colors } = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
@@ -71,7 +70,7 @@ export const Budget = () => {
 
   if (!form) return null;
 
-  const formattedBalance = balance ? formatUnitBalance(balance) : '0';
+  const formattedBalance = userBalance ? formatUnitBalance(userBalance) : '0';
 
   const totalIncomingFlowRate = useMemo(() => {
     if (!userSubscription?.incoming) {
@@ -128,8 +127,8 @@ export const Budget = () => {
 
           setTimeout(() => {
             refetchClaimable?.();
-            refetchBalance?.();
-          }, 1000);
+            refetchUserTokenData?.();
+          }, 2500);
         },
         onError: (errorMsg) => {
           setIsLoading(false);
@@ -158,10 +157,10 @@ export const Budget = () => {
 
   const isBalanceBelowMonthlySpend = () => {
     if (!form.values.budget || !isValidBudget) return false;
-    if (!balance) return false;
+    if (!userBalance) return false;
 
     const budget = form.values.budget || '0';
-    return balance < parseUnits(budget, 18);
+    return userBalance < parseUnits(budget, 18);
   };
 
   return (

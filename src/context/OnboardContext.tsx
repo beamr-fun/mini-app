@@ -29,13 +29,12 @@ type OnboardContextType = {
   budget: string;
   selectedFriends?: string[];
   form?: UseFormReturnType<OnboardFormValues>;
-  balance?: bigint;
+
   userClaimable?: bigint;
 
   isLoadingClaimable: boolean;
   claimableError: Error | null;
   besties?: User[] | null;
-  refetchBalance: () => Promise<void>;
   refetchClaimable: () => Promise<void>;
   bestiesError: Error | null;
   creationSteps: CreationSteps;
@@ -51,7 +50,6 @@ export const OnboardContext = React.createContext<OnboardContextType>({
   bestiesError: null,
   isLoadingClaimable: false,
   claimableError: null,
-  refetchBalance: async () => {},
   refetchClaimable: async () => {},
   creationSteps: {
     createPool: 'loading',
@@ -117,21 +115,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       budget: '',
       selectedFriends: [] as string[],
     },
-  });
-
-  const {
-    data: userBalance,
-    isLoading: isLoadingBalance,
-    error: balanceError,
-    refetch: refetchBalance,
-  } = useReadContract({
-    address: ADDR.SUPER_TOKEN,
-    abi: erc20Abi,
-    functionName: 'balanceOf',
-    query: {
-      enabled: !!address,
-    },
-    args: [address as Address],
   });
 
   const handleError = (error: unknown, defaultMessage: string) => {
@@ -291,12 +274,9 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         budget: form.values.budget,
         form,
         userClaimable,
-
         isLoadingClaimable,
         claimableError,
-        refetchBalance: refetchBalance as any as () => Promise<void>,
         refetchClaimable: refetchClaimable as any as () => Promise<void>,
-        balance: userBalance,
         besties,
         bestiesError,
         selectedFriends: form.values.selectedFriends,
