@@ -66,6 +66,8 @@ export const fetchBesties = async (fid: number, apiHeaders: APIHeaders) => {
 
     const data = await res.json();
 
+    console.log('data', data);
+
     if (!res.ok) {
       throw new Error(data?.error || 'Failed to fetch besties');
     }

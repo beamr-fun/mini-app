@@ -48,7 +48,7 @@ export const distributeFlow = async ({
     const operations = [
       prepareOperation({
         operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
-        target: gdaAddress[baseSepolia.id],
+        target: ADDR.GDA,
         data: encodeFunctionData({
           abi: gdaAbi,
           functionName: 'distributeFlow',
@@ -58,7 +58,7 @@ export const distributeFlow = async ({
       }),
       prepareOperation({
         operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
-        target: gdaAddress[baseSepolia.id],
+        target: ADDR.GDA,
         data: encodeFunctionData({
           abi: gdaAbi,
           functionName: 'distributeFlow',
@@ -98,27 +98,6 @@ export const distributeFlow = async ({
   } catch (error) {
     console.error('Error in distributeFlow:', error);
     onError((error as Error).message);
-  }
-};
-
-export const transfer = async ({
-  amount,
-  to,
-  walletClient,
-}: {
-  amount: bigint;
-  to: Address;
-  walletClient: any;
-}) => {
-  const hash = await walletClient.writeContract({
-    abi: erc20Abi,
-    address: ADDR.BEAMR,
-    functionName: 'transfer',
-    args: [amount, to],
-  });
-
-  if (!hash) {
-    throw new Error('Failed to get transaction hash');
   }
 };
 
