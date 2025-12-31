@@ -17,6 +17,7 @@ import { ADDR } from '../const/addresses';
 import { useGqlSub } from '../hooks/useGqlSub';
 import { User } from '@neynar/nodejs-sdk/build/api';
 import { userProfileTransform, UserTransformed } from '../transforms/user';
+import { getFlowDistributionRate } from '../utils/reads';
 
 let wakeupCalls = 0;
 
@@ -39,6 +40,10 @@ type UserContextType = {
   isLoadingAPI: boolean;
   apiError: Error | null;
   refetchLogin: () => Promise<void>;
+  collectionFlowRate: bigint | null;
+  isLoadingCollections: boolean;
+  collectionError: Error | null;
+  refetchCollections?: () => Promise<void>;
 };
 
 export const UserContext = createContext<UserContextType>({
@@ -52,6 +57,10 @@ export const UserContext = createContext<UserContextType>({
   apiError: null,
   getAuthHeaders: async () => false,
   refetchLogin: async () => {},
+
+  collectionFlowRate: null,
+  isLoadingCollections: false,
+  collectionError: null,
 });
 
 const login = async (wakeup: () => void) => {
@@ -94,7 +103,7 @@ const login = async (wakeup: () => void) => {
 
     console.log(`LOADING PROCESS: DURATION ${duration}ms`);
 
-    if (duration > 4000) {
+    if (duration > 3000) {
       console.log('DURATION EXCEEDED THRESHOLD, WAKE UP CALLS: ', wakeupCalls);
       if (wakeupCalls < 1) {
         wakeupCalls++;
@@ -208,6 +217,30 @@ export const UserProvider = ({
     }
   );
 
+  const {
+    data: collectionFlowRate,
+    isLoading: isLoadingCollections,
+    error: collectionError,
+    refetch: refetchCollections,
+  } = useQuery({
+    queryKey: ['collection-user-flows', apiData?.user?.fid],
+    queryFn: async () => {
+      if (!userSubscription?.pools?.length) {
+        return null;
+      }
+
+      const userFeeFlowRate = await getFlowDistributionRate({
+        userAddress: address as Address,
+        poolAddress: ADDR.COLLECTOR_POOL,
+        tokenAddress: ADDR.SUPER_TOKEN,
+      });
+
+      return userFeeFlowRate;
+    },
+    enabled:
+      !!userSubscription && userSubscription?.pools.length > 0 ? true : false,
+  });
+
   useEffect(() => {
     if (startingRoute) return;
     if (userSubError || apiError) {
@@ -259,6 +292,10 @@ export const UserProvider = ({
         userSubscription,
         userBalance,
         userBalanceFetchedAt,
+        collectionFlowRate: collectionFlowRate || null,
+        isLoadingCollections,
+        refetchCollections: refetchCollections as any as () => Promise<void>,
+        collectionError,
         hasPool,
         refetchUserTokenData:
           refetchUserTokenData as any as () => Promise<void>,

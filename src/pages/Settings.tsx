@@ -36,13 +36,20 @@ import { flowratePerSecondToMonth } from '../utils/common';
 import { Address, parseEther } from 'viem';
 import { distributeFlow } from '../utils/interactions';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
-import { getFlowDistributionRate, getUserFlowRates } from '../utils/reads';
-import { ADDR } from '../const/addresses';
 
 export const Settings = () => {
   const { colors } = useMantineTheme();
 
-  const { user, getAuthHeaders, userSubscription, isLoadingSub } = useUser();
+  const {
+    user,
+    getAuthHeaders,
+    userSubscription,
+    isLoadingSub,
+    collectionFlowRate,
+    isLoadingCollections,
+    collectionError,
+    refetchCollections,
+  } = useUser();
   const [loadingPrefs, setLoadingPrefs] = React.useState(false);
 
   const { address } = useAccount();
@@ -72,30 +79,6 @@ export const Settings = () => {
       return fetchUserPrefs(user!.fid, headers);
     },
     enabled: !!user?.fid,
-  });
-
-  const {
-    data: collectionFlowRate,
-    isLoading: isLoadingCollections,
-    error: collectionError,
-    refetch: refetchCollections,
-  } = useQuery({
-    queryKey: ['collection-user-flows', user?.fid],
-    queryFn: async () => {
-      if (!userSubscription?.pools?.length) {
-        return null;
-      }
-
-      const userFeeFlowRate = await getFlowDistributionRate({
-        userAddress: address as Address,
-        poolAddress: ADDR.COLLECTOR_POOL,
-        tokenAddress: ADDR.SUPER_TOKEN,
-      });
-
-      return userFeeFlowRate;
-    },
-    enabled:
-      !!userSubscription && userSubscription?.pools.length > 0 ? true : false,
   });
 
   const pools = useMemo(() => {
@@ -202,7 +185,7 @@ export const Settings = () => {
           setTimeout(() => {
             setLoadingPrefs(false);
             refetchPrefs();
-            refetchCollections();
+            refetchCollections?.();
             notifications.show({
               color: 'green',
               title: 'Success',
