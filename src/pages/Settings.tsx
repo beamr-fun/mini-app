@@ -35,7 +35,7 @@ import { flowratePerSecondToMonth } from '../utils/common';
 import { Address, parseEther } from 'viem';
 import { distributeFlow } from '../utils/interactions';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
-import { getUserFlowRates } from '../utils/reads';
+import { getFlowDistributionRate, getUserFlowRates } from '../utils/reads';
 import { ADDR } from '../const/addresses';
 
 export const Settings = () => {
@@ -74,7 +74,7 @@ export const Settings = () => {
   });
 
   const {
-    data: userCollectionRates,
+    data: collectionFlowRate,
     isLoading: isLoadingCollections,
     error: collectionError,
   } = useQuery({
@@ -84,60 +84,52 @@ export const Settings = () => {
         return null;
       }
 
-      const userFlowRates = await getUserFlowRates(
-        userSubscription.pools.map((pool) => ({
-          userAddress: address as Address,
-          poolAddress: pool.id as Address,
-          tokenAddress: ADDR.SUPER_TOKEN,
-        }))
-      );
+      const userFeeFlowRate = await getFlowDistributionRate({
+        userAddress: address as Address,
+        poolAddress: ADDR.COLLECTOR_POOL,
+        tokenAddress: ADDR.SUPER_TOKEN,
+      });
 
-      return userFlowRates;
+      return userFeeFlowRate;
     },
     enabled:
       !!userSubscription && userSubscription?.pools.length > 0 ? true : false,
   });
 
   const pools = useMemo(() => {
-    if (!userPrefs || !userSubscription || !userCollectionRates) {
-      return null;
-    }
-
-    if (!userPrefs.pools?.length || !userSubscription?.pools.length) {
+    if (!userPrefs?.pools || !userSubscription?.pools || !collectionFlowRate) {
       return [];
     }
 
-    return userSubscription.pools
-      .map((pool, index) => {
-        const prefs = userPrefs.pools.find(
-          (p) => p.poolAddress.toLowerCase() === pool.id.toLowerCase()
-        );
+    const subscriptionPools = userSubscription.pools;
 
-        if (!prefs) return null;
+    const totalUserFlowRate = subscriptionPools.reduce((acc, pool) => {
+      return acc + BigInt(pool.flowRate || 0);
+    }, 0n);
 
-        const collectorFlowRate = userCollectionRates[index];
+    return subscriptionPools.map((pool) => {
+      const poolFlowRate = BigInt(pool.flowRate || 0);
+      let reconstitutedFlowRate = poolFlowRate;
 
-        return {
-          id: pool.id,
-          creatorAddress: prefs.creatorAddress,
-          weightings: prefs.weightings,
-          name: pool.metadata.name,
-          lastUpdated: prefs.updatedAt,
-          poolAddress: prefs.poolAddress,
-          flowRate: pool.flowRate,
-          collectorFlowRate: userCollectionRates[index],
-        };
-      })
-      .filter((pool) => pool !== null) as {
-      id: string;
-      creatorAddress: string;
-      weightings: Weightings;
-      name: string;
-      lastUpdated: string;
-      poolAddress: string;
-      flowRate: string;
-    }[];
-  }, [userPrefs, userSubscription, userCollectionRates]);
+      if (totalUserFlowRate > 0n && collectionFlowRate > 0n) {
+        /* Calculate proportional fee: (Pool Flow * Total Fees) / Total Flow
+         */
+        const proportionalFee =
+          (poolFlowRate * BigInt(collectionFlowRate)) / totalUserFlowRate;
+        reconstitutedFlowRate = poolFlowRate + proportionalFee;
+      }
+
+      // Return the pool object combined with any UI preferences
+      const prefs = userPrefs.pools.find((p) => p.poolAddress === pool.id);
+
+      return {
+        ...pool,
+        ...prefs,
+        rawFlowRate: poolFlowRate, // Original flow
+        reconstitutedFlowRate: reconstitutedFlowRate.toString(), // Flow + Fees
+      };
+    });
+  }, [userPrefs, userSubscription, collectionFlowRate]);
 
   const handleUpdatePrefs = async (
     poolAddress: string,
@@ -203,10 +195,6 @@ export const Settings = () => {
         (pool) => pool.poolAddress !== poolAddress
       );
 
-      const noOtherPoolWithFlow = allOtherPools.every(
-        (pool) => BigInt(pool.flowRate) === 0n
-      );
-
       await distributeFlow({
         enableZeroFlowRate: true,
         onError(errorMsg) {
@@ -270,8 +258,21 @@ export const Settings = () => {
               if (!pool) return null;
               return (
                 <PoolCard
+                  id={pool.id}
+                  flowRate={pool.reconstitutedFlowRate}
+                  lastUpdated={pool.updatedAt || ''}
+                  creatorAddress={pool.creatorAddress || ''}
+                  name={pool.metadata.name || 'Unnamed Pool'}
+                  weightings={
+                    pool.weightings || {
+                      recast: '0',
+                      like: '0',
+                      comment: '0',
+                      follow: '0',
+                    }
+                  }
+                  poolAddress={pool.id}
                   key={pool.id}
-                  {...pool}
                   updatePrefs={handleUpdatePrefs}
                   loadingUpdate={loadingPrefs}
                   handleDistributeFlow={handleDistributeFlow}

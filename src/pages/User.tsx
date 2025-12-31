@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 
 import { useDisclosure } from '@mantine/hooks';
 import { useCTA } from '../hooks/useCTA';
-import { Address, formatUnits, isAddress, parseUnits } from 'viem';
+import { Address, isAddress } from 'viem';
 import { multiConnect } from '../utils/interactions';
 import { useAccount, useWalletClient } from 'wagmi';
 import { notifications } from '@mantine/notifications';
@@ -25,8 +25,6 @@ export const User = () => {
   const [isLoadingConnect, setIsLoadingConnect] = useState(false);
 
   const [poolsToConnect, setPoolsToConnect] = useState<Address[]>([]);
-
-  console.log('poolsToConnect', poolsToConnect);
 
   const hasToggledConnect = useRef(false);
 

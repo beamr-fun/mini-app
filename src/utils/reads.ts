@@ -73,7 +73,6 @@ export const getFlowDistributionRate = async ({
 };
 
 export const getUserFlowRates = async (userFlowRates: UserFlowRateParams[]) => {
-  console.log('userFlowRates', userFlowRates);
   try {
     const getFlowRatePromises = userFlowRates.map(
       ({ poolAddress, userAddress, tokenAddress }) => ({
