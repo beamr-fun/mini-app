@@ -31,6 +31,8 @@ export const Receiving = ({
       </Stack>
     );
 
+  console.log('userSubscription.incoming', userSubscription.incoming);
+
   return (
     <Stack gap="sm">
       <TableHeader sending={false} />

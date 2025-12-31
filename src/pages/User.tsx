@@ -26,6 +26,8 @@ export const User = () => {
 
   const [poolsToConnect, setPoolsToConnect] = useState<Address[]>([]);
 
+  console.log('poolsToConnect', poolsToConnect);
+
   const hasToggledConnect = useRef(false);
 
   const { incomingOnly } = useUser();

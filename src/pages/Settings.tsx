@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActionIcon,
   Avatar,
@@ -28,19 +28,15 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useUser } from '../hooks/useUser';
-import {
-  deleteUserSub,
-  fetchIsUserSubbed,
-  fetchUserPrefs,
-  updatePoolPrefs,
-  Weightings,
-} from '../utils/api';
+import { fetchUserPrefs, updatePoolPrefs, Weightings } from '../utils/api';
 import { notifications } from '@mantine/notifications';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { flowratePerSecondToMonth } from '../utils/common';
-import { Address, formatUnits, parseEther } from 'viem';
+import { Address, parseEther } from 'viem';
 import { distributeFlow } from '../utils/interactions';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
+import { getUserFlowRates } from '../utils/reads';
+import { ADDR } from '../const/addresses';
 
 export const Settings = () => {
   const { colors } = useMantineTheme();
@@ -77,8 +73,33 @@ export const Settings = () => {
     enabled: !!user?.fid,
   });
 
+  const {
+    data: userCollectionRates,
+    isLoading: isLoadingCollections,
+    error: collectionError,
+  } = useQuery({
+    queryKey: ['collection-user-flows', user?.fid],
+    queryFn: async () => {
+      if (!userSubscription?.pools?.length) {
+        return null;
+      }
+
+      const userFlowRates = await getUserFlowRates(
+        userSubscription.pools.map((pool) => ({
+          userAddress: address as Address,
+          poolAddress: pool.id as Address,
+          tokenAddress: ADDR.SUPER_TOKEN,
+        }))
+      );
+
+      return userFlowRates;
+    },
+    enabled:
+      !!userSubscription && userSubscription?.pools.length > 0 ? true : false,
+  });
+
   const pools = useMemo(() => {
-    if (!userPrefs || !userSubscription) {
+    if (!userPrefs || !userSubscription || !userCollectionRates) {
       return null;
     }
 
@@ -87,12 +108,14 @@ export const Settings = () => {
     }
 
     return userSubscription.pools
-      .map((pool) => {
+      .map((pool, index) => {
         const prefs = userPrefs.pools.find(
           (p) => p.poolAddress.toLowerCase() === pool.id.toLowerCase()
         );
 
         if (!prefs) return null;
+
+        const collectorFlowRate = userCollectionRates[index];
 
         return {
           id: pool.id,
@@ -102,6 +125,7 @@ export const Settings = () => {
           lastUpdated: prefs.updatedAt,
           poolAddress: prefs.poolAddress,
           flowRate: pool.flowRate,
+          collectorFlowRate: userCollectionRates[index],
         };
       })
       .filter((pool) => pool !== null) as {
@@ -113,7 +137,7 @@ export const Settings = () => {
       poolAddress: string;
       flowRate: string;
     }[];
-  }, [userPrefs, userSubscription]);
+  }, [userPrefs, userSubscription, userCollectionRates]);
 
   const handleUpdatePrefs = async (
     poolAddress: string,
