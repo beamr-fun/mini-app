@@ -2,9 +2,15 @@
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
-export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type Exact<T extends { [key: string]: unknown }> = {
+  [K in keyof T]: T[K];
+};
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]?: Maybe<T[SubKey]>;
+};
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]: Maybe<T[SubKey]>;
+};
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -43,7 +49,6 @@ export type Beam = {
   to_id: Scalars['String'];
   units: Scalars['numeric'];
 };
-
 
 /** columns and relationships of "Beam" */
 export type BeamMemberUnitsUpdatedArgs = {
@@ -93,7 +98,6 @@ export type BeamPool = {
   totalUnits: Scalars['numeric'];
 };
 
-
 /** columns and relationships of "BeamPool" */
 export type BeamPoolBeamsArgs = {
   distinct_on?: InputMaybe<Array<Beam_Select_Column>>;
@@ -103,7 +107,6 @@ export type BeamPoolBeamsArgs = {
   where?: InputMaybe<Beam_Bool_Exp>;
 };
 
-
 /** columns and relationships of "BeamPool" */
 export type BeamPoolDistributionUpdatesArgs = {
   distinct_on?: InputMaybe<Array<DistributionUpdated_Select_Column>>;
@@ -112,7 +115,6 @@ export type BeamPoolDistributionUpdatesArgs = {
   order_by?: InputMaybe<Array<DistributionUpdated_Order_By>>;
   where?: InputMaybe<DistributionUpdated_Bool_Exp>;
 };
-
 
 /** columns and relationships of "BeamPool" */
 export type BeamPoolMemberUnitsUpdatedArgs = {
@@ -280,7 +282,7 @@ export enum BeamPool_Select_Column {
   /** column name */
   Token = 'token',
   /** column name */
-  TotalUnits = 'totalUnits'
+  TotalUnits = 'totalUnits',
 }
 
 /** order by stddev() on columns of table "BeamPool" */
@@ -422,7 +424,7 @@ export enum BeamR_Initialized_Select_Column {
   /** column name */
   RootAdminRole = 'rootAdminRole',
   /** column name */
-  TxId = 'tx_id'
+  TxId = 'tx_id',
 }
 
 /** Streaming cursor of the table "BeamR_Initialized" */
@@ -512,7 +514,7 @@ export enum BeamR_PoolCreated_Select_Column {
   /** column name */
   Token = 'token',
   /** column name */
-  TxId = 'tx_id'
+  TxId = 'tx_id',
 }
 
 /** Streaming cursor of the table "BeamR_PoolCreated" */
@@ -583,7 +585,7 @@ export enum BeamR_PoolMetadataUpdated_Select_Column {
   /** column name */
   Pool = 'pool',
   /** column name */
-  TxId = 'tx_id'
+  TxId = 'tx_id',
 }
 
 /** Streaming cursor of the table "BeamR_PoolMetadataUpdated" */
@@ -649,7 +651,7 @@ export enum BeamR_RoleAdminChanged_Select_Column {
   /** column name */
   Role = 'role',
   /** column name */
-  TxId = 'tx_id'
+  TxId = 'tx_id',
 }
 
 /** Streaming cursor of the table "BeamR_RoleAdminChanged" */
@@ -715,7 +717,7 @@ export enum BeamR_RoleGranted_Select_Column {
   /** column name */
   Sender = 'sender',
   /** column name */
-  TxId = 'tx_id'
+  TxId = 'tx_id',
 }
 
 /** Streaming cursor of the table "BeamR_RoleGranted" */
@@ -781,7 +783,7 @@ export enum BeamR_RoleRevoked_Select_Column {
   /** column name */
   Sender = 'sender',
   /** column name */
-  TxId = 'tx_id'
+  TxId = 'tx_id',
 }
 
 /** Streaming cursor of the table "BeamR_RoleRevoked" */
@@ -806,7 +808,7 @@ export type Beam_Aggregate_Order_By = {
   avg?: InputMaybe<Beam_Avg_Order_By>;
   count?: InputMaybe<Order_By>;
   max?: InputMaybe<Beam_Max_Order_By>;
-  min?: InputMaybe<Beam_Min_Order_By>;
+  min?: InputMaybe<MIN_POOL_AMT_Order_By>;
   stddev?: InputMaybe<Beam_Stddev_Order_By>;
   stddev_pop?: InputMaybe<Beam_Stddev_Pop_Order_By>;
   stddev_samp?: InputMaybe<Beam_Stddev_Samp_Order_By>;
@@ -860,7 +862,7 @@ export type Beam_Max_Order_By = {
 };
 
 /** order by min() on columns of table "Beam" */
-export type Beam_Min_Order_By = {
+export type MIN_POOL_AMT_Order_By = {
   beamPool_id?: InputMaybe<Order_By>;
   beamR_id?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
@@ -913,7 +915,7 @@ export enum Beam_Select_Column {
   /** column name */
   ToId = 'to_id',
   /** column name */
-  Units = 'units'
+  Units = 'units',
 }
 
 /** order by stddev() on columns of table "Beam" */
@@ -1004,7 +1006,6 @@ export type BeamrGlobal = {
   rootAdminRole_id: Scalars['String'];
 };
 
-
 /** columns and relationships of "BeamrGlobal" */
 export type BeamrGlobalBeamPoolsArgs = {
   distinct_on?: InputMaybe<Array<BeamPool_Select_Column>>;
@@ -1013,7 +1014,6 @@ export type BeamrGlobalBeamPoolsArgs = {
   order_by?: InputMaybe<Array<BeamPool_Order_By>>;
   where?: InputMaybe<BeamPool_Bool_Exp>;
 };
-
 
 /** columns and relationships of "BeamrGlobal" */
 export type BeamrGlobalBeamsArgs = {
@@ -1060,7 +1060,7 @@ export enum BeamrGlobal_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
-  RootAdminRoleId = 'rootAdminRole_id'
+  RootAdminRoleId = 'rootAdminRole_id',
 }
 
 /** Streaming cursor of the table "BeamrGlobal" */
@@ -1207,7 +1207,7 @@ export enum DistributionUpdated_Select_Column {
   /** column name */
   OldFlowRate = 'oldFlowRate',
   /** column name */
-  Operator = 'operator'
+  Operator = 'operator',
 }
 
 /** order by stddev() on columns of table "DistributionUpdated" */
@@ -1396,7 +1396,7 @@ export enum MemberUnitsUpdated_Select_Column {
   /** column name */
   NewUnits = 'newUnits',
   /** column name */
-  OldUnits = 'oldUnits'
+  OldUnits = 'oldUnits',
 }
 
 /** order by stddev() on columns of table "MemberUnitsUpdated" */
@@ -1511,7 +1511,7 @@ export enum PoolMetadata_Select_Column {
   /** column name */
   Name = 'name',
   /** column name */
-  PoolType = 'poolType'
+  PoolType = 'poolType',
 }
 
 /** Streaming cursor of the table "PoolMetadata" */
@@ -1588,7 +1588,7 @@ export enum Role_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
-  RoleHash = 'roleHash'
+  RoleHash = 'roleHash',
 }
 
 /** Streaming cursor of the table "Role" */
@@ -1706,7 +1706,7 @@ export enum Tx_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
-  Timestamp = 'timestamp'
+  Timestamp = 'timestamp',
 }
 
 /** Streaming cursor of the table "TX" */
@@ -1812,7 +1812,7 @@ export enum TokenMetric_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
-  VanityMetricsId = 'vanityMetrics_id'
+  VanityMetricsId = 'vanityMetrics_id',
 }
 
 /** order by stddev() on columns of table "TokenMetric" */
@@ -1889,7 +1889,6 @@ export type User = {
   pools: Array<BeamPool>;
 };
 
-
 /** columns and relationships of "User" */
 export type UserAccountsArgs = {
   distinct_on?: InputMaybe<Array<UserAccount_Select_Column>>;
@@ -1898,7 +1897,6 @@ export type UserAccountsArgs = {
   order_by?: InputMaybe<Array<UserAccount_Order_By>>;
   where?: InputMaybe<UserAccount_Bool_Exp>;
 };
-
 
 /** columns and relationships of "User" */
 export type UserIncomingArgs = {
@@ -1909,7 +1907,6 @@ export type UserIncomingArgs = {
   where?: InputMaybe<Beam_Bool_Exp>;
 };
 
-
 /** columns and relationships of "User" */
 export type UserOutgoingArgs = {
   distinct_on?: InputMaybe<Array<Beam_Select_Column>>;
@@ -1918,7 +1915,6 @@ export type UserOutgoingArgs = {
   order_by?: InputMaybe<Array<Beam_Order_By>>;
   where?: InputMaybe<Beam_Bool_Exp>;
 };
-
 
 /** columns and relationships of "User" */
 export type UserPoolsArgs = {
@@ -1941,7 +1937,6 @@ export type UserAccount = {
   user?: Maybe<User>;
   user_id: Scalars['String'];
 };
-
 
 /** columns and relationships of "UserAccount" */
 export type UserAccountPoolsArgs = {
@@ -2020,7 +2015,7 @@ export enum UserAccount_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
-  UserId = 'user_id'
+  UserId = 'user_id',
 }
 
 /** order by stddev() on columns of table "UserAccount" */
@@ -2102,7 +2097,7 @@ export enum User_Select_Column {
   /** column name */
   Fid = 'fid',
   /** column name */
-  Id = 'id'
+  Id = 'id',
 }
 
 /** Streaming cursor of the table "User" */
@@ -2129,7 +2124,6 @@ export type VanityMetrics = {
   id: Scalars['String'];
   users: Scalars['Int'];
 };
-
 
 /** columns and relationships of "VanityMetrics" */
 export type VanityMetricsTokenMetricsArgs = {
@@ -2170,7 +2164,7 @@ export enum VanityMetrics_Select_Column {
   /** column name */
   Id = 'id',
   /** column name */
-  Users = 'users'
+  Users = 'users',
 }
 
 /** Streaming cursor of the table "VanityMetrics" */
@@ -2256,7 +2250,7 @@ export enum _Meta_Select_Column {
   /** column name */
   SourceBlock = 'sourceBlock',
   /** column name */
-  StartBlock = 'startBlock'
+  StartBlock = 'startBlock',
 }
 
 /** Streaming cursor of the table "_meta" */
@@ -2353,7 +2347,7 @@ export enum Chain_Metadata_Select_Column {
   /** column name */
   StartBlock = 'start_block',
   /** column name */
-  TimestampCaughtUpToHeadOrEndblock = 'timestamp_caught_up_to_head_or_endblock'
+  TimestampCaughtUpToHeadOrEndblock = 'timestamp_caught_up_to_head_or_endblock',
 }
 
 /** Streaming cursor of the table "chain_metadata" */
@@ -2384,7 +2378,7 @@ export enum Cursor_Ordering {
   /** ascending ordering of the cursor */
   Asc = 'ASC',
   /** descending ordering of the cursor */
-  Desc = 'DESC'
+  Desc = 'DESC',
 }
 
 export type Jsonb_Cast_Exp = {
@@ -2441,7 +2435,7 @@ export enum Order_By {
   /** in descending order, nulls first */
   DescNullsFirst = 'desc_nulls_first',
   /** in descending order, nulls last */
-  DescNullsLast = 'desc_nulls_last'
+  DescNullsLast = 'desc_nulls_last',
 }
 
 export type Query_Root = {
@@ -2528,7 +2522,6 @@ export type Query_Root = {
   raw_events_by_pk?: Maybe<Raw_Events>;
 };
 
-
 export type Query_RootBeamArgs = {
   distinct_on?: InputMaybe<Array<Beam_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -2536,7 +2529,6 @@ export type Query_RootBeamArgs = {
   order_by?: InputMaybe<Array<Beam_Order_By>>;
   where?: InputMaybe<Beam_Bool_Exp>;
 };
-
 
 export type Query_RootBeamPoolArgs = {
   distinct_on?: InputMaybe<Array<BeamPool_Select_Column>>;
@@ -2546,11 +2538,9 @@ export type Query_RootBeamPoolArgs = {
   where?: InputMaybe<BeamPool_Bool_Exp>;
 };
 
-
 export type Query_RootBeamPool_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootBeamR_InitializedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_Initialized_Select_Column>>;
@@ -2560,11 +2550,9 @@ export type Query_RootBeamR_InitializedArgs = {
   where?: InputMaybe<BeamR_Initialized_Bool_Exp>;
 };
 
-
 export type Query_RootBeamR_Initialized_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootBeamR_PoolCreatedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_PoolCreated_Select_Column>>;
@@ -2574,11 +2562,9 @@ export type Query_RootBeamR_PoolCreatedArgs = {
   where?: InputMaybe<BeamR_PoolCreated_Bool_Exp>;
 };
 
-
 export type Query_RootBeamR_PoolCreated_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootBeamR_PoolMetadataUpdatedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_PoolMetadataUpdated_Select_Column>>;
@@ -2588,11 +2574,9 @@ export type Query_RootBeamR_PoolMetadataUpdatedArgs = {
   where?: InputMaybe<BeamR_PoolMetadataUpdated_Bool_Exp>;
 };
 
-
 export type Query_RootBeamR_PoolMetadataUpdated_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootBeamR_RoleAdminChangedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_RoleAdminChanged_Select_Column>>;
@@ -2602,11 +2586,9 @@ export type Query_RootBeamR_RoleAdminChangedArgs = {
   where?: InputMaybe<BeamR_RoleAdminChanged_Bool_Exp>;
 };
 
-
 export type Query_RootBeamR_RoleAdminChanged_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootBeamR_RoleGrantedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_RoleGranted_Select_Column>>;
@@ -2616,11 +2598,9 @@ export type Query_RootBeamR_RoleGrantedArgs = {
   where?: InputMaybe<BeamR_RoleGranted_Bool_Exp>;
 };
 
-
 export type Query_RootBeamR_RoleGranted_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootBeamR_RoleRevokedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_RoleRevoked_Select_Column>>;
@@ -2630,16 +2610,13 @@ export type Query_RootBeamR_RoleRevokedArgs = {
   where?: InputMaybe<BeamR_RoleRevoked_Bool_Exp>;
 };
 
-
 export type Query_RootBeamR_RoleRevoked_By_PkArgs = {
   id: Scalars['String'];
 };
 
-
 export type Query_RootBeam_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootBeamrGlobalArgs = {
   distinct_on?: InputMaybe<Array<BeamrGlobal_Select_Column>>;
@@ -2649,11 +2626,9 @@ export type Query_RootBeamrGlobalArgs = {
   where?: InputMaybe<BeamrGlobal_Bool_Exp>;
 };
 
-
 export type Query_RootBeamrGlobal_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootDistributionUpdatedArgs = {
   distinct_on?: InputMaybe<Array<DistributionUpdated_Select_Column>>;
@@ -2663,11 +2638,9 @@ export type Query_RootDistributionUpdatedArgs = {
   where?: InputMaybe<DistributionUpdated_Bool_Exp>;
 };
 
-
 export type Query_RootDistributionUpdated_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootMemberUnitsUpdatedArgs = {
   distinct_on?: InputMaybe<Array<MemberUnitsUpdated_Select_Column>>;
@@ -2677,11 +2650,9 @@ export type Query_RootMemberUnitsUpdatedArgs = {
   where?: InputMaybe<MemberUnitsUpdated_Bool_Exp>;
 };
 
-
 export type Query_RootMemberUnitsUpdated_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootPoolMetadataArgs = {
   distinct_on?: InputMaybe<Array<PoolMetadata_Select_Column>>;
@@ -2691,11 +2662,9 @@ export type Query_RootPoolMetadataArgs = {
   where?: InputMaybe<PoolMetadata_Bool_Exp>;
 };
 
-
 export type Query_RootPoolMetadata_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootRoleArgs = {
   distinct_on?: InputMaybe<Array<Role_Select_Column>>;
@@ -2705,11 +2674,9 @@ export type Query_RootRoleArgs = {
   where?: InputMaybe<Role_Bool_Exp>;
 };
 
-
 export type Query_RootRole_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootTxArgs = {
   distinct_on?: InputMaybe<Array<Tx_Select_Column>>;
@@ -2719,11 +2686,9 @@ export type Query_RootTxArgs = {
   where?: InputMaybe<Tx_Bool_Exp>;
 };
 
-
 export type Query_RootTx_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootTokenMetricArgs = {
   distinct_on?: InputMaybe<Array<TokenMetric_Select_Column>>;
@@ -2733,11 +2698,9 @@ export type Query_RootTokenMetricArgs = {
   where?: InputMaybe<TokenMetric_Bool_Exp>;
 };
 
-
 export type Query_RootTokenMetric_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootUserArgs = {
   distinct_on?: InputMaybe<Array<User_Select_Column>>;
@@ -2747,7 +2710,6 @@ export type Query_RootUserArgs = {
   where?: InputMaybe<User_Bool_Exp>;
 };
 
-
 export type Query_RootUserAccountArgs = {
   distinct_on?: InputMaybe<Array<UserAccount_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -2756,16 +2718,13 @@ export type Query_RootUserAccountArgs = {
   where?: InputMaybe<UserAccount_Bool_Exp>;
 };
 
-
 export type Query_RootUserAccount_By_PkArgs = {
   id: Scalars['String'];
 };
 
-
 export type Query_RootUser_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_RootVanityMetricsArgs = {
   distinct_on?: InputMaybe<Array<VanityMetrics_Select_Column>>;
@@ -2775,11 +2734,9 @@ export type Query_RootVanityMetricsArgs = {
   where?: InputMaybe<VanityMetrics_Bool_Exp>;
 };
 
-
 export type Query_RootVanityMetrics_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Query_Root_MetaArgs = {
   distinct_on?: InputMaybe<Array<_Meta_Select_Column>>;
@@ -2789,7 +2746,6 @@ export type Query_Root_MetaArgs = {
   where?: InputMaybe<_Meta_Bool_Exp>;
 };
 
-
 export type Query_RootChain_MetadataArgs = {
   distinct_on?: InputMaybe<Array<Chain_Metadata_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -2798,7 +2754,6 @@ export type Query_RootChain_MetadataArgs = {
   where?: InputMaybe<Chain_Metadata_Bool_Exp>;
 };
 
-
 export type Query_RootRaw_EventsArgs = {
   distinct_on?: InputMaybe<Array<Raw_Events_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -2806,7 +2761,6 @@ export type Query_RootRaw_EventsArgs = {
   order_by?: InputMaybe<Array<Raw_Events_Order_By>>;
   where?: InputMaybe<Raw_Events_Bool_Exp>;
 };
-
 
 export type Query_RootRaw_Events_By_PkArgs = {
   serial: Scalars['Int'];
@@ -2830,18 +2784,15 @@ export type Raw_Events = {
   transaction_fields: Scalars['jsonb'];
 };
 
-
 /** columns and relationships of "raw_events" */
 export type Raw_EventsBlock_FieldsArgs = {
   path?: InputMaybe<Scalars['String']>;
 };
 
-
 /** columns and relationships of "raw_events" */
 export type Raw_EventsParamsArgs = {
   path?: InputMaybe<Scalars['String']>;
 };
-
 
 /** columns and relationships of "raw_events" */
 export type Raw_EventsTransaction_FieldsArgs = {
@@ -2912,7 +2863,7 @@ export enum Raw_Events_Select_Column {
   /** column name */
   SrcAddress = 'src_address',
   /** column name */
-  TransactionFields = 'transaction_fields'
+  TransactionFields = 'transaction_fields',
 }
 
 /** Streaming cursor of the table "raw_events" */
@@ -3066,7 +3017,6 @@ export type Subscription_Root = {
   raw_events_stream: Array<Raw_Events>;
 };
 
-
 export type Subscription_RootBeamArgs = {
   distinct_on?: InputMaybe<Array<Beam_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -3074,7 +3024,6 @@ export type Subscription_RootBeamArgs = {
   order_by?: InputMaybe<Array<Beam_Order_By>>;
   where?: InputMaybe<Beam_Bool_Exp>;
 };
-
 
 export type Subscription_RootBeamPoolArgs = {
   distinct_on?: InputMaybe<Array<BeamPool_Select_Column>>;
@@ -3084,18 +3033,15 @@ export type Subscription_RootBeamPoolArgs = {
   where?: InputMaybe<BeamPool_Bool_Exp>;
 };
 
-
 export type Subscription_RootBeamPool_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootBeamPool_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<BeamPool_Stream_Cursor_Input>>;
   where?: InputMaybe<BeamPool_Bool_Exp>;
 };
-
 
 export type Subscription_RootBeamR_InitializedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_Initialized_Select_Column>>;
@@ -3105,18 +3051,15 @@ export type Subscription_RootBeamR_InitializedArgs = {
   where?: InputMaybe<BeamR_Initialized_Bool_Exp>;
 };
 
-
 export type Subscription_RootBeamR_Initialized_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootBeamR_Initialized_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<BeamR_Initialized_Stream_Cursor_Input>>;
   where?: InputMaybe<BeamR_Initialized_Bool_Exp>;
 };
-
 
 export type Subscription_RootBeamR_PoolCreatedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_PoolCreated_Select_Column>>;
@@ -3126,18 +3069,15 @@ export type Subscription_RootBeamR_PoolCreatedArgs = {
   where?: InputMaybe<BeamR_PoolCreated_Bool_Exp>;
 };
 
-
 export type Subscription_RootBeamR_PoolCreated_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootBeamR_PoolCreated_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<BeamR_PoolCreated_Stream_Cursor_Input>>;
   where?: InputMaybe<BeamR_PoolCreated_Bool_Exp>;
 };
-
 
 export type Subscription_RootBeamR_PoolMetadataUpdatedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_PoolMetadataUpdated_Select_Column>>;
@@ -3147,18 +3087,15 @@ export type Subscription_RootBeamR_PoolMetadataUpdatedArgs = {
   where?: InputMaybe<BeamR_PoolMetadataUpdated_Bool_Exp>;
 };
 
-
 export type Subscription_RootBeamR_PoolMetadataUpdated_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootBeamR_PoolMetadataUpdated_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<BeamR_PoolMetadataUpdated_Stream_Cursor_Input>>;
   where?: InputMaybe<BeamR_PoolMetadataUpdated_Bool_Exp>;
 };
-
 
 export type Subscription_RootBeamR_RoleAdminChangedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_RoleAdminChanged_Select_Column>>;
@@ -3168,18 +3105,15 @@ export type Subscription_RootBeamR_RoleAdminChangedArgs = {
   where?: InputMaybe<BeamR_RoleAdminChanged_Bool_Exp>;
 };
 
-
 export type Subscription_RootBeamR_RoleAdminChanged_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootBeamR_RoleAdminChanged_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<BeamR_RoleAdminChanged_Stream_Cursor_Input>>;
   where?: InputMaybe<BeamR_RoleAdminChanged_Bool_Exp>;
 };
-
 
 export type Subscription_RootBeamR_RoleGrantedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_RoleGranted_Select_Column>>;
@@ -3189,18 +3123,15 @@ export type Subscription_RootBeamR_RoleGrantedArgs = {
   where?: InputMaybe<BeamR_RoleGranted_Bool_Exp>;
 };
 
-
 export type Subscription_RootBeamR_RoleGranted_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootBeamR_RoleGranted_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<BeamR_RoleGranted_Stream_Cursor_Input>>;
   where?: InputMaybe<BeamR_RoleGranted_Bool_Exp>;
 };
-
 
 export type Subscription_RootBeamR_RoleRevokedArgs = {
   distinct_on?: InputMaybe<Array<BeamR_RoleRevoked_Select_Column>>;
@@ -3210,11 +3141,9 @@ export type Subscription_RootBeamR_RoleRevokedArgs = {
   where?: InputMaybe<BeamR_RoleRevoked_Bool_Exp>;
 };
 
-
 export type Subscription_RootBeamR_RoleRevoked_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootBeamR_RoleRevoked_StreamArgs = {
   batch_size: Scalars['Int'];
@@ -3222,18 +3151,15 @@ export type Subscription_RootBeamR_RoleRevoked_StreamArgs = {
   where?: InputMaybe<BeamR_RoleRevoked_Bool_Exp>;
 };
 
-
 export type Subscription_RootBeam_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootBeam_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<Beam_Stream_Cursor_Input>>;
   where?: InputMaybe<Beam_Bool_Exp>;
 };
-
 
 export type Subscription_RootBeamrGlobalArgs = {
   distinct_on?: InputMaybe<Array<BeamrGlobal_Select_Column>>;
@@ -3243,18 +3169,15 @@ export type Subscription_RootBeamrGlobalArgs = {
   where?: InputMaybe<BeamrGlobal_Bool_Exp>;
 };
 
-
 export type Subscription_RootBeamrGlobal_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootBeamrGlobal_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<BeamrGlobal_Stream_Cursor_Input>>;
   where?: InputMaybe<BeamrGlobal_Bool_Exp>;
 };
-
 
 export type Subscription_RootDistributionUpdatedArgs = {
   distinct_on?: InputMaybe<Array<DistributionUpdated_Select_Column>>;
@@ -3264,18 +3187,15 @@ export type Subscription_RootDistributionUpdatedArgs = {
   where?: InputMaybe<DistributionUpdated_Bool_Exp>;
 };
 
-
 export type Subscription_RootDistributionUpdated_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootDistributionUpdated_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<DistributionUpdated_Stream_Cursor_Input>>;
   where?: InputMaybe<DistributionUpdated_Bool_Exp>;
 };
-
 
 export type Subscription_RootMemberUnitsUpdatedArgs = {
   distinct_on?: InputMaybe<Array<MemberUnitsUpdated_Select_Column>>;
@@ -3285,18 +3205,15 @@ export type Subscription_RootMemberUnitsUpdatedArgs = {
   where?: InputMaybe<MemberUnitsUpdated_Bool_Exp>;
 };
 
-
 export type Subscription_RootMemberUnitsUpdated_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootMemberUnitsUpdated_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<MemberUnitsUpdated_Stream_Cursor_Input>>;
   where?: InputMaybe<MemberUnitsUpdated_Bool_Exp>;
 };
-
 
 export type Subscription_RootPoolMetadataArgs = {
   distinct_on?: InputMaybe<Array<PoolMetadata_Select_Column>>;
@@ -3306,18 +3223,15 @@ export type Subscription_RootPoolMetadataArgs = {
   where?: InputMaybe<PoolMetadata_Bool_Exp>;
 };
 
-
 export type Subscription_RootPoolMetadata_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootPoolMetadata_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<PoolMetadata_Stream_Cursor_Input>>;
   where?: InputMaybe<PoolMetadata_Bool_Exp>;
 };
-
 
 export type Subscription_RootRoleArgs = {
   distinct_on?: InputMaybe<Array<Role_Select_Column>>;
@@ -3327,18 +3241,15 @@ export type Subscription_RootRoleArgs = {
   where?: InputMaybe<Role_Bool_Exp>;
 };
 
-
 export type Subscription_RootRole_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootRole_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<Role_Stream_Cursor_Input>>;
   where?: InputMaybe<Role_Bool_Exp>;
 };
-
 
 export type Subscription_RootTxArgs = {
   distinct_on?: InputMaybe<Array<Tx_Select_Column>>;
@@ -3348,18 +3259,15 @@ export type Subscription_RootTxArgs = {
   where?: InputMaybe<Tx_Bool_Exp>;
 };
 
-
 export type Subscription_RootTx_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootTx_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<Tx_Stream_Cursor_Input>>;
   where?: InputMaybe<Tx_Bool_Exp>;
 };
-
 
 export type Subscription_RootTokenMetricArgs = {
   distinct_on?: InputMaybe<Array<TokenMetric_Select_Column>>;
@@ -3369,18 +3277,15 @@ export type Subscription_RootTokenMetricArgs = {
   where?: InputMaybe<TokenMetric_Bool_Exp>;
 };
 
-
 export type Subscription_RootTokenMetric_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootTokenMetric_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<TokenMetric_Stream_Cursor_Input>>;
   where?: InputMaybe<TokenMetric_Bool_Exp>;
 };
-
 
 export type Subscription_RootUserArgs = {
   distinct_on?: InputMaybe<Array<User_Select_Column>>;
@@ -3390,7 +3295,6 @@ export type Subscription_RootUserArgs = {
   where?: InputMaybe<User_Bool_Exp>;
 };
 
-
 export type Subscription_RootUserAccountArgs = {
   distinct_on?: InputMaybe<Array<UserAccount_Select_Column>>;
   limit?: InputMaybe<Scalars['Int']>;
@@ -3399,11 +3303,9 @@ export type Subscription_RootUserAccountArgs = {
   where?: InputMaybe<UserAccount_Bool_Exp>;
 };
 
-
 export type Subscription_RootUserAccount_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootUserAccount_StreamArgs = {
   batch_size: Scalars['Int'];
@@ -3411,18 +3313,15 @@ export type Subscription_RootUserAccount_StreamArgs = {
   where?: InputMaybe<UserAccount_Bool_Exp>;
 };
 
-
 export type Subscription_RootUser_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootUser_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<User_Stream_Cursor_Input>>;
   where?: InputMaybe<User_Bool_Exp>;
 };
-
 
 export type Subscription_RootVanityMetricsArgs = {
   distinct_on?: InputMaybe<Array<VanityMetrics_Select_Column>>;
@@ -3432,18 +3331,15 @@ export type Subscription_RootVanityMetricsArgs = {
   where?: InputMaybe<VanityMetrics_Bool_Exp>;
 };
 
-
 export type Subscription_RootVanityMetrics_By_PkArgs = {
   id: Scalars['String'];
 };
-
 
 export type Subscription_RootVanityMetrics_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<VanityMetrics_Stream_Cursor_Input>>;
   where?: InputMaybe<VanityMetrics_Bool_Exp>;
 };
-
 
 export type Subscription_Root_MetaArgs = {
   distinct_on?: InputMaybe<Array<_Meta_Select_Column>>;
@@ -3453,13 +3349,11 @@ export type Subscription_Root_MetaArgs = {
   where?: InputMaybe<_Meta_Bool_Exp>;
 };
 
-
 export type Subscription_Root_Meta_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<_Meta_Stream_Cursor_Input>>;
   where?: InputMaybe<_Meta_Bool_Exp>;
 };
-
 
 export type Subscription_RootChain_MetadataArgs = {
   distinct_on?: InputMaybe<Array<Chain_Metadata_Select_Column>>;
@@ -3469,13 +3363,11 @@ export type Subscription_RootChain_MetadataArgs = {
   where?: InputMaybe<Chain_Metadata_Bool_Exp>;
 };
 
-
 export type Subscription_RootChain_Metadata_StreamArgs = {
   batch_size: Scalars['Int'];
   cursor: Array<InputMaybe<Chain_Metadata_Stream_Cursor_Input>>;
   where?: InputMaybe<Chain_Metadata_Bool_Exp>;
 };
-
 
 export type Subscription_RootRaw_EventsArgs = {
   distinct_on?: InputMaybe<Array<Raw_Events_Select_Column>>;
@@ -3485,11 +3377,9 @@ export type Subscription_RootRaw_EventsArgs = {
   where?: InputMaybe<Raw_Events_Bool_Exp>;
 };
 
-
 export type Subscription_RootRaw_Events_By_PkArgs = {
   serial: Scalars['Int'];
 };
-
 
 export type Subscription_RootRaw_Events_StreamArgs = {
   batch_size: Scalars['Int'];
@@ -3510,32 +3400,655 @@ export type Timestamptz_Comparison_Exp = {
   _nin?: InputMaybe<Array<Scalars['timestamptz']>>;
 };
 
-export type GlobalMostRecentSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type GlobalMostRecentSubscriptionVariables = Exact<{
+  [key: string]: never;
+}>;
 
+export type GlobalMostRecentSubscription = {
+  __typename?: 'subscription_root';
+  Beam: Array<{
+    __typename?: 'Beam';
+    id: string;
+    units: any;
+    lastUpdated: number;
+    beamPool?: {
+      __typename?: 'BeamPool';
+      flowRate: any;
+      totalUnits: any;
+    } | null;
+    from?: { __typename?: 'User'; fid: number; id: string } | null;
+    to?: { __typename?: 'User'; fid: number; id: string } | null;
+  }>;
+};
 
-export type GlobalMostRecentSubscription = { __typename?: 'subscription_root', Beam: Array<{ __typename?: 'Beam', id: string, units: any, lastUpdated: number, beamPool?: { __typename?: 'BeamPool', flowRate: any, totalUnits: any } | null, from?: { __typename?: 'User', fid: number, id: string } | null, to?: { __typename?: 'User', fid: number, id: string } | null }> };
+export type GlobalTopSubscriptionVariables = Exact<{ [key: string]: never }>;
 
-export type GlobalTopSubscriptionVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GlobalTopSubscription = { __typename?: 'subscription_root', BeamPool: Array<{ __typename?: 'BeamPool', id: string, flowRate: any, totalUnits: any, creatorAccount?: { __typename?: 'UserAccount', user?: { __typename?: 'User', fid: number } | null } | null }> };
+export type GlobalTopSubscription = {
+  __typename?: 'subscription_root';
+  BeamPool: Array<{
+    __typename?: 'BeamPool';
+    id: string;
+    flowRate: any;
+    totalUnits: any;
+    creatorAccount?: {
+      __typename?: 'UserAccount';
+      user?: { __typename?: 'User'; fid: number } | null;
+    } | null;
+  }>;
+};
 
 export type LoggedInUserSubscriptionVariables = Exact<{
   id: Scalars['String'];
 }>;
 
-
-export type LoggedInUserSubscription = { __typename?: 'subscription_root', User_by_pk?: { __typename?: 'User', id: string, pools: Array<{ __typename?: 'BeamPool', id: string, flowRate: any, totalUnits: any, active: boolean, metadata?: { __typename?: 'PoolMetadata', name: string } | null }>, incoming: Array<{ __typename?: 'Beam', id: string, units: any, isReceiverConnected: boolean, lastUpdated: number, beamPool?: { __typename?: 'BeamPool', flowRate: any, totalUnits: any, id: string } | null, from?: { __typename?: 'User', fid: number, id: string } | null }>, outgoing: Array<{ __typename?: 'Beam', units: any, id: string, beamPool?: { __typename?: 'BeamPool', flowRate: any, totalUnits: any, id: string } | null, to?: { __typename?: 'User', id: string, fid: number } | null }> } | null };
+export type LoggedInUserSubscription = {
+  __typename?: 'subscription_root';
+  User_by_pk?: {
+    __typename?: 'User';
+    id: string;
+    pools: Array<{
+      __typename?: 'BeamPool';
+      id: string;
+      flowRate: any;
+      totalUnits: any;
+      active: boolean;
+      metadata?: { __typename?: 'PoolMetadata'; name: string } | null;
+    }>;
+    incoming: Array<{
+      __typename?: 'Beam';
+      id: string;
+      units: any;
+      isReceiverConnected: boolean;
+      lastUpdated: number;
+      beamPool?: {
+        __typename?: 'BeamPool';
+        flowRate: any;
+        totalUnits: any;
+        id: string;
+      } | null;
+      from?: { __typename?: 'User'; fid: number; id: string } | null;
+    }>;
+    outgoing: Array<{
+      __typename?: 'Beam';
+      units: any;
+      id: string;
+      beamPool?: {
+        __typename?: 'BeamPool';
+        flowRate: any;
+        totalUnits: any;
+        id: string;
+      } | null;
+      to?: { __typename?: 'User'; id: string; fid: number } | null;
+    }>;
+  } | null;
+};
 
 export type GetTxByIdQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
 
+export type GetTxByIdQuery = {
+  __typename?: 'query_root';
+  TX_by_pk?: { __typename?: 'TX'; id: string } | null;
+};
 
-export type GetTxByIdQuery = { __typename?: 'query_root', TX_by_pk?: { __typename?: 'TX', id: string } | null };
-
-
-export const GlobalMostRecentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GlobalMostRecent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Beam"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"lastUpdated"},"value":{"kind":"EnumValue","value":"desc"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"20"}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"beamPool"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"units"}},{"kind":"Field","name":{"kind":"Name","value":"lastUpdated"}},{"kind":"Field","name":{"kind":"Name","value":"beamPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}}]}},{"kind":"Field","name":{"kind":"Name","value":"from"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"to"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<GlobalMostRecentSubscription, GlobalMostRecentSubscriptionVariables>;
-export const GlobalTopDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GlobalTop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"BeamPool"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"flowRate"},"value":{"kind":"EnumValue","value":"desc_nulls_last"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"20"}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"creatorAccount"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GlobalTopSubscription, GlobalTopSubscriptionVariables>;
-export const LoggedInUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"LoggedInUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"User_by_pk"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pools"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"incoming"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"lastUpdated"},"value":{"kind":"EnumValue","value":"desc"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"beamPool"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"units"}},{"kind":"Field","name":{"kind":"Name","value":"isReceiverConnected"}},{"kind":"Field","name":{"kind":"Name","value":"lastUpdated"}},{"kind":"Field","name":{"kind":"Name","value":"beamPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"from"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"outgoing"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"lastUpdated"},"value":{"kind":"EnumValue","value":"desc"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"beamPool"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"units"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"beamPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"to"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fid"}}]}}]}}]}}]}}]} as unknown as DocumentNode<LoggedInUserSubscription, LoggedInUserSubscriptionVariables>;
-export const GetTxByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTxById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"TX_by_pk"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<GetTxByIdQuery, GetTxByIdQueryVariables>;
+export const GlobalMostRecentDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'subscription',
+      name: { kind: 'Name', value: 'GlobalMostRecent' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'Beam' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'order_by' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'lastUpdated' },
+                      value: { kind: 'EnumValue', value: 'desc' },
+                    },
+                  ],
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: { kind: 'IntValue', value: '20' },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'where' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'beamPool' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'active' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: '_eq' },
+                                  value: { kind: 'BooleanValue', value: true },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'units' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lastUpdated' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'beamPool' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'flowRate' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'totalUnits' },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'from' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'fid' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'to' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'fid' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GlobalMostRecentSubscription,
+  GlobalMostRecentSubscriptionVariables
+>;
+export const GlobalTopDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'subscription',
+      name: { kind: 'Name', value: 'GlobalTop' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'BeamPool' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'order_by' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'flowRate' },
+                      value: { kind: 'EnumValue', value: 'desc_nulls_last' },
+                    },
+                  ],
+                },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'limit' },
+                value: { kind: 'IntValue', value: '20' },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'where' },
+                value: {
+                  kind: 'ObjectValue',
+                  fields: [
+                    {
+                      kind: 'ObjectField',
+                      name: { kind: 'Name', value: 'active' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: '_eq' },
+                            value: { kind: 'BooleanValue', value: true },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'flowRate' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'totalUnits' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'creatorAccount' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'user' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'fid' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  GlobalTopSubscription,
+  GlobalTopSubscriptionVariables
+>;
+export const LoggedInUserDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'subscription',
+      name: { kind: 'Name', value: 'LoggedInUser' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'User_by_pk' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'pools' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'flowRate' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'totalUnits' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'active' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'metadata' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'name' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'incoming' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'order_by' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'lastUpdated' },
+                            value: { kind: 'EnumValue', value: 'desc' },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'where' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'beamPool' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'active' },
+                                  value: {
+                                    kind: 'ObjectValue',
+                                    fields: [
+                                      {
+                                        kind: 'ObjectField',
+                                        name: { kind: 'Name', value: '_eq' },
+                                        value: {
+                                          kind: 'BooleanValue',
+                                          value: true,
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'units' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'isReceiverConnected' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'lastUpdated' },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'beamPool' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'flowRate' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'totalUnits' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'from' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'fid' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'outgoing' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'order_by' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'lastUpdated' },
+                            value: { kind: 'EnumValue', value: 'desc' },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'where' },
+                      value: {
+                        kind: 'ObjectValue',
+                        fields: [
+                          {
+                            kind: 'ObjectField',
+                            name: { kind: 'Name', value: 'beamPool' },
+                            value: {
+                              kind: 'ObjectValue',
+                              fields: [
+                                {
+                                  kind: 'ObjectField',
+                                  name: { kind: 'Name', value: 'active' },
+                                  value: {
+                                    kind: 'ObjectValue',
+                                    fields: [
+                                      {
+                                        kind: 'ObjectField',
+                                        name: { kind: 'Name', value: '_eq' },
+                                        value: {
+                                          kind: 'BooleanValue',
+                                          value: true,
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'units' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'beamPool' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'flowRate' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'totalUnits' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'to' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'id' },
+                            },
+                            {
+                              kind: 'Field',
+                              name: { kind: 'Name', value: 'fid' },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  LoggedInUserSubscription,
+  LoggedInUserSubscriptionVariables
+>;
+export const GetTxByIdDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetTxById' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'NamedType',
+              name: { kind: 'Name', value: 'String' },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'TX_by_pk' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'id' },
+                value: {
+                  kind: 'Variable',
+                  name: { kind: 'Name', value: 'id' },
+                },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetTxByIdQuery, GetTxByIdQueryVariables>;

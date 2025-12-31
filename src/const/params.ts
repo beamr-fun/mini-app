@@ -1,1 +1,1 @@
-export const BEAM_MIN = 6_000_000n;
+export const MIN_POOL_AMT = 6_000_000n;

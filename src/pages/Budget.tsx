@@ -36,7 +36,7 @@ import { notifications } from '@mantine/notifications';
 import { Address, parseUnits } from 'viem';
 import { isTestnet } from '../utils/setup';
 import { ADDR, ADDR_PROD, NATIVE_TOKEN } from '../const/addresses';
-import { BEAM_MIN } from '../const/params';
+import { MIN_POOL_AMT } from '../const/params';
 import sdk from '@farcaster/miniapp-sdk';
 import { SwapModal } from '../components/User/SwapModal';
 
@@ -57,7 +57,7 @@ export const Budget = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const isValidBudget = budget && BigInt(budget) >= BEAM_MIN;
+  const isValidBudget = budget && BigInt(budget) >= MIN_POOL_AMT;
 
   useCTA({
     label: 'Set Budget',
@@ -281,7 +281,7 @@ export const Budget = () => {
             fz={13}
             c={budget && !isValidBudget ? colors.red[7] : colors.gray[3]}
           >
-            (Min. {formatBalance(BEAM_MIN.toString())}/mo)
+            (Min. {formatBalance(MIN_POOL_AMT.toString())}/mo)
           </Text>
           <Group justify="space-between" wrap="nowrap" gap={0} mt={30}>
             <Button

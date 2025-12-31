@@ -302,6 +302,8 @@ export const Settings = () => {
   );
 };
 
+const MAX_WEIGHTING = 100;
+
 const PoolCard = ({
   flowRate,
   lastUpdated,
@@ -310,10 +312,12 @@ const PoolCard = ({
   updatePrefs,
   poolAddress,
   loadingUpdate,
+
   handleDistributeFlow,
 }: {
   id: string;
   creatorAddress: string;
+
   weightings: {
     recast: string;
     like: string;
@@ -367,12 +371,26 @@ const PoolCard = ({
     }
   };
 
+  const isWeightingOverMax = (type: keyof Weightings) => {
+    const value = Number(weightingState[type]);
+    return value > MAX_WEIGHTING;
+  };
+
+  const isAnyWeightingOverMax = useMemo(() => {
+    return (
+      isWeightingOverMax('like') ||
+      isWeightingOverMax('recast') ||
+      isWeightingOverMax('follow') ||
+      isWeightingOverMax('comment')
+    );
+  }, [weightingState]);
+
   return (
     <Card>
       <Group justify="space-between" mb={4}>
         <Text fw={500}>{name}</Text>
         <Tag bg={colors.blue[9]} c={colors.blue[3]} w="fit-content">
-          Tipping Pool
+          Microsub Pool
         </Tag>
       </Group>
       <Text c={colors.gray[3]} fz="sm" mb="md">
@@ -386,7 +404,7 @@ const PoolCard = ({
         valueIsNumericString
         leftSectionWidth={45}
         leftSection={<Avatar src={beamrTokenLogo} size={24} />}
-        description={'Amount streaming per month'}
+        description={`Fees Included: 2.5% Team + 2.5% Burn`}
         value={monthly}
         onChange={(val) => setMonthly(val.toString())}
         disabled={loadingUpdate}
@@ -430,18 +448,21 @@ const PoolCard = ({
             value={weightingState.like}
             disabled={loadingUpdate}
             onChange={(e) => handleChangeWeighting('like', e.target.value)}
+            error={isWeightingOverMax('like') ? 'Max is 100' : undefined}
           />
           <TextInput
             leftSection={<RefreshCcw size={20} color={colors.green[7]} />}
             value={weightingState.recast}
             disabled={loadingUpdate}
             onChange={(e) => handleChangeWeighting('recast', e.target.value)}
+            error={isWeightingOverMax('recast') ? 'Max is 100' : undefined}
           />
           <TextInput
             leftSection={<Users size={20} color={colors.purple[7]} />}
             value={weightingState.follow}
             disabled={loadingUpdate}
             onChange={(e) => handleChangeWeighting('follow', e.target.value)}
+            error={isWeightingOverMax('follow') ? 'Max is 100' : undefined}
           />
           <TextInput
             leftSection={
@@ -450,12 +471,13 @@ const PoolCard = ({
             disabled={loadingUpdate}
             value={weightingState.comment}
             onChange={(e) => handleChangeWeighting('comment', e.target.value)}
+            error={isWeightingOverMax('comment') ? 'Max is 100' : undefined}
           />
         </Stack>
         <Button
           size="xs"
           mb={'sm'}
-          disabled={prefsDiff || loadingUpdate}
+          disabled={prefsDiff || loadingUpdate || isAnyWeightingOverMax}
           onClick={() => updatePrefs(poolAddress, weightingState)}
           loading={loadingUpdate}
         >

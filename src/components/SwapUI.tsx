@@ -20,10 +20,9 @@ import {
   useSendTransaction,
   useWaitForTransactionReceipt,
 } from 'wagmi';
-import { BEAM_MIN } from '../const/params';
+import { MIN_POOL_AMT } from '../const/params';
 import { QuoteResponse } from '../validation/swap';
 import { notifications } from '@mantine/notifications';
-import { useOnboard } from '../hooks/useOnboard';
 
 type SwapToken = {
   balance: bigint;
@@ -171,7 +170,7 @@ export const SwapUI = ({
 
   const amountUnderMonthFlow =
     buyAmount &&
-    parseUnits(buyAmount || '0', 18) < parseUnits(BEAM_MIN.toString(), 18);
+    parseUnits(buyAmount || '0', 18) < parseUnits(MIN_POOL_AMT.toString(), 18);
 
   const noBuyAmount = !buyAmount || buyAmount === '0';
 
