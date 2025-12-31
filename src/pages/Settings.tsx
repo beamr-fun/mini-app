@@ -23,6 +23,7 @@ import {
   ChevronUp,
   Heart,
   MessageSquareReply,
+  PencilIcon,
   RefreshCcw,
   Users,
 } from 'lucide-react';
@@ -52,7 +53,7 @@ export const Settings = () => {
     data: userPrefs,
     isLoading: isLoadingPrefs,
     error,
-    refetch,
+    refetch: refetchPrefs,
   } = useQuery({
     queryKey: ['user-prefs', user?.fid],
     queryFn: async () => {
@@ -77,6 +78,7 @@ export const Settings = () => {
     data: collectionFlowRate,
     isLoading: isLoadingCollections,
     error: collectionError,
+    refetch: refetchCollections,
   } = useQuery({
     queryKey: ['collection-user-flows', user?.fid],
     queryFn: async () => {
@@ -158,7 +160,7 @@ export const Settings = () => {
         throw new Error('Failed to update pool preferences');
       }
 
-      await refetch();
+      await refetchPrefs();
     } catch (error) {
       console.error('Failed to update pool preferences', error);
 
@@ -191,10 +193,6 @@ export const Settings = () => {
       setLoadingPrefs(true);
       const flowRate = parseEther(monthly) / 30n / 24n / 60n / 60n;
 
-      const allOtherPools = pools.filter(
-        (pool) => pool.poolAddress !== poolAddress
-      );
-
       await distributeFlow({
         enableZeroFlowRate: true,
         onError(errorMsg) {
@@ -203,16 +201,18 @@ export const Settings = () => {
         onSuccess() {
           setTimeout(() => {
             setLoadingPrefs(false);
-
+            refetchPrefs();
+            refetchCollections();
             notifications.show({
               color: 'green',
               title: 'Success',
               message: 'Flow distribution updated successfully',
             });
+
             // if (noOtherPoolWithFlow && BigInt(flowRate) === 0n) {
             //   deleteUserSub(headers);
             // }
-          }, 2000);
+          }, 2500);
         },
         args: {
           poolAddress: poolAddress as Address,
@@ -235,7 +235,7 @@ export const Settings = () => {
     }
   };
 
-  if (isLoadingPrefs || isLoadingSub) {
+  if (isLoadingPrefs || isLoadingSub || isLoadingCollections) {
     return (
       <Group justify="center" h={350}>
         <Loader color="var(--glass-thick)" />
@@ -243,7 +243,7 @@ export const Settings = () => {
     );
   }
 
-  if (pools === null || error) {
+  if (pools === null || error || collectionError) {
     return <ErrorDisplay title="No Pools Found" description="" />;
   }
   return (
@@ -330,11 +330,14 @@ const PoolCard = ({
 }) => {
   const { colors } = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(false);
+
   const [weightingState, setWeightingState] =
     React.useState<Weightings>(weightings);
   const [monthly, setMonthly] = useState<string>(
     flowratePerSecondToMonth(BigInt(flowRate), 'rounded')
   );
+
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const existingMonthly = flowratePerSecondToMonth(BigInt(flowRate), 'rounded');
 
@@ -358,6 +361,12 @@ const PoolCard = ({
 
   const isZero = monthly === '0';
 
+  const focusInput = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
   return (
     <Card>
       <Group justify="space-between" mb={4}>
@@ -369,42 +378,46 @@ const PoolCard = ({
       <Text c={colors.gray[3]} fz="sm" mb="md">
         Last Updated: {new Date(lastUpdated).toLocaleDateString()}
       </Text>
-      <Group justify="space-between" mb="lg">
-        <Group gap="xs">
-          <NumberInput
-            label="Monthly Budget"
-            thousandSeparator
-            valueIsNumericString
-            leftSectionWidth={45}
-            leftSection={<Avatar src={beamrTokenLogo} size={24} />}
-            description={'Amount streaming per month'}
-            value={monthly}
-            onChange={(val) => setMonthly(val.toString())}
-            disabled={loadingUpdate}
-          />
 
-          <Text fw={500}></Text>
-        </Group>
-        <Group gap="xs">
-          <Button
-            size="xs"
-            disabled={monthlyDiff || loadingUpdate}
-            onClick={() => handleDistributeFlow(poolAddress, monthly)}
-            loading={loadingUpdate}
-          >
-            Adjust Flow
-          </Button>
-          <Button
-            size="xs"
-            variant="danger"
-            disabled={isZero}
-            onClick={() => {
-              setMonthly('0');
-            }}
-          >
-            Stop
-          </Button>
-        </Group>
+      <NumberInput
+        label="Monthly Budget"
+        ref={inputRef}
+        thousandSeparator
+        valueIsNumericString
+        leftSectionWidth={45}
+        leftSection={<Avatar src={beamrTokenLogo} size={24} />}
+        description={'Amount streaming per month'}
+        value={monthly}
+        onChange={(val) => setMonthly(val.toString())}
+        disabled={loadingUpdate}
+        mb="md"
+      />
+
+      <Group gap="sm" mb="md">
+        <Button
+          size="xs"
+          variant={monthlyDiff ? 'secondary' : undefined}
+          disabled={loadingUpdate}
+          onClick={
+            monthlyDiff
+              ? () => focusInput()
+              : () => handleDistributeFlow(poolAddress, monthly)
+          }
+          loading={loadingUpdate}
+          leftSection={monthlyDiff ? <PencilIcon size={14} /> : undefined}
+        >
+          {monthlyDiff ? 'Adjust Flow' : 'Set Flow'}
+        </Button>
+        <Button
+          size="xs"
+          variant="danger"
+          disabled={isZero}
+          onClick={() => {
+            setMonthly('0');
+          }}
+        >
+          Stop Flow
+        </Button>
       </Group>
 
       <Collapse in={opened}>
