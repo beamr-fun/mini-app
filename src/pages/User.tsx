@@ -1,4 +1,4 @@
-import { Button, Card, SegmentedControl } from '@mantine/core';
+import { Card, SegmentedControl } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
 import { useRef, useState } from 'react';
 

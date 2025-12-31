@@ -32,10 +32,11 @@ import { useUser } from '../hooks/useUser';
 import { fetchUserPrefs, updatePoolPrefs, Weightings } from '../utils/api';
 import { notifications } from '@mantine/notifications';
 import { ErrorDisplay } from '../components/ErrorDisplay';
-import { flowratePerSecondToMonth } from '../utils/common';
+import { flowratePerSecondToMonth, formatBalance } from '../utils/common';
 import { Address, parseEther } from 'viem';
 import { distributeFlow } from '../utils/interactions';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
+import { MIN_POOL_AMT } from '../const/params';
 
 export const Settings = () => {
   const { colors } = useMantineTheme();
@@ -368,6 +369,9 @@ const PoolCard = ({
     );
   }, [weightingState]);
 
+  const isBelowMin =
+    monthly !== '' && monthly !== '0' && BigInt(monthly) < MIN_POOL_AMT;
+
   return (
     <Card>
       <Group justify="space-between" mb={4}>
@@ -388,6 +392,11 @@ const PoolCard = ({
         leftSectionWidth={45}
         leftSection={<Avatar src={beamrTokenLogo} size={24} />}
         description={`Fees Included: 2.5% Team + 2.5% Burn`}
+        error={
+          isBelowMin
+            ? `Minimum monthly amount is ${formatBalance(MIN_POOL_AMT.toString())} BEAMR`
+            : undefined
+        }
         value={monthly}
         onChange={(val) => setMonthly(val.toString())}
         disabled={loadingUpdate}
@@ -398,7 +407,7 @@ const PoolCard = ({
         <Button
           size="xs"
           variant={monthlyDiff ? 'secondary' : undefined}
-          disabled={loadingUpdate}
+          disabled={loadingUpdate || isBelowMin}
           onClick={
             monthlyDiff
               ? () => focusInput()
