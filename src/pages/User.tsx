@@ -1,6 +1,6 @@
 import { Card, SegmentedControl } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { useDisclosure } from '@mantine/hooks';
 import { useCTA } from '../hooks/useCTA';

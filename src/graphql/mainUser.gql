@@ -9,6 +9,9 @@ subscription LoggedInUser($id: String!) {
       metadata {
         name
       }
+      creatorAccount {
+        address
+      }
     }
     incoming(
       order_by: { lastUpdated: desc }
@@ -26,6 +29,11 @@ subscription LoggedInUser($id: String!) {
       from {
         fid
         id
+      }
+      to {
+        creatorAccount {
+          address
+        }
       }
     }
     outgoing(

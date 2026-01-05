@@ -21,6 +21,9 @@ export type UserTransformed = {
     metadata: {
       name: string;
     };
+    creatorAccount: {
+      address: string;
+    };
   }[];
 
   incoming: {
