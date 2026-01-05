@@ -13,7 +13,6 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
-import beamrLogo from '../assets/beamrLogo.png';
 import beamrTokenLogo from '../assets/beamrTokenLogo.png';
 import { useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';

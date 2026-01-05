@@ -13,7 +13,7 @@ import { flowratePerSecondToMonth } from '../../utils/common';
 import { BeamrNav } from '../svg/BeamrNav';
 import { DancingText } from '../DancingText';
 import { IconTransfer } from '../svg/IconTransfer';
-import { CircleAlert, TrendingUp, Zap } from 'lucide-react';
+import { CircleAlert, Info, TrendingUp, Zap } from 'lucide-react';
 import classes from '../../styles/effects.module.css';
 
 export const BalanceDisplay = ({
@@ -24,7 +24,12 @@ export const BalanceDisplay = ({
   setTab: (tab: string) => void;
 }) => {
   const { colors } = useMantineTheme();
-  const { userSubscription, userBalance, userBalanceFetchedAt } = useUser();
+  const {
+    userSubscription,
+    userBalance,
+    userBalanceFetchedAt,
+    collectionFlowRate,
+  } = useUser();
 
   const totalIncomingFlowRate = useMemo(() => {
     if (!userSubscription?.incoming) {
@@ -65,8 +70,12 @@ export const BalanceDisplay = ({
       total += beamFlowRate;
     });
 
+    if (collectionFlowRate) {
+      total += collectionFlowRate;
+    }
+
     return total;
-  }, [userSubscription?.outgoing]);
+  }, [userSubscription?.outgoing, collectionFlowRate]);
 
   const amtConnected = useMemo(() => {
     if (!userSubscription) {
@@ -160,13 +169,23 @@ export const BalanceDisplay = ({
         <Text c={colors.green[7]} fz="sm">
           Incoming
         </Text>
+
         <Text c={colors.purple[7]} fz="sm">
           Outgoing
         </Text>
       </Group>
       <Group justify="space-between">
         <Text fz="sm">{totalIncomingPerMonth}</Text>
-        <Text fz="sm">{totalOutgoingPerMonth}</Text>
+        <Group gap={6}>
+          <Text fz="sm">{totalOutgoingPerMonth}</Text>
+          <Tooltip
+            w={250}
+            multiline
+            label="Amount includes 2.5% Beamr team fee + 2.5% Beamr Burn fee"
+          >
+            <Info size={12} />
+          </Tooltip>
+        </Group>
       </Group>
       {userSubscription?.incoming && userSubscription?.incoming?.length > 0 && (
         <Group gap={'xs'} mt="md" justify="space-between">
