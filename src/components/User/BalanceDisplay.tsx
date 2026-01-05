@@ -15,6 +15,7 @@ import { DancingText } from '../DancingText';
 import { IconTransfer } from '../svg/IconTransfer';
 import { CircleAlert, Info, TrendingUp, Zap } from 'lucide-react';
 import classes from '../../styles/effects.module.css';
+import { usePoolAccount } from '../../hooks/usePoolAccount';
 
 export const BalanceDisplay = ({
   openSwap,
@@ -31,6 +32,8 @@ export const BalanceDisplay = ({
     collectionFlowRate,
   } = useUser();
 
+  const { userPoolAddress } = usePoolAccount();
+
   const totalIncomingFlowRate = useMemo(() => {
     if (!userSubscription?.incoming) {
       return 0n;
@@ -46,11 +49,21 @@ export const BalanceDisplay = ({
       const perUnitFlowRate =
         BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
       const beamFlowRate = perUnitFlowRate * BigInt(item.units);
+
+      const receivingAddress = item.id.split('_')?.[1];
+
+      if (
+        userPoolAddress &&
+        receivingAddress?.toLowerCase() !== userPoolAddress.toLowerCase()
+      ) {
+        return;
+      }
+
       total += beamFlowRate;
     });
 
     return total;
-  }, [userSubscription?.incoming]);
+  }, [userSubscription?.incoming, userPoolAddress]);
 
   const totalOutgoingFlowRate = useMemo(() => {
     if (!userSubscription?.outgoing) {

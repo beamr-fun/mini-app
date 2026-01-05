@@ -1,7 +1,7 @@
 import sdk from '@farcaster/miniapp-sdk';
 import { JWTPayload } from '../types/sharedTypes';
 import { useQuery } from '@tanstack/react-query';
-import { createContext, ReactNode, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, useEffect, useState } from 'react';
 import { Address } from 'viem';
 
 import { useAccount, useConnect } from 'wagmi';
@@ -44,9 +44,6 @@ type UserContextType = {
   isLoadingCollections: boolean;
   collectionError: Error | null;
   refetchCollections?: () => Promise<void>;
-  userPoolAddress: string | null;
-  hasConflict: boolean;
-  isConnectedToPoolAddress: boolean;
 };
 
 export const UserContext = createContext<UserContextType>({
@@ -63,9 +60,6 @@ export const UserContext = createContext<UserContextType>({
   collectionFlowRate: null,
   isLoadingCollections: false,
   collectionError: null,
-  userPoolAddress: null,
-  hasConflict: false,
-  isConnectedToPoolAddress: false,
 });
 
 const login = async (wakeup: () => void) => {
@@ -285,52 +279,6 @@ export const UserProvider = ({
     address,
   ]);
 
-  const { userPoolAddress, hasConflict, isConnectedToPoolAddress } =
-    useMemo((): {
-      userPoolAddress: string | null;
-      hasConflict: boolean;
-      isConnectedToPoolAddress: boolean;
-    } => {
-      if (!userSubscription)
-        return {
-          userPoolAddress: null,
-          hasConflict: false,
-          isConnectedToPoolAddress: false,
-        };
-
-      if (incomingOnly)
-        return {
-          userPoolAddress: null,
-          hasConflict: false,
-          isConnectedToPoolAddress: false,
-        };
-
-      if (!userSubscription.pools || userSubscription.pools.length === 0)
-        return {
-          userPoolAddress: null,
-          hasConflict: false,
-          isConnectedToPoolAddress: false,
-        };
-
-      const recentPoolAddress =
-        userSubscription.pools[0]?.creatorAccount?.address || null;
-
-      const uniquePoolIds = new Set(
-        userSubscription.pools.map((pool) => pool.creatorAccount.address)
-      );
-
-      const hasConflict = uniquePoolIds.size > 1;
-
-      const isConnectedToPoolAddress =
-        address?.toLowerCase() === recentPoolAddress?.toLowerCase();
-
-      return {
-        userPoolAddress: recentPoolAddress,
-        hasConflict,
-        isConnectedToPoolAddress,
-      };
-    }, [userSubscription, address]);
-
   return (
     <UserContext.Provider
       value={{
@@ -357,9 +305,6 @@ export const UserProvider = ({
         isLoadingAPI,
         userSubError,
         refetchLogin: refetchLogin as any as () => Promise<void>,
-        userPoolAddress,
-        hasConflict,
-        isConnectedToPoolAddress,
       }}
     >
       {children}
