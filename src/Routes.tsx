@@ -6,17 +6,37 @@ import { Explainer } from './pages/Explainer';
 import { Budget } from './pages/Budget';
 import { Friends } from './pages/Friends';
 import { CreateConfirm } from './pages/CreateConfirm';
-import { Group } from '@mantine/core';
+import {
+  Button,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  useMantineTheme,
+} from '@mantine/core';
 import { useUser } from './hooks/useUser';
 import { Global } from './pages/Global';
 import { Settings } from './pages/Settings';
 import { Strategy } from './pages/Strategy';
 import { PageLayout } from './layouts/PageLayout';
 import { BeamrHeadline } from './components/BeamrHeadline';
-import { Loader } from 'lucide-react';
+import { Loader, ZapOff } from 'lucide-react';
+import { useAccount, useSwitchChain, useWalletClient } from 'wagmi';
+import { network } from './utils/setup';
+import { truncateAddress } from './utils/common';
+import { WrongNetwork } from './components/WrongNetwork';
+
+const handleNetworkSwitch = async (walletClient: any) => {};
 
 const ConditionalRedirect = () => {
   const { startingRoute } = useUser();
+  const { switchChainAsync } = useSwitchChain();
+  const { chain } = useAccount();
+  const { colors } = useMantineTheme();
+
+  if (1 == 1) {
+    return <WrongNetwork />;
+  }
 
   if (startingRoute === '/' || !startingRoute) {
     return (
