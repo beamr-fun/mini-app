@@ -1,6 +1,8 @@
 import { Flex, Stack, Text, useMantineTheme } from '@mantine/core';
 import { useUser } from '../../hooks/useUser';
 import { TableHeader, TableRow } from './TableItems';
+import { usePoolAccount } from '../../hooks/usePoolAccount';
+import { useMemo } from 'react';
 
 export const Receiving = ({
   onConnectClick,
@@ -13,12 +15,32 @@ export const Receiving = ({
 }) => {
   const { userSubscription } = useUser();
   const { colors } = useMantineTheme();
+  const { userPoolAddress } = usePoolAccount();
+
+  const filteredIncoming = useMemo(() => {
+    if (!userSubscription) return null;
+
+    if (userSubscription && userSubscription.incoming.length === 0) {
+      return [];
+    }
+
+    if (!userPoolAddress) return userSubscription.incoming;
+
+    return userSubscription.incoming.filter((item) => {
+      const receivingAddress = item.id.split('_')?.[1];
+
+      return receivingAddress?.toLowerCase() === userPoolAddress.toLowerCase();
+    });
+  }, [userSubscription, userPoolAddress]);
 
   if (!userSubscription) {
     return <Text>No Subscription</Text>;
   }
 
-  if (userSubscription && userSubscription.incoming.length === 0)
+  if (
+    (userSubscription && userSubscription.incoming.length === 0) ||
+    filteredIncoming?.length === 0
+  )
     return (
       <Stack gap="sm" px="xs">
         <TableHeader sending={false} />
@@ -30,8 +52,6 @@ export const Receiving = ({
         </Flex>
       </Stack>
     );
-
-  console.log('userSubscription.incoming', userSubscription.incoming);
 
   return (
     <Stack gap="sm">
@@ -47,6 +67,7 @@ export const Receiving = ({
               100
             ).toFixed(2)
           );
+
           return (
             <TableRow
               sending={false}

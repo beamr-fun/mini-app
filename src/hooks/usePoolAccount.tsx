@@ -10,12 +10,14 @@ export const usePoolAccount = () => {
     userPoolAddress: string | null;
     hasConflict: boolean;
     isConnectedToPoolAddress: boolean;
+    notConnectedToPoolAddress: boolean;
   } => {
     if (!userSubscription)
       return {
         userPoolAddress: null,
         hasConflict: false,
         isConnectedToPoolAddress: false,
+        notConnectedToPoolAddress: false,
       };
 
     if (incomingOnly)
@@ -23,6 +25,7 @@ export const usePoolAccount = () => {
         userPoolAddress: null,
         hasConflict: false,
         isConnectedToPoolAddress: false,
+        notConnectedToPoolAddress: false,
       };
 
     if (!userSubscription.pools || userSubscription.pools.length === 0)
@@ -30,6 +33,7 @@ export const usePoolAccount = () => {
         userPoolAddress: null,
         hasConflict: false,
         isConnectedToPoolAddress: false,
+        notConnectedToPoolAddress: false,
       };
 
     const recentPoolAddress =
@@ -48,6 +52,8 @@ export const usePoolAccount = () => {
       userPoolAddress: recentPoolAddress,
       hasConflict,
       isConnectedToPoolAddress,
+      notConnectedToPoolAddress:
+        !!recentPoolAddress && !isConnectedToPoolAddress,
     };
   }, [userSubscription, address, incomingOnly]);
   return data;
