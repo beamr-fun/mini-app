@@ -199,12 +199,18 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    setCreationSteps((prev) => ({
+      ...prev,
+      distributeFlow: 'loading',
+    }));
+
     const flowRate =
       parseEther(form.values.budget.toString()) / 30n / 24n / 60n / 60n; // budget per month to flow rate per second
 
     await distributeFlow({
       onError(errMsg) {
         handleError(errMsg, 'Error distributing flow');
+        setCreationSteps((prev) => ({ ...prev, distributeFlow: 'error' }));
       },
       onSuccess(txHash) {
         setCreationSteps((prev) => ({ ...prev, distributeFlow: 'success' }));
