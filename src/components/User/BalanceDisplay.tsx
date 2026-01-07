@@ -34,22 +34,34 @@ export const BalanceDisplay = ({
 
   const { userPoolAddress } = usePoolAccount();
 
-  const { totalIncomingFlowRate } = useMemo(() => {
+  const {
+    totalIncomingFlowRate,
+    connectedIncoming,
+    amtConnected,
+    unconnectedIncoming,
+  } = useMemo(() => {
     if (!userSubscription?.incoming) {
       return {
         totalIncomingFlowRate: 0n,
+        connectedIncoming: 0n,
+        unconnectedIncoming: 0n,
+        amtConnected: 0,
       };
     }
 
     if (userSubscription.incoming.length === 0) {
       return {
         totalIncomingFlowRate: 0n,
+        connectedIncoming: 0n,
+        unconnectedIncoming: 0n,
+        amtConnected: 0,
       };
     }
 
     let total = 0n;
     let connected = 0n;
     let unconnected = 0n;
+    let amtConnected = 0;
 
     userSubscription.incoming.forEach((item) => {
       const perUnitFlowRate =
@@ -67,6 +79,7 @@ export const BalanceDisplay = ({
 
       if (item.isReceiverConnected) {
         connected += beamFlowRate;
+        amtConnected += 1;
       } else {
         unconnected += beamFlowRate;
       }
@@ -76,6 +89,9 @@ export const BalanceDisplay = ({
 
     return {
       totalIncomingFlowRate: total,
+      connectedIncoming: connected,
+      unconnectedIncoming: unconnected,
+      amtConnected,
     };
   }, [userSubscription?.incoming, userPoolAddress]);
 
@@ -104,46 +120,22 @@ export const BalanceDisplay = ({
     return total;
   }, [userSubscription?.outgoing, collectionFlowRate]);
 
-  const amtConnected = useMemo(() => {
-    if (!userSubscription) {
-      return 0;
-    }
-
-    let total = 0;
-
-    userSubscription.incoming.forEach((item) => {
-      if (item.isReceiverConnected) {
-        total += 1;
-      }
-    });
-    return total;
-  }, [userSubscription]);
-
   const hasUnconnected =
     amtConnected < (userSubscription?.incoming.length || 0);
 
-  const totalIncomingPerMonth = totalIncomingFlowRate
-    ? flowratePerSecondToMonth(totalIncomingFlowRate)
+  const realIncomingPerMonth = connectedIncoming
+    ? flowratePerSecondToMonth(connectedIncoming)
     : 0n;
 
-  const totalOutgoingPerMonth = totalOutgoingFlowRate
+  const realOutgoingPerMonth = totalOutgoingFlowRate
     ? flowratePerSecondToMonth(totalOutgoingFlowRate)
     : 0n;
 
-  const moreIncomingThanOutgoing =
-    totalIncomingFlowRate >= totalOutgoingFlowRate;
+  const moreIncomingThanOutgoing = connectedIncoming >= totalOutgoingFlowRate;
 
   const netFlowRate = moreIncomingThanOutgoing
-    ? totalIncomingFlowRate - totalOutgoingFlowRate
-    : totalOutgoingFlowRate - totalIncomingFlowRate;
-
-  const percentageOfIncoming =
-    totalIncomingFlowRate && totalOutgoingFlowRate
-      ? Number(
-          (totalIncomingFlowRate * 10000n) /
-            (totalIncomingFlowRate + totalOutgoingFlowRate)
-        ) / 100
-      : 0;
+    ? connectedIncoming - totalOutgoingFlowRate
+    : totalOutgoingFlowRate - connectedIncoming;
 
   const netMonthly = flowratePerSecondToMonth(netFlowRate);
 
@@ -186,13 +178,12 @@ export const BalanceDisplay = ({
           {netMonthly}
         </Text>
       </Group>
-      <FlowProgressBar />
-      {/* <Progress
-        mb="xs"
-        color={colors.green[7]}
-        bg={colors.purple[7]}
-        value={percentageOfIncoming}
-      /> */}
+      <FlowProgressBar
+        connected={connectedIncoming}
+        notConnected={unconnectedIncoming}
+        outgoing={totalOutgoingFlowRate}
+      />
+
       <Group justify="space-between">
         <Text c={colors.green[7]} fz="sm">
           Incoming
@@ -203,9 +194,9 @@ export const BalanceDisplay = ({
         </Text>
       </Group>
       <Group justify="space-between">
-        <Text fz="sm">{totalIncomingPerMonth}</Text>
+        <Text fz="sm">{realIncomingPerMonth}</Text>
         <Group gap={6}>
-          <Text fz="sm">{totalOutgoingPerMonth}</Text>
+          <Text fz="sm">{realOutgoingPerMonth}</Text>
           <Tooltip
             w={250}
             multiline
