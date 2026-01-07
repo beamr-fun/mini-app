@@ -1,7 +1,6 @@
 import {
   Box,
   Group,
-  Modal,
   NumberInput,
   Paper,
   Image,
@@ -10,7 +9,6 @@ import {
   useMantineTheme,
   Button,
   Tooltip,
-  TextInput,
 } from '@mantine/core';
 import {
   charLimit,
@@ -27,17 +25,15 @@ import { PageLayout } from '../layouts/PageLayout';
 import { useCTA } from '../hooks/useCTA';
 import { IconTransfer } from '../components/svg/IconTransfer';
 import { useDisclosure } from '@mantine/hooks';
-import { SwapUI } from '../components/SwapUI';
 import beamrEcon from '../assets/beamrEcon.png';
-import { ExternalLink, Info, PlusIcon } from 'lucide-react';
+import { Info, PlusIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { multiConnect } from '../utils/interactions';
 import { notifications } from '@mantine/notifications';
 import { Address, parseUnits } from 'viem';
 import { isTestnet } from '../utils/setup';
-import { ADDR, ADDR_PROD, NATIVE_TOKEN } from '../const/addresses';
+import { ADDR } from '../const/addresses';
 import { MIN_POOL_AMT } from '../const/params';
-import sdk from '@farcaster/miniapp-sdk';
 import { SwapModal } from '../components/User/SwapModal';
 
 export const Budget = () => {
