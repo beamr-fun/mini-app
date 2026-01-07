@@ -5,7 +5,6 @@ import {
   Card,
   Flex,
   Group,
-  Image,
   Loader,
   SegmentedControl,
   Stack,

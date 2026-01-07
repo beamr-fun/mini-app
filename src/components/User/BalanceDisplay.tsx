@@ -1,7 +1,9 @@
 import {
   ActionIcon,
+  Box,
   Card,
   Group,
+  Stack,
   Text,
   Tooltip,
   useMantineTheme,
@@ -203,11 +205,29 @@ export const BalanceDisplay = ({
         </Group>
       </Group>
       {userSubscription?.incoming && userSubscription?.incoming?.length > 0 && (
-        <Group gap={'xs'} mt="md" justify="space-between">
+        <Group gap={'xs'} mt="md">
           <Tooltip
             w={300}
             multiline
-            label="Connect to Beams in order to stream to your wallet."
+            label={
+              <Stack p="sm">
+                <Group wrap="nowrap" align="start" gap="xs">
+                  <Box w={16}>
+                    <Info size={16} color={colors.gray[2]} />
+                  </Box>
+                  <Text fz={'sm'} c={colors.gray[2]}>
+                    Only connected pool streams are included in your real-time
+                    $BEAMR balance. Unconnected pool funds are held in escrow.
+                  </Text>
+                </Group>
+                <Group wrap="nowrap" align="start" gap="xs">
+                  <Info size={16} color={colors.gray[3]} />
+                  <Text fz="sm" c={colors.gray[3]}>
+                    Max 256 connections per user.
+                  </Text>
+                </Group>
+              </Stack>
+            }
           >
             <Group
               gap={4}
@@ -217,28 +237,24 @@ export const BalanceDisplay = ({
                 cursor: 'pointer',
               }}
             >
+              <Text c={hasUnconnected ? colors.gray[0] : colors.gray[3]}>
+                {hasUnconnected ? 'Unconnected streams' : 'All connected'} (
+                {amtConnected}/256)
+              </Text>
               {hasUnconnected && (
                 <CircleAlert
                   size={14}
-                  style={{ transform: 'translateY(-1px)' }}
+                  // style={{ transform: 'translateY(1px)' }}
                 />
               )}
-              <Text
-                fz="sm"
-                td="underline"
-                c={hasUnconnected ? colors.gray[0] : colors.gray[3]}
-              >
-                {hasUnconnected ? 'Unconnected streams.' : 'All connected'}
-              </Text>
             </Group>
           </Tooltip>
-          <Tooltip
+          {/* <Tooltip
             w={250}
             multiline
             label={`Max 256 connections per user. You are connected to ${amtConnected} beams.`}
           >
             <Group gap={4}>
-              <Text fz="sm">{amtConnected}/256</Text>
               <Zap
                 size={16}
                 color={colors.gray[3]}
@@ -247,7 +263,7 @@ export const BalanceDisplay = ({
                 }}
               />
             </Group>
-          </Tooltip>
+          </Tooltip> */}
         </Group>
       )}
     </Card>
