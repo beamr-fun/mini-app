@@ -7,7 +7,6 @@ import { useUser } from '../../hooks/useUser';
 import { useMemo } from 'react';
 import { Card, Flex, Group, Text, useMantineTheme } from '@mantine/core';
 import { AlertCircle } from 'lucide-react';
-import { isDev } from '../../utils/setup';
 
 export const CreatePool = () => {
   return (

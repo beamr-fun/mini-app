@@ -34,66 +34,62 @@ export const BalanceDisplay = ({
 
   const { userPoolAddress } = usePoolAccount();
 
-  const {
-    totalIncomingFlowRate,
-    connectedIncoming,
-    amtConnected,
-    unconnectedIncoming,
-  } = useMemo(() => {
-    if (!userSubscription?.incoming) {
-      return {
-        totalIncomingFlowRate: 0n,
-        connectedIncoming: 0n,
-        unconnectedIncoming: 0n,
-        amtConnected: 0,
-      };
-    }
-
-    if (userSubscription.incoming.length === 0) {
-      return {
-        totalIncomingFlowRate: 0n,
-        connectedIncoming: 0n,
-        unconnectedIncoming: 0n,
-        amtConnected: 0,
-      };
-    }
-
-    let total = 0n;
-    let connected = 0n;
-    let unconnected = 0n;
-    let amtConnected = 0;
-
-    userSubscription.incoming.forEach((item) => {
-      const perUnitFlowRate =
-        BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
-      const beamFlowRate = perUnitFlowRate * BigInt(item.units);
-
-      const receivingAddress = item.id.split('_')?.[1];
-
-      if (
-        userPoolAddress &&
-        receivingAddress?.toLowerCase() !== userPoolAddress.toLowerCase()
-      ) {
-        return;
+  const { connectedIncoming, amtConnected, unconnectedIncoming } =
+    useMemo(() => {
+      if (!userSubscription?.incoming) {
+        return {
+          totalIncomingFlowRate: 0n,
+          connectedIncoming: 0n,
+          unconnectedIncoming: 0n,
+          amtConnected: 0,
+        };
       }
 
-      if (item.isReceiverConnected) {
-        connected += beamFlowRate;
-        amtConnected += 1;
-      } else {
-        unconnected += beamFlowRate;
+      if (userSubscription.incoming.length === 0) {
+        return {
+          totalIncomingFlowRate: 0n,
+          connectedIncoming: 0n,
+          unconnectedIncoming: 0n,
+          amtConnected: 0,
+        };
       }
 
-      total += beamFlowRate;
-    });
+      let total = 0n;
+      let connected = 0n;
+      let unconnected = 0n;
+      let amtConnected = 0;
 
-    return {
-      totalIncomingFlowRate: total,
-      connectedIncoming: connected,
-      unconnectedIncoming: unconnected,
-      amtConnected,
-    };
-  }, [userSubscription?.incoming, userPoolAddress]);
+      userSubscription.incoming.forEach((item) => {
+        const perUnitFlowRate =
+          BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
+        const beamFlowRate = perUnitFlowRate * BigInt(item.units);
+
+        const receivingAddress = item.id.split('_')?.[1];
+
+        if (
+          userPoolAddress &&
+          receivingAddress?.toLowerCase() !== userPoolAddress.toLowerCase()
+        ) {
+          return;
+        }
+
+        if (item.isReceiverConnected) {
+          connected += beamFlowRate;
+          amtConnected += 1;
+        } else {
+          unconnected += beamFlowRate;
+        }
+
+        total += beamFlowRate;
+      });
+
+      return {
+        totalIncomingFlowRate: total,
+        connectedIncoming: connected,
+        unconnectedIncoming: unconnected,
+        amtConnected,
+      };
+    }, [userSubscription?.incoming, userPoolAddress]);
 
   const totalOutgoingFlowRate = useMemo(() => {
     if (!userSubscription?.outgoing) {
@@ -147,7 +143,7 @@ export const BalanceDisplay = ({
         <DancingText
           userBalance={userBalance || 0n}
           fetchedAt={userBalanceFetchedAt || new Date()}
-          flowRate={totalIncomingFlowRate - totalOutgoingFlowRate}
+          flowRate={connectedIncoming - totalOutgoingFlowRate}
           fw={500}
           fz={'lg'}
           c={colors.gray[0]}
