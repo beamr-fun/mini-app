@@ -3,15 +3,15 @@ import { useForm, UseFormReturnType } from '@mantine/form';
 import { useQuery } from '@tanstack/react-query';
 import { User } from '@neynar/nodejs-sdk/build/api';
 import { ADDR } from '../const/addresses';
-import { usePublicClient, useReadContract, useWalletClient } from 'wagmi';
-import { Address, erc20Abi, parseEther } from 'viem';
+import { usePublicClient, useWalletClient } from 'wagmi';
+import { Address, parseEther } from 'viem';
 import { useUser } from '../hooks/useUser';
 import { completePool, createPool, fetchBesties } from '../utils/api';
 import { distributeFlow } from '../utils/interactions';
 import { startTxPoll } from '../utils/poll';
 import { notifications } from '@mantine/notifications';
 import { charLimit } from '../utils/common';
-import { getClaimable, getEthBalance } from '../utils/reads';
+import { getClaimable } from '../utils/reads';
 
 type CreationSteps = {
   createPool: 'loading' | 'error' | 'success';

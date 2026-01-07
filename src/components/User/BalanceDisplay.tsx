@@ -2,7 +2,6 @@ import {
   ActionIcon,
   Card,
   Group,
-  Progress,
   Text,
   Tooltip,
   useMantineTheme,
@@ -16,6 +15,7 @@ import { IconTransfer } from '../svg/IconTransfer';
 import { CircleAlert, Info, TrendingUp, Zap } from 'lucide-react';
 import classes from '../../styles/effects.module.css';
 import { usePoolAccount } from '../../hooks/usePoolAccount';
+import { FlowProgressBar } from './FlowProgressBar';
 
 export const BalanceDisplay = ({
   openSwap,
@@ -34,16 +34,22 @@ export const BalanceDisplay = ({
 
   const { userPoolAddress } = usePoolAccount();
 
-  const totalIncomingFlowRate = useMemo(() => {
+  const { totalIncomingFlowRate } = useMemo(() => {
     if (!userSubscription?.incoming) {
-      return 0n;
+      return {
+        totalIncomingFlowRate: 0n,
+      };
     }
 
     if (userSubscription.incoming.length === 0) {
-      return 0n;
+      return {
+        totalIncomingFlowRate: 0n,
+      };
     }
 
     let total = 0n;
+    let connected = 0n;
+    let unconnected = 0n;
 
     userSubscription.incoming.forEach((item) => {
       const perUnitFlowRate =
@@ -59,10 +65,18 @@ export const BalanceDisplay = ({
         return;
       }
 
+      if (item.isReceiverConnected) {
+        connected += beamFlowRate;
+      } else {
+        unconnected += beamFlowRate;
+      }
+
       total += beamFlowRate;
     });
 
-    return total;
+    return {
+      totalIncomingFlowRate: total,
+    };
   }, [userSubscription?.incoming, userPoolAddress]);
 
   const totalOutgoingFlowRate = useMemo(() => {
@@ -172,12 +186,13 @@ export const BalanceDisplay = ({
           {netMonthly}
         </Text>
       </Group>
-      <Progress
+      <FlowProgressBar />
+      {/* <Progress
         mb="xs"
         color={colors.green[7]}
         bg={colors.purple[7]}
         value={percentageOfIncoming}
-      />
+      /> */}
       <Group justify="space-between">
         <Text c={colors.green[7]} fz="sm">
           Incoming

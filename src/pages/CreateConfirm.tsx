@@ -37,7 +37,9 @@ export const CreateConfirm = () => {
       ? 'Creating Pool'
       : distributeReady
         ? 'Distribute Flow'
-        : 'View Pool',
+        : allStepsComplete
+          ? 'View Pool'
+          : 'Loading...',
     onClick: distributeReady
       ? () => {
           handleDistributeFlow?.();
