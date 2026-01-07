@@ -9,10 +9,12 @@ import {
   Box,
   Stack,
   Image,
+  Avatar,
 } from '@mantine/core';
 import { BookIcon, Share2Icon } from 'lucide-react';
 import poolDiagram from '../assets/poolDiagram.png';
-import { useScrollIntoView } from '@mantine/hooks';
+import beamrEcon from '../assets/beamrEcon.png';
+import beamrLogo from '../assets/beamrTokenLogo.png';
 
 export const Strategy = () => {
   const { colors } = useMantineTheme();
@@ -24,7 +26,7 @@ export const Strategy = () => {
     if (ref.current) {
       ref.current.scrollIntoView({
         behavior: 'smooth',
-        block: 'start', // Align the top of the element to the top of the container
+        block: 'start',
       });
     }
   };
@@ -119,36 +121,25 @@ export const Strategy = () => {
         </Paper>
         <Paper>
           <Group mb={20}>
-            <Share2Icon
-              size={24}
-              style={{
-                stroke: 'url(#beamr-gradient)',
-              }}
-            />
+            <Avatar size={28} src={beamrLogo} />
             <Text fz={20} fw={600} c={colors.gray[0]} ref={explainedRef2}>
-              Pools Explained
+              Streams Are Real Time
             </Text>
           </Group>
-          <Stack gap={8} mb="md">
-            <Text mb={'md'}>
-              Beamr pools are the easiest way to sustainably reward the people
-              who make your feed worth scrolling:
-            </Text>
-            <Text> 1. Open a $BEAMR token stream</Text>
-            <Text>
-              {' '}
-              2. Beamr dynamically splits that stream based on your interactions
-              (likes, comments, follows, etc.)
-            </Text>
-            <Text>
-              3. Creators earn instantly & consistently based on (your) human
-              choice, not gameable metrics{' '}
-            </Text>
-          </Stack>
+          <Text mb={'md'}>
+            Beamr streams settle passively (ie without repetitive transactions)
+            and in real-time.
+          </Text>
+          <Text mb={'md'}>
+            If you have incoming streams, they can fund your outgoing
+            streams--resulting in maximum capital efficiency and stream
+            composability.
+          </Text>
+
           <Group justify="center">
-            <Box w={247} h={190} mt="md">
+            <Box w={299} h={236} mt="md">
               <Image
-                src={poolDiagram}
+                src={beamrEcon}
                 alt="Beamr Economy Diagram"
                 w="100%"
                 h="100%"
