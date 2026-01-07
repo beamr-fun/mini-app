@@ -10,7 +10,7 @@ import { Group } from '@mantine/core';
 import { useUser } from './hooks/useUser';
 import { Global } from './pages/Global';
 import { Settings } from './pages/Settings';
-import { Strategy } from './pages/Strategy';
+import { Strategy } from './pages/Info';
 import { PageLayout } from './layouts/PageLayout';
 import { BeamrHeadline } from './components/BeamrHeadline';
 import { Loader } from 'lucide-react';
@@ -47,7 +47,7 @@ export const ClientRoutes = () => {
       <Route path="/home" element={<User />} />
       <Route path="/global" element={<Global />} />
       <Route path="/settings" element={<Settings />} />
-      <Route path="/strategy" element={<Strategy />} />
+      <Route path="/info" element={<Strategy />} />
       <Route path="/create-pool" element={<CreatePool />}>
         <Route index element={<Navigate to="1" replace />} />
         <Route path="1" element={<Explainer />} />
