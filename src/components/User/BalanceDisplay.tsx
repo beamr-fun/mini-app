@@ -36,14 +36,14 @@ export const BalanceDisplay = ({
 
   const { userPoolAddress } = usePoolAccount();
 
-  const { connectedIncoming, amtConnected, unconnectedIncoming } =
+  const { connectedIncoming, amtUnconnected, unconnectedIncoming } =
     useMemo(() => {
       if (!userSubscription?.incoming) {
         return {
           totalIncomingFlowRate: 0n,
           connectedIncoming: 0n,
           unconnectedIncoming: 0n,
-          amtConnected: 0,
+          amtUnconnected: 0,
         };
       }
 
@@ -52,14 +52,14 @@ export const BalanceDisplay = ({
           totalIncomingFlowRate: 0n,
           connectedIncoming: 0n,
           unconnectedIncoming: 0n,
-          amtConnected: 0,
+          amtUnconnected: 0,
         };
       }
 
       let total = 0n;
       let connected = 0n;
       let unconnected = 0n;
-      let amtConnected = 0;
+      let amtUnconnected = 0;
 
       userSubscription.incoming.forEach((item) => {
         const perUnitFlowRate =
@@ -78,7 +78,7 @@ export const BalanceDisplay = ({
         if (item.isReceiverConnected) {
           connected += beamFlowRate;
         } else {
-          amtConnected += 1;
+          amtUnconnected += 1;
           unconnected += beamFlowRate;
         }
 
@@ -89,7 +89,7 @@ export const BalanceDisplay = ({
         totalIncomingFlowRate: total,
         connectedIncoming: connected,
         unconnectedIncoming: unconnected,
-        amtConnected,
+        amtUnconnected,
       };
     }, [userSubscription?.incoming, userPoolAddress]);
 
@@ -118,8 +118,7 @@ export const BalanceDisplay = ({
     return total;
   }, [userSubscription?.outgoing, collectionFlowRate]);
 
-  const hasUnconnected =
-    amtConnected < (userSubscription?.incoming.length || 0);
+  const hasUnconnected = amtUnconnected > 0;
 
   const realIncomingPerMonth = connectedIncoming
     ? flowratePerSecondToMonth(connectedIncoming)
@@ -262,7 +261,7 @@ export const BalanceDisplay = ({
             >
               <Text c={hasUnconnected ? colors.gray[0] : colors.gray[3]}>
                 {hasUnconnected ? 'Unconnected streams' : 'All connected'} (
-                {amtConnected}/256)
+                {amtUnconnected}/256)
               </Text>
               {hasUnconnected && (
                 <CircleAlert
@@ -275,7 +274,7 @@ export const BalanceDisplay = ({
           {/* <Tooltip
             w={250}
             multiline
-            label={`Max 256 connections per user. You are connected to ${amtConnected} beams.`}
+            label={`Max 256 connections per user. You are connected to ${amtUnconnected} beams.`}
           >
             <Group gap={4}>
               <Zap
