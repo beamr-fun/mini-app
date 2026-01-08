@@ -39,7 +39,7 @@ export const Strategy = () => {
 
       <Stack>
         <Paper>
-          <Group mb={20}>
+          <Group mb={'sm'}>
             <BookIcon
               size={24}
               // color={colors.gray[0]}
@@ -52,11 +52,7 @@ export const Strategy = () => {
               Learn
             </Text>
           </Group>
-          <Text mb={16}>
-            This is for you to understand what the product is and how to use it
-            effectively.
-          </Text>
-          <Text mb="sm">On this page:</Text>
+
           <List spacing={'xs'} withPadding>
             <List.Item>
               <Text
