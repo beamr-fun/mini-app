@@ -87,6 +87,8 @@ export const Settings = () => {
       return [];
     }
 
+    const collectionRate = collectionFlowRate || 0n;
+
     const subscriptionPools = userSubscription.pools;
 
     const totalUserFlowRate = subscriptionPools.reduce((acc, pool) => {
@@ -96,13 +98,14 @@ export const Settings = () => {
     return subscriptionPools.map((pool) => {
       const poolFlowRate = BigInt(pool.flowRate || 0);
       let reconstitutedFlowRate = poolFlowRate;
+      let proportionalRate = 0n;
 
-      if (totalUserFlowRate > 0n && collectionFlowRate > 0n) {
+      if (totalUserFlowRate > 0n && collectionRate > 0n) {
         /* Calculate proportional fee: (Pool Flow * Total Fees) / Total Flow
          */
-        const proportionalFee =
-          (poolFlowRate * BigInt(collectionFlowRate)) / totalUserFlowRate;
-        reconstitutedFlowRate = poolFlowRate + proportionalFee;
+        proportionalRate =
+          (poolFlowRate * BigInt(collectionRate)) / totalUserFlowRate;
+        reconstitutedFlowRate = poolFlowRate + proportionalRate;
       }
 
       // Return the pool object combined with any UI preferences
@@ -111,6 +114,7 @@ export const Settings = () => {
       return {
         ...pool,
         ...prefs,
+        proportionalRate,
         rawFlowRate: poolFlowRate, // Original flow
         reconstitutedFlowRate: reconstitutedFlowRate.toString(), // Flow + Fees
       };
@@ -177,6 +181,12 @@ export const Settings = () => {
       setLoadingPrefs(true);
       const flowRate = parseEther(monthly) / 30n / 24n / 60n / 60n;
 
+      const otherPoolFlowRates = pools
+        .filter((p) => p.id !== poolAddress)
+        .map((pool) => {
+          return BigInt(pool.reconstitutedFlowRate || 0);
+        });
+
       await distributeFlow({
         enableZeroFlowRate: true,
         onError(errorMsg) {
@@ -202,8 +212,8 @@ export const Settings = () => {
           poolAddress: poolAddress as Address,
           flowRate: flowRate,
           user: address as Address,
+          otherPoolFlowRates,
         },
-
         publicClient,
         walletClient,
       });

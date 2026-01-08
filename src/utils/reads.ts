@@ -54,7 +54,6 @@ export const getFlowDistributionRate = async ({
   userAddress,
   tokenAddress,
 }: UserFlowRateParams) => {
-  console.log('tokenAddress', tokenAddress);
   try {
     const rate = await publicClient.readContract({
       address: ADDR.GDA_FORWARDER,
@@ -62,8 +61,6 @@ export const getFlowDistributionRate = async ({
       functionName: 'getFlowDistributionFlowRate',
       args: [tokenAddress, userAddress, poolAddress],
     });
-
-    console.log('rate', rate);
 
     return rate as bigint;
   } catch (error) {

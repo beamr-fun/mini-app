@@ -7,6 +7,7 @@ import { useUser } from '../../hooks/useUser';
 import { useMemo } from 'react';
 import { Card, Flex, Group, Text, useMantineTheme } from '@mantine/core';
 import { AlertCircle } from 'lucide-react';
+import { MULTI_POOL_WHITELIST } from '../../const/params';
 
 export const CreatePool = () => {
   return (
@@ -34,6 +35,14 @@ const ErrorHandler = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
+  // We have a race condition where the indexer sometimes outruns the backend
+
+  // So we can assume that if the creations steps are all loading, the user is new
+
+  // The Context unmounts/remounts on navigation, so this state will reset if the user navigates away and back
+
+  // IF ONBOARD CONTEXT IS FRESH (ALL STEPS LOADING) AND BUDGET IS EMPTY, ALLOW POOL CREATION
+
   const freshOnboardContextState =
     Object.values(creationSteps).every((step) => step === 'loading') &&
     budget === '';
@@ -43,7 +52,9 @@ const ErrorHandler = ({ children }: { children: React.ReactNode }) => {
 
     if (!userSubscription || !userSubscription.pools.length) return false;
 
-    if (freshOnboardContextState) return false;
+    if (!freshOnboardContextState) return false;
+
+    if (MULTI_POOL_WHITELIST.includes(user.fid)) return false;
 
     if (hasOpenPool) return true;
 

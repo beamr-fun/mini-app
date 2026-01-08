@@ -118,8 +118,8 @@ export const Global = () => {
   }, [user, userSubscription]);
 
   useCTA({
-    label: hideButton ? 'Start Beaming' : undefined,
-    onClick: hideButton ? () => navigate('/create-pool/1') : undefined,
+    label: hideButton ? undefined : 'Start Beaming',
+    onClick: hideButton ? undefined : () => navigate('/create-pool/1'),
     extraDeps: [hideButton],
   });
 

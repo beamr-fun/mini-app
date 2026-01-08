@@ -1,12 +1,11 @@
-import { Address, encodeFunctionData, erc20Abi } from 'viem';
+import { Address, encodeFunctionData } from 'viem';
 import { OPERATION_TYPE, prepareOperation } from '@sfpro/sdk/constant';
-import { gdaAbi, gdaAddress } from '@sfpro/sdk/abi/core';
+import { gdaAbi } from '@sfpro/sdk/abi/core';
 import { ADDR } from '../const/addresses';
 import { SuperfluidAbi } from '../abi/Superfluid';
-import { baseSepolia } from 'viem/chains';
 
 export const distributeFlow = async ({
-  args: { poolAddress, user, flowRate },
+  args: { poolAddress, user, flowRate, otherPoolFlowRates },
   walletClient,
   publicClient,
   onSuccess,
@@ -19,6 +18,7 @@ export const distributeFlow = async ({
     poolAddress: Address;
     user: Address;
     flowRate: bigint;
+    otherPoolFlowRates: bigint[];
   };
   walletClient: any;
   publicClient: any;
@@ -41,21 +41,33 @@ export const distributeFlow = async ({
       );
     }
 
-    const userFlowRate = flowRate === 0n ? 0n : (flowRate * 95n) / 100n; // 95% to user
+    const poolTargetRate = (flowRate * 95n) / 100n;
 
-    const feeFlowRate = flowRate === 0n ? 0n : flowRate - userFlowRate; // 5% fee
+    // 2. Calculate the Total Gross across ALL pools
+    // Assuming otherPoolFlowRates are also the 'Gross' (100%) values
+    const totalGrossRate = [flowRate, ...otherPoolFlowRates].reduce(
+      (acc, rate) => acc + rate,
+      0n
+    );
+
+    // 3. Calculate the Global Fee (5% of the Total Gross)
+    // Because distributeFlow is an 'overwrite' operation, this syncs
+    // the collector pool to 5% of the user's entire footprint.
+    const globalFeeFlowRate = (totalGrossRate * 5n) / 100n;
 
     const operations = [
+      // Update the specific target pool to 95%
       prepareOperation({
         operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
         target: ADDR.GDA,
         data: encodeFunctionData({
           abi: gdaAbi,
           functionName: 'distributeFlow',
-          args: [ADDR.SUPER_TOKEN, user, poolAddress, userFlowRate, '0x'],
+          args: [ADDR.SUPER_TOKEN, user, poolAddress, poolTargetRate, '0x'],
         }),
         userData: '0x',
       }),
+      // Update the collector pool to 5% of the total aggregate
       prepareOperation({
         operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
         target: ADDR.GDA,
@@ -66,7 +78,7 @@ export const distributeFlow = async ({
             ADDR.SUPER_TOKEN,
             user,
             ADDR.COLLECTOR_POOL,
-            feeFlowRate,
+            globalFeeFlowRate,
             '0x',
           ],
         }),

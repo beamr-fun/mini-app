@@ -90,3 +90,19 @@ export const charLimit = (str: string, limit: number): string => {
 export const nowInSeconds = (): number => {
   return Math.floor(Date.now() / 1000);
 };
+
+export const calculateFeeFromNet = (
+  netAmount: bigint,
+  feePercentage: number
+): bigint => {
+  const precision = 100;
+  const totalParts = 100 * precision;
+  const feeParts = Math.round(feePercentage * precision);
+  const netParts = BigInt(totalParts - feeParts);
+
+  const principle = (netAmount * BigInt(totalParts)) / netParts;
+
+  return principle - netAmount;
+};
+
+console.log('calculateFeeFromNet', calculateFeeFromNet(1000n, 2.5));

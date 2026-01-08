@@ -71,7 +71,15 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
 
-  const { user, address, getAuthHeaders, setIncomingOnly } = useUser();
+  const {
+    user,
+    address,
+    getAuthHeaders,
+    setIncomingOnly,
+    userSubscription,
+    collectionFlowRate,
+    refetchCollections,
+  } = useUser();
 
   const {
     data: besties,
@@ -207,6 +215,11 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     const flowRate =
       parseEther(form.values.budget.toString()) / 30n / 24n / 60n / 60n; // budget per month to flow rate per second
 
+    const otherPoolFlowRates =
+      userSubscription?.pools
+        ?.filter((p) => p.id !== poolAddress)
+        .map((pool) => (BigInt(pool.flowRate || 0) * 100n) / 95n) || [];
+
     await distributeFlow({
       onError(errMsg) {
         handleError(errMsg, 'Error distributing flow');
@@ -214,6 +227,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       },
       onSuccess(txHash) {
         setCreationSteps((prev) => ({ ...prev, distributeFlow: 'success' }));
+        refetchCollections?.();
         startTxPoll({
           id: txHash,
           onTimeout() {
@@ -244,6 +258,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
         poolAddress: poolAddress as Address,
         user: address as Address,
         flowRate: flowRate,
+        otherPoolFlowRates,
       },
       walletClient,
       publicClient,
