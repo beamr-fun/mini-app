@@ -34,8 +34,7 @@ import {
   RecentBeam,
 } from '../transforms/global';
 import { BeamrHeadline } from '../components/BeamrHeadline';
-
-//
+import { MULTI_POOL_WHITELIST } from '../const/params';
 
 type LeaderPool = {
   pfpUrl: string;
@@ -49,7 +48,14 @@ type LeaderPool = {
 
 export const Global = () => {
   const [tab, setTab] = useState('Recent');
-  const { getAuthHeaders, hasPool, apiError, userSubError } = useUser();
+  const {
+    getAuthHeaders,
+    hasOpenPool,
+    apiError,
+    userSubError,
+    userSubscription,
+    user,
+  } = useUser();
 
   const highlevelError = apiError || userSubError;
 
@@ -93,12 +99,28 @@ export const Global = () => {
     });
   }, [leaderRaw]);
 
-  const shouldRenderCTA = !hasPool && !highlevelError;
+  const hideButton = useMemo(() => {
+    if (!user || !user.fid) return true;
+
+    if (highlevelError) return true;
+
+    if (MULTI_POOL_WHITELIST.includes(user.fid)) {
+      return false;
+    }
+
+    if (!userSubscription || !userSubscription.pools.length) {
+      return false;
+    }
+
+    if (hasOpenPool) {
+      return true;
+    }
+  }, [user, userSubscription]);
 
   useCTA({
-    label: shouldRenderCTA ? 'Start Beaming' : undefined,
-    onClick: shouldRenderCTA ? () => navigate('/create-pool/1') : undefined,
-    extraDeps: [shouldRenderCTA],
+    label: hideButton ? 'Start Beaming' : undefined,
+    onClick: hideButton ? () => navigate('/create-pool/1') : undefined,
+    extraDeps: [hideButton],
   });
 
   // useCTA({

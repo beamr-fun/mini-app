@@ -73,7 +73,7 @@ export const Strategy = () => {
                 style={{ cursor: 'pointer' }}
                 onClick={() => scrollToSection(explainedRef2)}
               >
-                Beamr Boosts
+                Real Time Streaming
               </Text>
             </List.Item>
           </List>

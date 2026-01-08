@@ -20,7 +20,8 @@ export const CreatePool = () => {
 
 const ErrorHandler = ({ children }: { children: React.ReactNode }) => {
   const { bestiesError } = useOnboard();
-  const { userSubscription } = useUser();
+  const { userSubscription, user, hasOpenPool } = useUser();
+  const { creationSteps, budget } = useOnboard();
 
   const { colors } = useMantineTheme();
 
@@ -33,23 +34,23 @@ const ErrorHandler = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  const hasOneOrMorePools = useMemo(() => {
-    if (!userSubscription || !userSubscription.pools) {
-      return false;
-    }
+  const freshOnboardContextState =
+    Object.values(creationSteps).every((step) => step === 'loading') &&
+    budget === '';
 
-    const activePools = userSubscription.pools?.filter(
-      (pool) => pool.active === true
-    );
+  const shouldBlockCreatePool = useMemo(() => {
+    if (!user) return true;
 
-    if (activePools.length >= 1) {
-      return true;
-    }
+    if (!userSubscription || !userSubscription.pools.length) return false;
+
+    if (freshOnboardContextState) return false;
+
+    if (hasOpenPool) return true;
 
     return false;
-  }, [userSubscription]);
+  }, [userSubscription, user, hasOpenPool, freshOnboardContextState]);
 
-  if (hasOneOrMorePools) {
+  if (shouldBlockCreatePool) {
     return (
       <Flex h={'50vh'} justify={'center'} align={'center'}>
         <Card>

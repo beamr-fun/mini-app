@@ -17,6 +17,7 @@ export type UserTransformed = {
     flowRate: string;
     totalUnits: string;
     active: boolean;
+    hasDistributed: boolean;
     id: string;
     metadata: {
       name: string;

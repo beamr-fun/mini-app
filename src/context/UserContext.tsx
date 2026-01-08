@@ -32,7 +32,7 @@ type UserContextType = {
   userBalance?: bigint;
   userBalanceFetchedAt?: Date;
   refetchUserTokenData?: () => Promise<void>;
-  hasPool: boolean;
+  hasOpenPool: boolean;
   incomingOnly: boolean;
   setIncomingOnly: (only: boolean) => void;
   isLoadingSub: boolean;
@@ -47,7 +47,7 @@ type UserContextType = {
 };
 
 export const UserContext = createContext<UserContextType>({
-  hasPool: false,
+  hasOpenPool: false,
   incomingOnly: false,
   setIncomingOnly: (only: boolean) => {},
   refetchUserTokenData: async () => {},
@@ -137,7 +137,7 @@ export const UserProvider = ({
   const { connect, connectors } = useConnect();
 
   const [startingRoute, setStartingRoute] = useState<string | undefined>();
-  const [hasPool, setHasPool] = useState<boolean>(false);
+  const [hasOpenPool, setHasOpenPool] = useState<boolean>(false);
   const [incomingOnly, setIncomingOnly] = useState<boolean>(false);
 
   const { data: beamrTokenData, refetch: refetchUserTokenData } = useToken({
@@ -243,7 +243,7 @@ export const UserProvider = ({
   useEffect(() => {
     if (startingRoute) return;
     if (userSubError || apiError) {
-      setHasPool(false);
+      setHasOpenPool(false);
       setStartingRoute('/global');
       sdk.actions.ready();
       return;
@@ -255,14 +255,17 @@ export const UserProvider = ({
     const currentSub = userSubscription;
 
     if (!currentSub) {
-      setHasPool(false);
+      setHasOpenPool(false);
       setStartingRoute('/global');
     } else {
       if (currentSub.pools.length > 0) {
-        setHasPool(true);
+        const openPools = currentSub.pools.filter(
+          (pool) => pool.hasDistributed
+        );
+        setHasOpenPool(openPools.length > 0);
         setStartingRoute('/home');
       } else {
-        setHasPool(false);
+        setHasOpenPool(false);
         setIncomingOnly(true);
         setStartingRoute('/global');
       }
@@ -295,7 +298,7 @@ export const UserProvider = ({
         isLoadingCollections,
         refetchCollections: refetchCollections as any as () => Promise<void>,
         collectionError,
-        hasPool,
+        hasOpenPool,
         refetchUserTokenData:
           refetchUserTokenData as any as () => Promise<void>,
         incomingOnly,

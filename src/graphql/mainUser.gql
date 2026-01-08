@@ -6,6 +6,7 @@ subscription LoggedInUser($id: String!) {
       flowRate
       totalUnits
       active
+      hasDistributed
       metadata {
         name
       }
@@ -19,6 +20,7 @@ subscription LoggedInUser($id: String!) {
     ) {
       id
       units
+
       isReceiverConnected
       lastUpdated
       beamPool {
@@ -29,11 +31,6 @@ subscription LoggedInUser($id: String!) {
       from {
         fid
         id
-      }
-      to {
-        creatorAccount {
-          address
-        }
       }
     }
     outgoing(
