@@ -125,6 +125,10 @@ export const BalanceDisplay = ({
     ? flowratePerSecondToMonth(connectedIncoming)
     : 0n;
 
+  const unconnectedIncomingPerMonth = unconnectedIncoming
+    ? flowratePerSecondToMonth(unconnectedIncoming)
+    : 0n;
+
   const realOutgoingPerMonth = totalOutgoingFlowRate
     ? flowratePerSecondToMonth(totalOutgoingFlowRate)
     : 0n;
@@ -165,16 +169,35 @@ export const BalanceDisplay = ({
           </Group>
         </ActionIcon>
       </Group>
-      <Group
-        c={moreIncomingThanOutgoing ? colors.green[7] : colors.purple[7]}
-        gap={4}
-        mb={'sm'}
-      >
-        <TrendingUp size={18} />
-        <Text fz="sm">
+      <Group gap={4} mb={'sm'}>
+        <Text
+          fz="sm"
+          c={moreIncomingThanOutgoing ? colors.green[7] : colors.purple[7]}
+        >
           Net Rate {moreIncomingThanOutgoing ? '+' : '-'}
           {netMonthly}
         </Text>
+        {hasUnconnected && (
+          <Tooltip
+            multiline
+            w={300}
+            label={
+              <Text fz={'sm'}>
+                Unconnected streams are not included in net rate. Click to
+                manage connections
+              </Text>
+            }
+          >
+            <Text
+              fz="sm"
+              className={classes.glow}
+              onClick={() => setTab('Receiving')}
+              style={{ cursor: 'pointer' }}
+            >
+              ({unconnectedIncomingPerMonth})
+            </Text>
+          </Tooltip>
+        )}
       </Group>
       <FlowProgressBar
         connected={connectedIncoming}
