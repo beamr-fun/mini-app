@@ -194,7 +194,7 @@ export const BalanceDisplay = ({
               onClick={() => setTab('Receiving')}
               style={{ cursor: 'pointer' }}
             >
-              ({unconnectedIncomingPerMonth})
+              (+{unconnectedIncomingPerMonth})
             </Text>
           </Tooltip>
         )}
