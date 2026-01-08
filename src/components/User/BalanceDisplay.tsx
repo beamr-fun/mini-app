@@ -77,8 +77,8 @@ export const BalanceDisplay = ({
 
         if (item.isReceiverConnected) {
           connected += beamFlowRate;
-          amtConnected += 1;
         } else {
+          amtConnected += 1;
           unconnected += beamFlowRate;
         }
 
