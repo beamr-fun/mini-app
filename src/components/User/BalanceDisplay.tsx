@@ -14,7 +14,7 @@ import { flowratePerSecondToMonth } from '../../utils/common';
 import { BeamrNav } from '../svg/BeamrNav';
 import { DancingText } from '../DancingText';
 import { IconTransfer } from '../svg/IconTransfer';
-import { CircleAlert, Info, TrendingUp, Zap } from 'lucide-react';
+import { CircleAlert, Info } from 'lucide-react';
 import classes from '../../styles/effects.module.css';
 import { usePoolAccount } from '../../hooks/usePoolAccount';
 import { FlowProgressBar } from './FlowProgressBar';
