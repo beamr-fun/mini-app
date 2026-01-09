@@ -1,10 +1,31 @@
 import { Flex, Stack, Text, useMantineTheme } from '@mantine/core';
 import { useUser } from '../../hooks/useUser';
 import { TableHeader, TableRow } from './TableItems';
+import { useMemo } from 'react';
 
 export const Sending = () => {
   const { userSubscription } = useUser();
   const { colors } = useMantineTheme();
+
+  const sorted = useMemo(() => {
+    if (!userSubscription) return [];
+
+    if (userSubscription.outgoing.length === 0) {
+      return [];
+    }
+
+    return [...userSubscription.outgoing].sort((a, b) => {
+      const aPerUnitFlowRate =
+        BigInt(a.beamPool?.flowRate) / BigInt(a.beamPool?.totalUnits);
+      const aBeamFlowRate = aPerUnitFlowRate * BigInt(a.units);
+
+      const bPerUnitFlowRate =
+        BigInt(b.beamPool?.flowRate) / BigInt(b.beamPool?.totalUnits);
+      const bBeamFlowRate = bPerUnitFlowRate * BigInt(b.units);
+
+      return bBeamFlowRate > aBeamFlowRate ? 1 : -1;
+    });
+  }, [userSubscription]);
 
   if (!userSubscription) {
     return <Text>No Subscription</Text>;
@@ -28,7 +49,7 @@ export const Sending = () => {
       <TableHeader sending={true} />
 
       <Stack gap="12px">
-        {userSubscription.outgoing.map((item) => {
+        {sorted.map((item) => {
           const perUnitFlowRate =
             BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
           const beamFlowRate = perUnitFlowRate * BigInt(item.units);
