@@ -1,6 +1,5 @@
 import { Progress, useMantineTheme } from '@mantine/core';
 import classes from '../../styles/effects.module.css';
-import React from 'react';
 
 type FlowProgressBarProps = {
   connected: bigint;
@@ -25,9 +24,10 @@ export const FlowProgressBar = ({
     );
   }
 
-  const connectedPct = Number((connected * 100n) / total);
-  const notConnectedPct = Number((notConnected * 100n) / total);
-  const outgoingPct = Number((outgoing * 100n) / total);
+  const totalNum = Number(total);
+  const connectedPct = (Number(connected) / totalNum) * 100;
+  const notConnectedPct = (Number(notConnected) / totalNum) * 100;
+  const outgoingPct = (Number(outgoing) / totalNum) * 100;
 
   return (
     <Progress.Root mb="xs" bg={colors.dark[5]}>
