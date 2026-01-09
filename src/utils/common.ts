@@ -48,7 +48,7 @@ export function formatUnitBalance(
 
 export const flowratePerSecondToMonth = (
   flowrate: bigint,
-  format?: 'rounded' | 'monthly' | 'raw' | 'parsed',
+  format?: 'rounded' | 'monthly' | 'raw' | 'parsed' | 'no-label',
   decimals = 18
 ): string => {
   const secondsInMonth = BigInt(60 * 60 * 24 * 30);
@@ -68,6 +68,10 @@ export const flowratePerSecondToMonth = (
     // round to nearest integer
 
     return Math.round(parseFloat(formatted)).toString();
+  }
+
+  if (format === 'no-label') {
+    return formatUnitBalance(units, decimals, 2);
   }
 
   if (!format || format === 'monthly') {

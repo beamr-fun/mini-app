@@ -130,15 +130,15 @@ export const BalanceDisplay = ({
   const hasUnconnected = amtUnconnected > 0;
 
   const realIncomingPerMonth = connectedIncoming
-    ? flowratePerSecondToMonth(connectedIncoming)
+    ? flowratePerSecondToMonth(connectedIncoming, 'no-label')
     : 0n;
 
   const unconnectedIncomingPerMonth = unconnectedIncoming
-    ? flowratePerSecondToMonth(unconnectedIncoming)
+    ? flowratePerSecondToMonth(unconnectedIncoming, 'no-label')
     : 0n;
 
   const realOutgoingPerMonth = totalOutgoingFlowRate
-    ? flowratePerSecondToMonth(totalOutgoingFlowRate)
+    ? flowratePerSecondToMonth(totalOutgoingFlowRate, 'no-label')
     : 0n;
 
   const moreIncomingThanOutgoing = connectedIncoming >= totalOutgoingFlowRate;
@@ -147,7 +147,7 @@ export const BalanceDisplay = ({
     ? connectedIncoming - totalOutgoingFlowRate
     : totalOutgoingFlowRate - connectedIncoming;
 
-  const netMonthly = flowratePerSecondToMonth(netFlowRate);
+  const netMonthly = flowratePerSecondToMonth(netFlowRate, 'no-label');
 
   return (
     <Card mb="md">
@@ -182,7 +182,7 @@ export const BalanceDisplay = ({
           fz="sm"
           c={moreIncomingThanOutgoing ? colors.green[7] : colors.purple[7]}
         >
-          Net Rate {moreIncomingThanOutgoing ? '+' : '-'}
+          Net Monthly Rate {moreIncomingThanOutgoing ? '+' : '-'}
           {netMonthly}
         </Text>
         {hasUnconnected && (
