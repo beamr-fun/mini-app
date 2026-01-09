@@ -17,7 +17,7 @@ export const Receiving = ({
   const { colors } = useMantineTheme();
   const { userPoolAddress } = usePoolAccount();
 
-  const filteredIncoming = useMemo(() => {
+  const processedIncoming = useMemo(() => {
     if (!userSubscription) return null;
 
     if (userSubscription && userSubscription.incoming.length === 0) {
@@ -26,11 +26,25 @@ export const Receiving = ({
 
     if (!userPoolAddress) return userSubscription.incoming;
 
-    return userSubscription.incoming.filter((item) => {
-      const receivingAddress = item.id.split('_')?.[1];
+    return userSubscription.incoming
+      .filter((item) => {
+        const receivingAddress = item.id.split('_')?.[1];
 
-      return receivingAddress?.toLowerCase() === userPoolAddress.toLowerCase();
-    });
+        return (
+          receivingAddress?.toLowerCase() === userPoolAddress.toLowerCase()
+        );
+      })
+      .sort((a, b) => {
+        const aPerUnitFlowRate =
+          BigInt(a.beamPool?.flowRate) / BigInt(a.beamPool?.totalUnits);
+        const aBeamFlowRate = aPerUnitFlowRate * BigInt(a.units);
+
+        const bPerUnitFlowRate =
+          BigInt(b.beamPool?.flowRate) / BigInt(b.beamPool?.totalUnits);
+        const bBeamFlowRate = bPerUnitFlowRate * BigInt(b.units);
+
+        return bBeamFlowRate > aBeamFlowRate ? 1 : -1;
+      });
   }, [userSubscription, userPoolAddress]);
 
   if (!userSubscription) {
@@ -39,7 +53,7 @@ export const Receiving = ({
 
   if (
     (userSubscription && userSubscription.incoming.length === 0) ||
-    filteredIncoming?.length === 0
+    processedIncoming?.length === 0
   )
     return (
       <Stack gap="sm" px="xs">
@@ -57,7 +71,7 @@ export const Receiving = ({
     <Stack gap="sm">
       <TableHeader sending={false} />
       <Stack gap="sm">
-        {userSubscription.incoming.map((item) => {
+        {processedIncoming?.map((item) => {
           const perUnitFlowRate =
             BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
           const beamFlowRate = perUnitFlowRate * BigInt(item.units);
