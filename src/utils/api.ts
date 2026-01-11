@@ -414,3 +414,43 @@ export const getQuote = async (params: QuoteRequestParams) => {
     throw Error;
   }
 };
+
+export const fetchActivePool = async (headers: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/pool/active-pool`, {
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data?.error || 'Failed to fetch active pool');
+    }
+
+    const data = await res.json();
+
+    return data?.poolAddress;
+  } catch (error) {
+    console.error('Error fetching active pool', error);
+    throw Error;
+  }
+};
+
+export const fetchIsConnected = async (headers: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/user-connected`, {
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data?.error || 'Failed to fetch active pool');
+    }
+
+    const data = await res.json();
+
+    return data?.isConnected;
+  } catch (error) {
+    console.error('Error fetching active pool', error);
+    throw Error;
+  }
+};

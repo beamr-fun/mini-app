@@ -6,7 +6,6 @@ import {
   Button,
   Card,
   Collapse,
-  Flex,
   Group,
   Loader,
   NumberInput,
@@ -20,6 +19,7 @@ import beamrTokenLogo from '../assets/beamrTokenLogo.png';
 import { useDisclosure } from '@mantine/hooks';
 import {
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   Heart,
   MessageSquareReply,
@@ -29,7 +29,13 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useUser } from '../hooks/useUser';
-import { fetchUserPrefs, updatePoolPrefs, Weightings } from '../utils/api';
+import {
+  fetchActivePool,
+  fetchIsConnected,
+  fetchUserPrefs,
+  updatePoolPrefs,
+  Weightings,
+} from '../utils/api';
 import { notifications } from '@mantine/notifications';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { flowratePerSecondToMonth, formatBalance } from '../utils/common';
@@ -55,10 +61,11 @@ export const Settings = () => {
 
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
+  const [showInactive, setShowInactive] = useState(false);
   const publicClient = usePublicClient();
 
   const {
-    data: userPrefs,
+    data: apiData,
     isLoading: isLoadingPrefs,
     error,
     refetch: refetchPrefs,
@@ -77,13 +84,25 @@ export const Settings = () => {
         return;
       }
 
-      return fetchUserPrefs(user!.fid, headers);
+      const [userPrefs, activePoolAddress, isConnected] = await Promise.all([
+        fetchUserPrefs(user!.fid, headers),
+        fetchActivePool(headers),
+        fetchIsConnected(headers),
+      ]);
+
+      return {
+        userPrefs,
+        activePoolAddress,
+        isConnected,
+      };
     },
     enabled: !!user?.fid,
   });
 
+  const { userPrefs, activePoolAddress, isConnected } = apiData || {};
+
   const pools = useMemo(() => {
-    if (!userPrefs?.pools || !userSubscription?.pools || !collectionFlowRate) {
+    if (!userPrefs?.pools || !userSubscription?.pools) {
       return [];
     }
 
@@ -240,56 +259,98 @@ export const Settings = () => {
   if (pools === null || error || collectionError) {
     return <ErrorDisplay title="No Pools Found" description="" />;
   }
+
+  const activePool = pools.find(
+    (pool) =>
+      pool.poolAddress?.toLowerCase() === activePoolAddress?.toLowerCase()
+  );
+
+  const inactivePools = pools.filter(
+    (pool) =>
+      pool.poolAddress?.toLowerCase() !== activePoolAddress?.toLowerCase()
+  );
+
+  console.log('inactivePools', inactivePools);
+
   return (
     <Stack>
       <Box>
-        <Text fw={600} mb="md">
-          Your Pools
+        <Text fw={600} fz="xl" mb="md">
+          Your Pool
         </Text>
-        {pools && pools.length > 0 ? (
-          <Stack gap="md">
-            {pools.map((pool) => {
-              if (!pool) return null;
-              return (
-                <PoolCard
-                  id={pool.id}
-                  flowRate={pool.reconstitutedFlowRate}
-                  lastUpdated={pool.updatedAt || ''}
-                  creatorAddress={pool.creatorAddress || ''}
-                  name={pool.metadata.name || 'Unnamed Pool'}
-                  weightings={
-                    pool.weightings || {
-                      recast: '0',
-                      like: '0',
-                      comment: '0',
-                      follow: '0',
-                    }
-                  }
-                  poolAddress={pool.id}
-                  key={pool.id}
-                  updatePrefs={handleUpdatePrefs}
-                  loadingUpdate={loadingPrefs}
-                  handleDistributeFlow={handleDistributeFlow}
+        <Box mb="md">
+          {activePool ? (
+            <PoolCard
+              id={activePool.id}
+              flowRate={activePool.reconstitutedFlowRate}
+              lastUpdated={activePool.updatedAt || ''}
+              creatorAddress={activePool.creatorAddress || ''}
+              name={activePool.metadata.name || 'Unnamed Pool'}
+              weightings={
+                activePool.weightings || {
+                  recast: '0',
+                  like: '0',
+                  comment: '0',
+                  follow: '0',
+                }
+              }
+              poolAddress={activePool.id}
+              updatePrefs={handleUpdatePrefs}
+              loadingUpdate={loadingPrefs}
+              handleDistributeFlow={handleDistributeFlow}
+            />
+          ) : (
+            <ErrorDisplay
+              title="No Active Pool"
+              description="You have not created a pool. If you have a pool and are seeing this error, contact beamr support."
+            />
+          )}
+        </Box>
+        {inactivePools.length > 0 && (
+          <>
+            {' '}
+            <Group gap={'xs'} mb="md">
+              <Text fz="lg">Inactive Pools</Text>
+              <ActionIcon onClick={() => setShowInactive(!showInactive)}>
+                <ChevronRight
+                  size={18}
+                  color={colors.gray[4]}
+                  style={{
+                    transform: showInactive ? 'rotate(90deg)' : 'rotate(0deg)',
+                    transition: 'transform 150ms ease',
+                  }}
                 />
-              );
-            })}
-          </Stack>
-        ) : (
-          <Card>
-            <Flex
-              justify={'center'}
-              align={'center'}
-              h={100}
-              direction={'column'}
-            >
-              <Text size="xl" mb="md">
-                No Streams
-              </Text>
-              <Text c={colors.gray[2]}>
-                No Beams at all for this contract.{' '}
-              </Text>
-            </Flex>
-          </Card>
+              </ActionIcon>
+            </Group>
+            <Collapse in={showInactive}>
+              <Stack gap="md">
+                {inactivePools.map((pool) => {
+                  return (
+                    <PoolCard
+                      id={pool.id}
+                      flowRate={pool.reconstitutedFlowRate}
+                      lastUpdated={pool.updatedAt || ''}
+                      creatorAddress={pool.creatorAddress || ''}
+                      name={pool.metadata.name || 'Unnamed Pool'}
+                      weightings={
+                        pool.weightings || {
+                          recast: '0',
+                          like: '0',
+                          comment: '0',
+                          follow: '0',
+                        }
+                      }
+                      poolAddress={pool.id}
+                      key={pool.id}
+                      updatePrefs={handleUpdatePrefs}
+                      loadingUpdate={loadingPrefs}
+                      handleDistributeFlow={handleDistributeFlow}
+                    />
+                  );
+                })}
+              </Stack>
+            </Collapse>
+          </>
         )}
       </Box>
     </Stack>

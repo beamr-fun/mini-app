@@ -1,3 +1,3 @@
 export const MIN_POOL_AMT = 6_000_000n;
 
-export const MULTI_POOL_WHITELIST = [11650];
+export const MULTI_POOL_WHITELIST = [11650, 1149437, 868887, 17124];
