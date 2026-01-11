@@ -1,5 +1,5 @@
 import { Follower, User } from '@neynar/nodejs-sdk/build/api';
-import { isAddress, parseEventLogs } from 'viem';
+import { Address, isAddress, parseEventLogs } from 'viem';
 import z from 'zod';
 import { BeamRABI } from '../abi/BeamR';
 import { isTestnet, keys } from './setup';
@@ -428,7 +428,11 @@ export const fetchActivePool = async (headers: APIHeaders) => {
 
     const data = await res.json();
 
-    return data?.poolAddress;
+    if (!data?.poolAddress || !isAddress(data.poolAddress)) {
+      return null;
+    }
+
+    return data?.poolAddress as Address;
   } catch (error) {
     console.error('Error fetching active pool', error);
     throw Error;
