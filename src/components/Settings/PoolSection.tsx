@@ -17,6 +17,7 @@ import {
   fetchIsConnected,
   fetchUserPrefs,
   updatePoolPrefs,
+  UserPrefs,
   Weightings,
 } from '../../utils/api';
 import { notifications } from '@mantine/notifications';
@@ -26,7 +27,19 @@ import { distributeFlow } from '../../utils/interactions';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
 import { PoolCard } from '../../components/Settings/PoolCard';
 
-export const PoolSection = () => {
+export const PoolSection = ({
+  userPrefs,
+  activePoolAddress,
+  refetchPrefs,
+  isLoadingPrefs,
+  prefsError,
+}: {
+  prefsError: Error | null;
+  isLoadingPrefs: boolean;
+  refetchPrefs: () => void;
+  userPrefs?: UserPrefs;
+  activePoolAddress?: string;
+}) => {
   const { colors } = useMantineTheme();
 
   const {
@@ -45,43 +58,6 @@ export const PoolSection = () => {
   const { data: walletClient } = useWalletClient();
   const [showInactive, setShowInactive] = useState(false);
   const publicClient = usePublicClient();
-
-  const {
-    data: apiData,
-    isLoading: isLoadingPrefs,
-    error,
-    refetch: refetchPrefs,
-  } = useQuery({
-    queryKey: ['user-prefs', user?.fid],
-    queryFn: async () => {
-      const headers = await getAuthHeaders();
-
-      if (!headers) {
-        notifications.show({
-          color: 'red',
-          title: 'Error',
-          message: 'Failed to get headers',
-        });
-
-        return;
-      }
-
-      const [userPrefs, activePoolAddress, isConnected] = await Promise.all([
-        fetchUserPrefs(user!.fid, headers),
-        fetchActivePool(headers),
-        fetchIsConnected(headers),
-      ]);
-
-      return {
-        userPrefs,
-        activePoolAddress,
-        isConnected,
-      };
-    },
-    enabled: !!user?.fid,
-  });
-
-  const { userPrefs, activePoolAddress, isConnected } = apiData || {};
 
   const pools = useMemo(() => {
     if (!userPrefs?.pools || !userSubscription?.pools) {
@@ -238,7 +214,7 @@ export const PoolSection = () => {
     );
   }
 
-  if (pools === null || error || collectionError) {
+  if (pools === null || prefsError || collectionError) {
     return <ErrorDisplay title="No Pools Found" description="" />;
   }
 
