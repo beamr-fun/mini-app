@@ -458,3 +458,24 @@ export const fetchIsConnected = async (headers: APIHeaders) => {
     throw Error;
   }
 };
+
+export const connectToPool = async (headers: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/connect-user`, {
+      method: 'POST',
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data?.error || 'Failed to connect to pool');
+    }
+
+    if (res.status === 200) {
+      return true;
+    }
+  } catch (error) {
+    console.error('Error connecting to pool', error);
+    throw Error;
+  }
+};

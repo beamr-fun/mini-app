@@ -75,7 +75,12 @@ export const Settings = () => {
   if (panel === 'Connection') {
     return (
       <SettingsLayout panel={panel} setPanel={setPanel}>
-        <WebhookConnection />
+        <WebhookConnection
+          activePoolAddress={activePoolAddress}
+          isConnected={isConnected}
+          isLoadingPrefs={isLoadingPrefs}
+          prefsError={error}
+        />
       </SettingsLayout>
     );
   }
