@@ -254,7 +254,7 @@ export const Budget = () => {
             <Text fz={'xl'} mb={2}>
               Budget
             </Text>
-            <Tooltip label="">
+            <Tooltip label="Stream includes 2.5% Beamr team fee + 2.5% Beamr burn fee">
               <Info size={16} color={colors.gray[4]} />
             </Tooltip>
           </Group>
