@@ -38,13 +38,7 @@ import { SwapModal } from '../components/User/SwapModal';
 
 export const Budget = () => {
   const navigate = useNavigate();
-  const {
-    budget,
-    form,
-    userClaimable,
-
-    refetchClaimable,
-  } = useOnboard();
+  const { budget, form, userClaimable, refetchClaimable } = useOnboard();
   const { userSubscription, userBalance, refetchUserTokenData } = useUser();
   const { address } = useAccount();
   const { colors } = useMantineTheme();
@@ -184,8 +178,8 @@ export const Budget = () => {
             Beamr Wallet Selection
           </Text>
           <Text mb="md" c={colors.gray[3]}>
-            Switch your connected wallet in the mini app menu now if you
-            purchased or are receiving $BEAMR in another wallet.
+            Switch your connected wallet in the menu if you purchased or are
+            receiving $BEAMR in another wallet (likely your primary wallet).
           </Text>
           <Group gap={6} mb={34}>
             <Box
@@ -254,7 +248,7 @@ export const Budget = () => {
             <Text fz={'xl'} mb={2}>
               Budget
             </Text>
-            <Tooltip label="">
+            <Tooltip label="Stream includes 2.5% Beamr team fee + 2.5% Beamr burn fee">
               <Info size={16} color={colors.gray[4]} />
             </Tooltip>
           </Group>
