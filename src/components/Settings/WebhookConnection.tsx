@@ -81,10 +81,10 @@ export const WebhookConnection = ({
   return (
     <Paper>
       <Text fz="lg" fw={500} mb="sm">
-        Microsub Activated
+        Microsub Service Activated
       </Text>
       <Text c={colors.gray[3]} mb="md">
-        This connection allows Neynar to respond to your interactions and
+        This subscriber allows Neynar to respond to your interactions and
         allocate pool shares accordingly.
       </Text>
 

@@ -12,7 +12,7 @@ import {
   fetchUserPrefs,
 } from '../utils/api';
 
-const OPTIONS = ['Pools', 'Connection'] as const;
+const OPTIONS = ['Pools', 'Subscriber'] as const;
 type Option = (typeof OPTIONS)[number];
 
 export const Settings = () => {
@@ -72,7 +72,7 @@ export const Settings = () => {
     );
   }
 
-  if (panel === 'Connection') {
+  if (panel === 'Subscriber') {
     return (
       <SettingsLayout panel={panel} setPanel={setPanel}>
         <WebhookConnection
