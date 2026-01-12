@@ -1,16 +1,14 @@
 import { http, createConfig } from 'wagmi';
-import { base, baseSepolia, optimismSepolia } from 'wagmi/chains';
+import { base, baseSepolia } from 'wagmi/chains';
 import { createPublicClient } from 'viem';
-import { isDev, network, keys } from './setup';
+import { network, keys } from './setup';
 import miniAppConnector from '@farcaster/miniapp-wagmi-connector';
 
-export const appChain = isDev ? baseSepolia : base;
-
 export const config = createConfig({
-  chains: [appChain],
+  chains: [network],
   transports: {
     [baseSepolia.id]: http(keys.rpc),
-    [base.id]: http(),
+    [base.id]: http(keys.rpc),
   },
   connectors: [miniAppConnector()],
 });

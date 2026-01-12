@@ -9,35 +9,24 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useOnboard } from '../hooks/useOnboard';
-import { Search } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useCTA } from '../hooks/useCTA';
 import { PageLayout } from '../layouts/PageLayout';
 import { useNavigate } from 'react-router-dom';
+import { formatBalance } from '../utils/common';
 
 export const Friends = () => {
-  const { budget, following, form, selectedFriends, handlePoolCreate } =
-    useOnboard();
+  const { besties, form, selectedFriends, handlePoolCreate } = useOnboard();
 
-  const [filter, setFilter] = useState('');
+  const budget = form?.values.budget || '0';
+
   const navigate = useNavigate();
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(event.target.value);
-  };
-
   const filteredFriends = useMemo(() => {
-    if (!following) return [];
+    if (!besties) return [];
 
-    const query = filter.toLowerCase();
-    return following
-      .filter(
-        (friend) =>
-          friend.user.username.toLowerCase().includes(query) ||
-          friend.user.display_name?.toLowerCase().includes(query)
-      )
-      .map((friend) => ({ ...friend, checked: false }));
-  }, [following, filter]);
+    return besties.map((friend) => ({ ...friend, checked: false }));
+  }, [besties]);
 
   const hasSelected3 =
     (selectedFriends && selectedFriends?.length >= 3) || false;
@@ -53,51 +42,40 @@ export const Friends = () => {
   });
 
   return (
-    <PageLayout title="Choose Friends">
-      <Group justify="center" mb={24}>
-        <Group align="end">
-          <Text fz={36}>{budget}/mo</Text>
-          <Text
-            fz={'sm'}
-            variant="label"
-            style={{
-              transform: 'translateY(-9px)',
-            }}
-          >
-            BEAMR
-          </Text>
-        </Group>
-      </Group>
-      <Text mb={'xl'}>Seed your Beamr with 3 of your favorite Casters</Text>
-      <Text fz="lg" mb="md" c={'var(--mantine-color-gray-2)'}>
-        Select 3+ Casters to start Beamin!
+    <PageLayout title="Seed Pool">
+      <Stack mb="md" align="center">
+        <Text fz={36}>{formatBalance(budget)}</Text>
+        <Text
+          fz={'sm'}
+          variant="label"
+          style={{
+            transform: 'translateY(-9px)',
+          }}
+        >
+          BEAMR/mo
+        </Text>
+      </Stack>
+
+      <Text fz="lg" mb="md">
+        Add the first recipients to your pool (3+)
       </Text>
       <Card>
-        <TextInput
-          leftSection={<Search size={18} />}
-          mb="sm"
-          variant="search"
-          placeholder="Search by username or display name"
-          onChange={handleSearch}
-          leftSectionWidth={36}
-        />
-
         <Stack gap={6}>
-          {filteredFriends.slice(0, 10).map((friend) => {
+          {filteredFriends.map((friend) => {
             return (
               <Box
-                key={friend.user.fid}
+                key={friend.fid}
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
                   if (
                     form?.values.selectedFriends?.includes(
-                      friend.user.fid.toString()
+                      friend.fid.toString()
                     )
                   ) {
                     form?.setFieldValue(
                       'selectedFriends',
                       (form.values.selectedFriends || []).filter(
-                        (fid: string) => fid !== friend.user.fid.toString()
+                        (fid: string) => fid !== friend.fid.toString()
                       )
                     );
                   } else {
@@ -106,7 +84,7 @@ export const Friends = () => {
 
                       [
                         ...(form.values.selectedFriends || []),
-                        friend.user.fid.toString(),
+                        friend.fid.toString(),
                       ]
                     );
                   }
@@ -115,15 +93,15 @@ export const Friends = () => {
                 <Group p={4}>
                   <Checkbox.Indicator
                     checked={form?.values.selectedFriends?.includes(
-                      friend.user.fid.toString()
+                      friend.fid.toString()
                     )}
                   />
                   <Group gap={8}>
-                    <Avatar src={friend.user.pfp_url} size={36} />
+                    <Avatar src={friend.pfp_url} size={36} />
                     <Box>
-                      <Text fz="sm">{friend.user.display_name}</Text>
+                      <Text fz="sm">{friend.display_name}</Text>
                       <Text fz="sm" c="dim">
-                        @{friend.user.username}
+                        @{friend.username}
                       </Text>
                     </Box>
                   </Group>

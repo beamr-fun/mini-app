@@ -1,8 +1,7 @@
 import { ActionIcon, Box, Button, Group } from '@mantine/core';
-import { Globe, Settings, User } from 'lucide-react';
+import { Globe, Info, Settings, User } from 'lucide-react';
 import classes from '../styles/layout.module.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BeamrNav } from '../components/svg/BeamrNav';
 import { useScrollDirection } from '../hooks/useScrollDirection';
 import { useCTA } from '../hooks/useCTA';
 
@@ -12,12 +11,12 @@ const DEFAULT_NAV_LINKS = [
     Icon: Globe,
   },
   {
-    link: '/strategy',
-    Icon: BeamrNav,
-  },
-  {
     link: '/home',
     Icon: User,
+  },
+  {
+    link: '/info',
+    Icon: Info,
   },
   {
     link: '/settings',

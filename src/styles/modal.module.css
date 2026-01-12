@@ -1,7 +1,30 @@
 .title {
 }
+.content {
+  background: radial-gradient(
+      circle at 50vw -20vh,
+      rgba(0, 80, 120, 1),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 135vw 75vh,
+      rgba(0, 80, 120, 0.35),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at -10vw 110vh,
+      rgba(0, 80, 120, 0.35),
+      transparent 30%
+    ),
+    #0a0a0a !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+.inner {
+}
 .header {
   height: 10px;
+  background: transparent;
 }
 .close {
 }

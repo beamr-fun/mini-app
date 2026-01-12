@@ -1,7 +1,7 @@
 subscription GlobalMostRecent {
   Beam(
     order_by: { lastUpdated: desc }
-    limit: 30
+    limit: 20
     where: { beamPool: { active: { _eq: true } } }
   ) {
     id
@@ -14,61 +14,31 @@ subscription GlobalMostRecent {
     from {
       fid
       id
-      profile {
-        id
-        pfp_url
-        display_name
-        username
-        id
-      }
     }
     to {
       fid
       id
-      profile {
-        id
-        pfp_url
-        display_name
-        username
-        id
-      }
     }
   }
 }
 
 subscription GlobalTop {
-  Beam(
-    order_by: { beamPool: { flowRate: desc_nulls_last } }
-    limit: 30
-    where: { beamPool: { active: { _eq: true } } }
+  BeamPool(
+    order_by: { flowRate: desc_nulls_last }
+    limit: 20
+    where: { active: { _eq: true } }
   ) {
     id
-    units
-    lastUpdated
-    beamPool {
-      flowRate
-      totalUnits
-    }
-    from {
-      fid
-      id
-      profile {
-        id
-        pfp_url
-        display_name
-        username
-        id
-      }
-    }
-    to {
-      fid
-      id
-      profile {
-        id
-        pfp_url
-        display_name
-        username
-        id
+    flowRate
+    totalUnits
+    creatorAccount {
+      user {
+        fid
+        # profile {
+        #   pfp_url
+        #   username
+        #   display_name
+        # }
       }
     }
   }

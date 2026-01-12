@@ -3,6 +3,16 @@ subscription LoggedInUser($id: String!) {
     id
     pools {
       id
+      flowRate
+      totalUnits
+      active
+      hasDistributed
+      metadata {
+        name
+      }
+      creatorAccount {
+        address
+      }
     }
     incoming(
       order_by: { lastUpdated: desc }
@@ -10,21 +20,17 @@ subscription LoggedInUser($id: String!) {
     ) {
       id
       units
+
+      isReceiverConnected
       lastUpdated
       beamPool {
         flowRate
         totalUnits
+        id
       }
       from {
         fid
         id
-        profile {
-          id
-          pfp_url
-          display_name
-          username
-          id
-        }
       }
     }
     outgoing(
@@ -41,13 +47,6 @@ subscription LoggedInUser($id: String!) {
       to {
         id
         fid
-        profile {
-          id
-          display_name
-          username
-          pfp_url
-          id
-        }
       }
     }
   }

@@ -1,75 +1,130 @@
 import sdk from '@farcaster/miniapp-sdk';
 import { JWTPayload } from '../types/sharedTypes';
 import { useQuery } from '@tanstack/react-query';
-import { createContext, ReactNode, useEffect, useMemo, useState } from 'react';
+import { createContext, ReactNode, useEffect, useState } from 'react';
 import { Address } from 'viem';
 
-import { useAccount } from 'wagmi';
-import { AuthResponse, FCUser } from '../types/sharedTypes';
+import { useAccount, useConnect } from 'wagmi';
+import { AuthResponse } from '../types/sharedTypes';
 import { APIHeaders } from '../utils/api';
 import {
   LoggedInUserDocument,
   LoggedInUserSubscription,
 } from '../generated/graphql';
-import { keys } from '../utils/setup';
+import { keys, network } from '../utils/setup';
 import { useToken } from '../hooks/useToken';
 import { ADDR } from '../const/addresses';
 import { useGqlSub } from '../hooks/useGqlSub';
+import { User } from '@neynar/nodejs-sdk/build/api';
+import { userProfileTransform, UserTransformed } from '../transforms/user';
+import { getFlowDistributionRate } from '../utils/reads';
 
-type UserSub = LoggedInUserSubscription['User_by_pk'];
-//
+let wakeupCalls = 0;
+
 type UserContextType = {
-  user?: FCUser;
+  user?: User;
   address?: Address;
   jwtPayload?: JWTPayload;
-  userSubscription?: UserSub;
+  userSubscription?: UserTransformed | null;
   token?: string;
   getAuthHeaders: () => Promise<APIHeaders | false>;
   startingRoute?: string;
   userBalance?: bigint;
   userBalanceFetchedAt?: Date;
+  refetchUserTokenData?: () => Promise<void>;
+  hasOpenPool: boolean;
+  incomingOnly: boolean;
+  setIncomingOnly: (only: boolean) => void;
+  isLoadingSub: boolean;
+  userSubError: Error | null;
+  isLoadingAPI: boolean;
+  apiError: Error | null;
+  refetchLogin: () => Promise<void>;
+  collectionFlowRate: bigint | null;
+  isLoadingCollections: boolean;
+  collectionError: Error | null;
+  refetchCollections?: () => Promise<void>;
 };
 
 export const UserContext = createContext<UserContextType>({
+  hasOpenPool: false,
+  incomingOnly: false,
+  setIncomingOnly: (only: boolean) => {},
+  refetchUserTokenData: async () => {},
+  isLoadingSub: false,
+  userSubError: null,
+  isLoadingAPI: false,
+  apiError: null,
   getAuthHeaders: async () => false,
+  refetchLogin: async () => {},
+  collectionFlowRate: null,
+  isLoadingCollections: false,
+  collectionError: null,
 });
 
-const login = async () => {
-  const [tokenRes, context] = await Promise.all([
-    sdk.quickAuth.getToken(),
-    sdk.context,
-  ]);
+const login = async (wakeup: () => void) => {
+  try {
+    console.log('LOADING PROCESS: START');
 
-  const token = tokenRes?.token || null;
+    const timerStart = Date.now();
 
-  if (!token) {
-    throw new Error('No auth token available');
+    const tokenRes = await sdk.quickAuth.getToken();
+
+    console.log('LOADING PROCESS: TOKEN');
+
+    const token = tokenRes?.token || null;
+
+    if (!token) {
+      throw new Error('No auth token available');
+    }
+
+    console.log('LOADING PROCESS: API REQUEST');
+
+    const res = await fetch(`${keys.apiUrl}/v1/user/auth`, {
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok || res.status !== 200) {
+      console.error('Failed to authenticate user', await res.text());
+      throw new Error('Failed to authenticate user');
+    }
+
+    const data = (await res.json()) as AuthResponse;
+
+    console.log('LOADING PROCESS: API RESPONSE');
+
+    const timerStop = Date.now();
+
+    const duration = timerStop - timerStart;
+
+    console.log(`LOADING PROCESS: DURATION ${duration}ms`);
+
+    if (duration > 3000) {
+      console.log('DURATION EXCEEDED THRESHOLD, WAKE UP CALLS: ', wakeupCalls);
+      if (wakeupCalls < 1) {
+        wakeupCalls++;
+        console.log('LOADING PROCESS: INVOKING WAKEUP');
+        wakeup();
+      }
+    }
+
+    if (!data.success) {
+      console.error('Authentication failed', data);
+      throw new Error('Authentication unsuccessful');
+    }
+
+    return {
+      user: data.user,
+      jwt: data.jwtPayload,
+      token: token || undefined,
+    };
+  } catch (error) {
+    console.error('Error during login:', error);
+    throw error;
   }
-
-  const res = await fetch(`${keys.apiUrl}/v1/user/auth`, {
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!res.ok || res.status !== 200) {
-    console.error('Failed to authenticate user', await res.text());
-    throw new Error('Failed to authenticate user');
-  }
-
-  const data = (await res.json()) as AuthResponse;
-
-  if (!data.success) {
-    console.error('Authentication failed', data);
-    throw new Error('Authentication unsuccessful');
-  }
-
-  return {
-    user: data.user,
-    jwt: data.jwtPayload,
-    context,
-    token: token || undefined,
-  };
 };
 
 export const UserProvider = ({
@@ -79,157 +134,153 @@ export const UserProvider = ({
 }) => {
   const IS_TESTING = false;
   const { address } = useAccount();
+  const { connect, connectors } = useConnect();
 
-  const [hasLoadedSubscription, setHasLoadedSubscription] = useState(false);
-  // const [userSubscription, setUserSubscription] = useState<
-  //   LoggedInUserSubscription['User_by_pk'] | undefined
-  // >(undefined);
   const [startingRoute, setStartingRoute] = useState<string | undefined>();
+  const [hasOpenPool, setHasOpenPool] = useState<boolean>(false);
+  const [incomingOnly, setIncomingOnly] = useState<boolean>(false);
 
-  const { data } = useToken({
+  const { data: beamrTokenData, refetch: refetchUserTokenData } = useToken({
     userAddress: address,
     tokenAddress: ADDR.SUPER_TOKEN,
     calls: { balanceOf: true },
+    enabled: !!address,
   });
 
-  const userBalance = data?.balanceOf as bigint | undefined;
-  const userBalanceFetchedAt = data?.fetchedAt;
+  const userBalance = beamrTokenData?.balanceOf as bigint | undefined;
+  const userBalanceFetchedAt = beamrTokenData?.fetchedAt;
 
   const {
     data: apiData,
-    isLoading,
-    error,
-    refetch,
+    isLoading: isLoadingAPI,
+    error: apiError,
+    refetch: refetchLogin,
   } = useQuery({
     queryKey: ['user', address],
-    queryFn: () => login(),
-    enabled: !!address && !IS_TESTING,
+    queryFn: () => login(() => connect({ connector: connectors[0] })),
+    enabled: !!address,
   });
 
-  const { data: userSubRes } = useGqlSub<LoggedInUserSubscription>(
-    LoggedInUserDocument,
-    {
-      variables: { id: apiData?.user?.fid?.toString() || '' },
-      enabled: !!apiData?.user?.fid && !IS_TESTING,
-    }
-  );
+  const getAuthHeaders = async (): Promise<APIHeaders | false> => {
+    const BUFFER = 10 * 1000; // 6 seconds buffer
+    // Helper to validate a given data object
+    const isValid = (data: typeof apiData) => {
+      return (
+        data &&
+        data.user &&
+        data.jwt &&
+        data.token &&
+        data.jwt.exp * 1000 > Date.now() + BUFFER // Check expiry
+      );
+    };
 
-  const userSubscription = useMemo(() => {
-    if (!userSubRes) {
-      return undefined;
-    }
-
-    if (!userSubRes.User_by_pk) {
-      return undefined;
-    }
-
-    const onlyMostRecentOutgoing = userSubRes.User_by_pk?.outgoing.filter(
-      (outgoing) =>
-        outgoing.beamPool?.id === '0x33A49b63639cE3aF37941bdb02B13023E0468BaF'
-    );
-
-    return { ...userSubRes.User_by_pk, outgoing: onlyMostRecentOutgoing };
-  }, [userSubRes]);
-
-  // useEffect(() => {
-  //   if (IS_TESTING) {
-  //     return;
-  //   }
-
-  //   let dispose: () => void = () => {};
-
-  //   const getUserSubscription = async () => {
-  //     const context = await sdk.context;
-
-  //     const fid = context?.user?.fid;
-
-  //     if (!fid) {
-  //       return;
-  //     }
-
-  //     dispose = wsClient.subscribe<LoggedInUserSubscription>(
-  //       {
-  //         query: print(LoggedInUserDocument),
-  //         variables: { id: fid.toString() },
-  //       },
-  //       {
-  //         next: (data) => {
-  //           const userSub = data?.data?.User_by_pk;
-  //           setHasLoadedSubscription(true);
-
-  //           if (userSub) {
-  //             setUserSubscription(userSub);
-  //           }
-  //         },
-  //         error: console.error,
-  //         complete: () => {},
-  //       }
-  //     );
-  //   };
-
-  //   getUserSubscription();
-
-  //   return () => dispose();
-  // }, []);
-
-  useEffect(() => {
-    // if (OVERRIDE) {
-    //   setStartingRoute(OVERRIDE);
-    //   sdk.actions.ready();
-    //   return;
-    // }
-
-    // if (IS_TESTING) {
-    //   setStartingRoute('/create-pool/1');
-    //   sdk.actions.ready();
-    //   return;
-    // }
-    if (startingRoute) return;
-    if (userSubscription && apiData) {
-      if (!userSubscription || !userSubscription?.pools?.length) {
-        console.log('No pools found for user in subscription data');
-        setStartingRoute('/create-pool/1');
-      } else {
-        setStartingRoute('/home');
-        console.log('User subscription pools:', userSubscription.pools);
-      }
-
-      sdk.actions.ready();
-    }
-  }, [hasLoadedSubscription, userSubscription, apiData]);
-
-  const getAuthHeaders = async () => {
-    if (!apiData || !apiData?.user || !apiData?.jwt || !apiData?.token) {
-      // try to re-login
-      // return login(address as Address);
-      await refetch();
-
-      if (!apiData || !apiData?.jwt || !apiData?.user || !apiData?.token) {
-        return false;
-      }
+    // CURRENT state (captured in closure)
+    if (isValid(apiData)) {
       return {
         'Content-Type': 'application/json',
-        authorization: `Bearer ${apiData.token}`,
+        authorization: `Bearer ${apiData!.token}`,
       };
     }
 
-    if (apiData.jwt.exp * 1000 < Date.now()) {
-      await refetch();
+    // If invalid or expired, force a refresh
+    // This gives us the FRESH data immediately.
+    const { data: newData, isError } = await refetchLogin();
 
-      if (!apiData || !apiData?.jwt || !apiData?.user || !apiData?.token) {
-        return false;
-      }
-      return {
-        'Content-Type': 'application/json',
-        authorization: `Bearer ${apiData.token}`,
-      };
+    // 4. Validate the NEW data
+    if (isError || !isValid(newData)) {
+      return false;
     }
 
     return {
       'Content-Type': 'application/json',
-      authorization: `Bearer ${apiData.token}`,
+      authorization: `Bearer ${newData!.token}`,
     };
   };
+
+  const {
+    data: userSubscription,
+    isLoading: isLoadingSub,
+    error: userSubError,
+  } = useGqlSub<LoggedInUserSubscription, UserTransformed | null>(
+    LoggedInUserDocument,
+    {
+      // variables: { id: '0-8453' },
+      variables: { id: `${apiData?.user?.fid.toString()}-${network.id}` || '' },
+      enabled: !!apiData?.user?.fid && !IS_TESTING,
+      transform: async (data) => {
+        if (!userSubscription) {
+          console.log('LOADING PROCESS: SUBSCRIBER RESPONSE');
+        }
+        return userProfileTransform(data, getAuthHeaders);
+      },
+    }
+  );
+
+  const {
+    data: collectionFlowRate,
+    isLoading: isLoadingCollections,
+    error: collectionError,
+    refetch: refetchCollections,
+  } = useQuery({
+    queryKey: ['collection-user-flows', apiData?.user?.fid],
+    queryFn: async () => {
+      if (!userSubscription?.pools?.length) {
+        return null;
+      }
+
+      const userFeeFlowRate = await getFlowDistributionRate({
+        userAddress: address as Address,
+        poolAddress: ADDR.COLLECTOR_POOL,
+        tokenAddress: ADDR.SUPER_TOKEN,
+      });
+
+      return userFeeFlowRate;
+    },
+    enabled:
+      !!userSubscription && userSubscription?.pools.length > 0 ? true : false,
+  });
+
+  useEffect(() => {
+    if (startingRoute) return;
+    if (userSubError || apiError) {
+      setHasOpenPool(false);
+      setStartingRoute('/global');
+      sdk.actions.ready();
+      return;
+    }
+    if (isLoadingSub || !apiData) return;
+
+    console.log('LOADING PROCESS: DATA TRANSFORMED');
+
+    const currentSub = userSubscription;
+
+    if (!currentSub) {
+      setHasOpenPool(false);
+      setStartingRoute('/global');
+    } else {
+      if (currentSub.pools.length > 0) {
+        const openPools = currentSub.pools.filter(
+          (pool) => pool.hasDistributed
+        );
+        setHasOpenPool(openPools.length > 0);
+        setStartingRoute('/home');
+      } else {
+        setHasOpenPool(false);
+        setIncomingOnly(true);
+        setStartingRoute('/global');
+      }
+    }
+
+    sdk.actions.ready();
+    console.log('LOADING COMPLETE: SDK READY');
+  }, [
+    isLoadingSub,
+    userSubscription,
+    apiData,
+    apiError,
+    userSubError,
+    address,
+  ]);
 
   return (
     <UserContext.Provider
@@ -243,6 +294,20 @@ export const UserProvider = ({
         userSubscription,
         userBalance,
         userBalanceFetchedAt,
+        collectionFlowRate: collectionFlowRate || null,
+        isLoadingCollections,
+        refetchCollections: refetchCollections as any as () => Promise<void>,
+        collectionError,
+        hasOpenPool,
+        refetchUserTokenData:
+          refetchUserTokenData as any as () => Promise<void>,
+        incomingOnly,
+        setIncomingOnly,
+        isLoadingSub,
+        apiError,
+        isLoadingAPI,
+        userSubError,
+        refetchLogin: refetchLogin as any as () => Promise<void>,
       }}
     >
       {children}

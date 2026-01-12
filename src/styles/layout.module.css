@@ -50,6 +50,10 @@
   border-radius: rem(24px) !important;
 }
 
+.paper [data-error='true'] {
+  background: rgba(244, 87, 68, 0.05) !important;
+}
+
 .navBox {
   background-color: var(--glass-pronounced);
   border-radius: rem(18px);

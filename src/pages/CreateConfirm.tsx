@@ -10,8 +10,9 @@ import {
 import { useOnboard } from '../hooks/useOnboard';
 import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../layouts/PageLayout';
-import { CheckCheck } from 'lucide-react';
+import { CheckCheck, ChevronDown, InfoIcon } from 'lucide-react';
 import { useCTA } from '../hooks/useCTA';
+import classes from '../styles/effects.module.css';
 
 export const CreateConfirm = () => {
   const { creationSteps } = useOnboard();
@@ -19,59 +20,95 @@ export const CreateConfirm = () => {
   const { handleDistributeFlow } = useOnboard();
   const navigate = useNavigate();
 
-  const allStepsComplete = Object.values(creationSteps).every((step) => step);
+  const allStepsComplete = Object.values(creationSteps).every(
+    (step) => step === 'success'
+  );
 
   const distributeReady =
-    creationSteps.createPool &&
-    !creationSteps.distributeFlow &&
-    !creationSteps.completePool &&
-    !creationSteps.indexTransaction;
+    creationSteps.createPool === 'success' &&
+    creationSteps.distributeFlow === 'requesting';
 
-  const awaitingCreate = Object.values(creationSteps).every((step) => !step);
+  const awaitingCreate = Object.values(creationSteps).every(
+    (step) => 'loading' === step
+  );
 
-  useCTA({
+  const { setCTA } = useCTA({
     label: awaitingCreate
       ? 'Creating Pool'
       : distributeReady
         ? 'Distribute Flow'
-        : 'Start Beaming',
+        : allStepsComplete
+          ? 'View Pool'
+          : 'Loading...',
     onClick: distributeReady
       ? () => {
           handleDistributeFlow?.();
         }
       : () => {
+          setCTA({});
           navigate('/home');
         },
     disabled: !distributeReady && !allStepsComplete,
+    extraDeps: [distributeReady, allStepsComplete, creationSteps],
   });
 
+  const createDescription =
+    creationSteps.createPool === 'loading'
+      ? 'Creating your pool'
+      : creationSteps.createPool === 'error'
+        ? 'Pool creation failed. Please try again.'
+        : 'Pool Created';
+
+  const distributeDescription =
+    creationSteps.distributeFlow === 'loading'
+      ? 'Awaiting pool creation'
+      : creationSteps.distributeFlow === 'requesting'
+        ? 'Please initiate wallet transaction'
+        : creationSteps.distributeFlow === 'error'
+          ? 'Flow distribution failed. Please try again.'
+          : 'Flow Distributed';
+
+  const completeDescription =
+    creationSteps.completePool === 'loading'
+      ? 'Awaiting flow distribution'
+      : creationSteps.completePool === 'error'
+        ? 'Pool confirmation failed. Please try again.'
+        : 'Pool Confirmed';
+
+  const indexDescription =
+    creationSteps.indexTransaction === 'loading'
+      ? 'Awaiting pool confirmation'
+      : creationSteps.indexTransaction === 'error'
+        ? 'Indexing timed out. Pool still created successfully.'
+        : 'Indexed Successfully';
+
   return (
-    <PageLayout title="Complete">
-      <Text mb="xs">Congrats! Your Beamr Tipping Pool is being created.</Text>
+    <PageLayout title="Launching Pool">
+      <Text mb="xs">You're almost there.</Text>
       <Text mb="lg" c={colors.gray[3]} fz="sm">
-        The following steps should only take 5-30s
+        The following steps should only take 5-30s.
       </Text>
       <Card>
         <Stack mb="xl" gap="xl">
           <LoaderStep
             title={'Creating Pool'}
-            description={'Deploying your pool.'}
-            complete={creationSteps.createPool}
+            description={createDescription}
+            status={creationSteps.createPool}
           />
           <LoaderStep
             title={'Distributing Budget'}
-            description={'Requesting funds from your wallet'}
-            complete={creationSteps.distributeFlow}
+            description={distributeDescription}
+            status={creationSteps.distributeFlow}
           />
           <LoaderStep
             title={'Confirming Pool'}
-            description={'Registering your pool with Beamr.'}
-            complete={creationSteps.completePool}
+            description={completeDescription}
+            status={creationSteps.completePool}
           />
           <LoaderStep
             title={'Indexing'}
-            description={'Discovering your pool onchain.'}
-            complete={creationSteps.indexTransaction}
+            description={indexDescription}
+            status={creationSteps.indexTransaction}
           />
         </Stack>
       </Card>
@@ -80,34 +117,54 @@ export const CreateConfirm = () => {
 };
 
 const LoaderStep = ({
-  complete,
+  status,
   title,
   description,
 }: {
-  complete: boolean;
+  status: 'loading' | 'error' | 'success' | 'requesting' | 'timeout';
   title: string;
   description: string;
 }) => {
   const { colors } = useMantineTheme();
+
+  const Icon =
+    status === 'success' ? (
+      <CheckCheck
+        size={28}
+        strokeWidth={2}
+        style={{
+          stroke: 'url(#beamr-gradient)',
+          fill: 'none',
+        }}
+      />
+    ) : status === 'requesting' ? (
+      <ChevronDown
+        size={28}
+        strokeWidth={2}
+        className={classes.glow}
+        style={{
+          stroke: colors.yellow[5],
+          fill: 'none',
+        }}
+      />
+    ) : status === 'error' ? (
+      <InfoIcon size={28} color={colors.red[5]} />
+    ) : status === 'timeout' ? (
+      <InfoIcon size={28} color={colors.yellow[5]} />
+    ) : (
+      <Loader size={28} color={'var(--glass-thick)'} />
+    );
+
   return (
     <Group align="flex-start" gap="md" wrap="nowrap">
-      {complete ? (
-        <CheckCheck
-          size={28}
-          strokeWidth={2}
-          style={{
-            stroke: 'url(#beamr-gradient)',
-            fill: 'none',
-          }}
-        />
-      ) : (
-        <Loader size={28} color={'var(--glass-thick)'} />
-      )}
+      {Icon}
       <Box>
         <Text fz={'lg'} fw={500} mb={2}>
           {title}
         </Text>
-        <Text c={colors.gray[3]}>{description}</Text>
+        <Text c={colors.gray[3]} mb="md">
+          {description}
+        </Text>
       </Box>
     </Group>
   );

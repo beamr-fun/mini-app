@@ -1,13 +1,16 @@
-import { Address, erc20Abi } from 'viem';
-import { GDAForwarderAbi } from '../abi/GDAFowarder';
+import { Address, encodeFunctionData } from 'viem';
+import { OPERATION_TYPE, prepareOperation } from '@sfpro/sdk/constant';
+import { gdaAbi } from '@sfpro/sdk/abi/core';
 import { ADDR } from '../const/addresses';
+import { SuperfluidAbi } from '../abi/Superfluid';
 
 export const distributeFlow = async ({
-  args: { poolAddress, user, flowRate },
+  args: { poolAddress, user, flowRate, otherPoolFlowRates },
   walletClient,
   publicClient,
   onSuccess,
   onError,
+  enableZeroFlowRate = false,
 }: {
   onSuccess: (txHash: string) => void;
   onError: (errMsg: string) => void;
@@ -15,9 +18,11 @@ export const distributeFlow = async ({
     poolAddress: Address;
     user: Address;
     flowRate: bigint;
+    otherPoolFlowRates: bigint[];
   };
   walletClient: any;
   publicClient: any;
+  enableZeroFlowRate?: boolean;
 }) => {
   try {
     if (!walletClient || typeof walletClient.writeContract !== 'function') {
@@ -30,21 +35,62 @@ export const distributeFlow = async ({
       throw new Error('Public client is not available');
     }
 
-    // const simulation = await publicClient.simulateContract({
-    //   abi: GDAForwarderAbi,
-    //   address: ADDR.GDA_FORWARDER,
-    //   functionName: 'distributeFlow',
-    //   from: user,
-    //   args: [ADDR.SUPER_TOKEN, user, poolAddress, flowRate, '0x'],
-    // });
+    if (flowRate === 0n && !enableZeroFlowRate) {
+      throw new Error(
+        'Flow rate cannot be zero, unless enableZeroFlowRate is true'
+      );
+    }
 
-    // console.log('simulation', simulation);
+    const poolTargetRate = (flowRate * 95n) / 100n;
+
+    // 2. Calculate the Total Gross across ALL pools
+    // Assuming otherPoolFlowRates are also the 'Gross' (100%) values
+    const totalGrossRate = [flowRate, ...otherPoolFlowRates].reduce(
+      (acc, rate) => acc + rate,
+      0n
+    );
+
+    // 3. Calculate the Global Fee (5% of the Total Gross)
+    // Because distributeFlow is an 'overwrite' operation, this syncs
+    // the collector pool to 5% of the user's entire footprint.
+    const globalFeeFlowRate = (totalGrossRate * 5n) / 100n;
+
+    const operations = [
+      // Update the specific target pool to 95%
+      prepareOperation({
+        operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
+        target: ADDR.GDA,
+        data: encodeFunctionData({
+          abi: gdaAbi,
+          functionName: 'distributeFlow',
+          args: [ADDR.SUPER_TOKEN, user, poolAddress, poolTargetRate, '0x'],
+        }),
+        userData: '0x',
+      }),
+      // Update the collector pool to 5% of the total aggregate
+      prepareOperation({
+        operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
+        target: ADDR.GDA,
+        data: encodeFunctionData({
+          abi: gdaAbi,
+          functionName: 'distributeFlow',
+          args: [
+            ADDR.SUPER_TOKEN,
+            user,
+            ADDR.COLLECTOR_POOL,
+            globalFeeFlowRate,
+            '0x',
+          ],
+        }),
+        userData: '0x',
+      }),
+    ];
 
     const hash = await walletClient.writeContract({
-      abi: GDAForwarderAbi,
-      address: ADDR.GDA_FORWARDER,
-      functionName: 'distributeFlow',
-      args: [ADDR.SUPER_TOKEN, user, poolAddress, flowRate, '0x'],
+      abi: SuperfluidAbi,
+      functionName: 'batchCall',
+      address: ADDR.SUPER_FLUID,
+      args: [operations],
     });
 
     if (!hash) {
@@ -64,27 +110,6 @@ export const distributeFlow = async ({
   } catch (error) {
     console.error('Error in distributeFlow:', error);
     onError((error as Error).message);
-  }
-};
-
-export const transfer = async ({
-  amount,
-  to,
-  walletClient,
-}: {
-  amount: bigint;
-  to: Address;
-  walletClient: any;
-}) => {
-  const hash = await walletClient.writeContract({
-    abi: erc20Abi,
-    address: ADDR.BEAMR,
-    functionName: 'transfer',
-    args: [amount, to],
-  });
-
-  if (!hash) {
-    throw new Error('Failed to get transaction hash');
   }
 };
 
@@ -164,3 +189,53 @@ export const transfer = async ({
 
 //   console.log('Transaction receipt:', receipt);
 // };
+
+export const multiConnect = async ({
+  poolIds,
+  walletClient,
+  userAddress,
+  onLoading,
+  onError,
+  onSuccess,
+}: {
+  poolIds: Address[];
+  walletClient: any;
+  userAddress: Address;
+  onLoading: () => void;
+  onSuccess: (txHash: string) => void;
+  onError: (errMsg: string) => void;
+}) => {
+  onLoading();
+
+  try {
+    const operations = poolIds.map((poolAddress) =>
+      prepareOperation({
+        operationType: OPERATION_TYPE.SUPERFLUID_CALL_AGREEMENT,
+        target: ADDR.GDA,
+        data: encodeFunctionData({
+          abi: gdaAbi,
+          functionName: 'connectPool',
+          args: [poolAddress, '0x'],
+        }),
+        userData: '0x',
+      })
+    );
+
+    const hash = await walletClient.writeContract({
+      abi: SuperfluidAbi,
+      functionName: 'batchCall',
+      address: ADDR.SUPER_FLUID,
+      args: [operations],
+    });
+
+    if (!hash) {
+      onError('Failed to get transaction hash');
+      throw new Error('Failed to get transaction hash');
+    }
+
+    onSuccess(hash);
+  } catch (error) {
+    console.error('Error in multiConnect:', error);
+    onError((error as Error).message);
+  }
+};

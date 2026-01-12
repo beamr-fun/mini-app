@@ -1,4 +1,4 @@
-import { formatUnits } from 'viem';
+import { formatUnits, parseUnits } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
 export const truncateAddress = (address: string, length = 6): string => {
@@ -46,14 +46,67 @@ export function formatUnitBalance(
   return formatBalance(formatUnits(units, decimals), displayDecimals);
 }
 
-export const flowratePerSecondToMonth = (flowrate: bigint): string => {
+export const flowratePerSecondToMonth = (
+  flowrate: bigint,
+  format?: 'rounded' | 'monthly' | 'raw' | 'parsed' | 'no-label',
+  decimals = 18
+): string => {
   const secondsInMonth = BigInt(60 * 60 * 24 * 30);
   const units = flowrate * secondsInMonth;
 
-  return `${formatUnitBalance(units, 18, 2)}/mo`;
+  if (format === 'raw') {
+    return units.toString();
+  }
+
+  if (format === 'parsed') {
+    return formatUnits(units, decimals);
+  }
+
+  if (format === 'rounded') {
+    const formatted = formatUnits(units, decimals);
+
+    // round to nearest integer
+
+    return Math.round(parseFloat(formatted)).toString();
+  }
+
+  if (format === 'no-label') {
+    return formatUnitBalance(units, decimals, 2);
+  }
+
+  if (!format || format === 'monthly') {
+    return `${formatUnitBalance(units, decimals, 2)}/mo`;
+  }
+
+  return `${formatUnitBalance(units, decimals, 2)}/mo`;
 };
 
 export const flowratePerMonthToSecond = (monthlyAmount: bigint): bigint => {
   const secondsInMonth = BigInt(60 * 60 * 24 * 30);
   return monthlyAmount / secondsInMonth;
 };
+
+export const charLimit = (str: string, limit: number): string => {
+  if (str.length <= limit) return str;
+  return str.slice(0, limit) + '...';
+};
+
+export const nowInSeconds = (): number => {
+  return Math.floor(Date.now() / 1000);
+};
+
+export const calculateFeeFromNet = (
+  netAmount: bigint,
+  feePercentage: number
+): bigint => {
+  const precision = 100;
+  const totalParts = 100 * precision;
+  const feeParts = Math.round(feePercentage * precision);
+  const netParts = BigInt(totalParts - feeParts);
+
+  const principle = (netAmount * BigInt(totalParts)) / netParts;
+
+  return principle - netAmount;
+};
+
+console.log('calculateFeeFromNet', calculateFeeFromNet(1000n, 2.5));

@@ -1,11 +1,20 @@
 import { Box, Flex, Group, ScrollArea } from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
 import { Header } from '../components/Header';
 import classes from '../styles/layout.module.css';
 import { Nav } from './Nav';
 import { CTAProvider } from '../context/CTAContext';
+import { useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+
+  const viewportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    viewportRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+  }, [location?.pathname]);
+
   return (
     <CTAProvider>
       <Flex
@@ -21,12 +30,14 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
             </linearGradient>
           </defs>
         </svg>
+
         <ScrollArea
           id="main-scroll"
+          viewportRef={viewportRef}
+          // key={pathname} // Reset scroll position on route change
           classNames={{ root: classes.scrollArea, thumb: classes.scrollThumb }}
         >
           <Box className={classes.contentBox}>
-            <Notifications />
             <Header />
             {children}
           </Box>

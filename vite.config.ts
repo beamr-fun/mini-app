@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: [
-      'divorce-daughter-considerable-wine.trycloudflare.com',
+      'change-protocol-insertion-cool.trycloudflare.com',
       'https://mini-app-production-96b0.up.railway.app',
     ],
   },

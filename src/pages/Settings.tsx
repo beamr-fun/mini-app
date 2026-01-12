@@ -1,103 +1,116 @@
-import React from 'react';
+import { ReactNode, use, useState } from 'react';
+import { PoolSection } from '../components/Settings/PoolSection';
+import { Select, Text } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
+import { WebhookConnection } from '../components/Settings/WebhookConnection';
+import { useQuery } from '@tanstack/react-query';
+import { useUser } from '../hooks/useUser';
+import { notifications } from '@mantine/notifications';
 import {
-  ActionIcon,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  Collapse,
-  Group,
-  Stack,
-  Text,
-  TextInput,
-  useMantineTheme,
-} from '@mantine/core';
-import { Tag } from '../components/Tag';
-import beamrTokenLogo from '../assets/beamrTokenLogo.png';
-import { useDisclosure } from '@mantine/hooks';
-import {
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  Heart,
-  MessageSquareReply,
-  RefreshCcw,
-  Speech,
-  Users,
-} from 'lucide-react';
+  fetchActivePool,
+  fetchIsConnected,
+  fetchUserPrefs,
+} from '../utils/api';
+
+const OPTIONS = ['Pools', 'Subscriber'] as const;
+type Option = (typeof OPTIONS)[number];
 
 export const Settings = () => {
-  const { colors } = useMantineTheme();
-  const [opened, { toggle }] = useDisclosure(false);
+  const [panel, setPanel] = useState<Option>('Pools');
+
+  const { user, getAuthHeaders } = useUser();
+
+  const {
+    data: apiData,
+    isLoading: isLoadingPrefs,
+    error,
+    refetch: refetchPrefs,
+  } = useQuery({
+    queryKey: ['user-prefs', user?.fid],
+    queryFn: async () => {
+      const headers = await getAuthHeaders();
+
+      if (!headers) {
+        notifications.show({
+          color: 'red',
+          title: 'Error',
+          message: 'Failed to get headers',
+        });
+
+        return;
+      }
+
+      const [userPrefs, activePoolAddress, isConnected] = await Promise.all([
+        fetchUserPrefs(user!.fid, headers),
+        fetchActivePool(headers),
+        fetchIsConnected(headers),
+      ]);
+
+      return {
+        userPrefs,
+        activePoolAddress: activePoolAddress || undefined,
+
+        isConnected,
+      };
+    },
+    enabled: !!user?.fid,
+  });
+
+  const { userPrefs, activePoolAddress, isConnected } = apiData || {};
+
+  if (panel === 'Pools') {
+    return (
+      <SettingsLayout panel={panel} setPanel={setPanel}>
+        <PoolSection
+          userPrefs={userPrefs}
+          activePoolAddress={activePoolAddress}
+          isLoadingPrefs={isLoadingPrefs}
+          prefsError={error}
+          refetchPrefs={refetchPrefs as () => void}
+        />
+      </SettingsLayout>
+    );
+  }
+
+  if (panel === 'Subscriber') {
+    return (
+      <SettingsLayout panel={panel} setPanel={setPanel}>
+        <WebhookConnection
+          activePoolAddress={activePoolAddress}
+          isConnected={isConnected}
+          isLoadingPrefs={isLoadingPrefs}
+          prefsError={error}
+        />
+      </SettingsLayout>
+    );
+  }
+  return null;
+};
+
+const SettingsLayout = ({
+  children,
+  panel,
+  setPanel,
+}: {
+  children: ReactNode;
+  setPanel: (option: Option) => void;
+  panel: Option;
+}) => {
   return (
-    <PageLayout title="Settings">
-      <Stack>
-        <Box>
-          <Text fw={600} mb="md">
-            Your Pools
-          </Text>
-          <Card>
-            <Group justify="space-between">
-              <Text>Jord's Tipping Pool</Text>
-              <Tag bg={colors.blue[9]} c={colors.blue[3]} w="fit-content">
-                Tipping Pool
-              </Tag>
-            </Group>
-            <Text c={colors.gray[3]} fz="sm" mb="md">
-              Created Oct 28th
-            </Text>
-            <Group justify="space-between" mb="lg">
-              <Group gap="xs">
-                <Avatar src={beamrTokenLogo} size={24} />
-                <Text fw={500}>300/mo</Text>
-              </Group>
-              <Group gap="xs">
-                <Button size="xs">Adjust Flow</Button>
-                <Button size="xs" variant="secondary">
-                  Stop
-                </Button>
-              </Group>
-            </Group>
-
-            <Collapse in={opened}>
-              <Text mb={10} c={colors.gray[3]}>
-                Shares Per Action
-              </Text>
-              <Stack gap="sm" mb="md">
-                <Group gap="sm">
-                  <Heart size={20} color={colors.red[7]} />
-                  <Text>5</Text>
-                </Group>
-                <Group gap="sm">
-                  <RefreshCcw size={20} color={colors.green[7]} />
-                  <Text>10</Text>
-                </Group>
-                <Group gap="sm">
-                  <Users size={20} color={colors.purple[7]} />
-                  <Text>15</Text>
-                </Group>
-                <Group gap="sm">
-                  <MessageSquareReply size={20} color={colors.blue[5]} />
-                  <Text>25</Text>
-                </Group>
-              </Stack>
-              <Button size="xs" variant="secondary" mb={'sm'}>
-                Edit Preferences
-              </Button>
-            </Collapse>
-            <Group gap={4}>
-              <Text c={colors.gray[3]} fz="sm">
-                Prefs
-              </Text>
-
-              <ActionIcon size="xs" onClick={toggle}>
-                {opened ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </ActionIcon>
-            </Group>
-          </Card>
-        </Box>
-      </Stack>
+    <PageLayout>
+      <Text fz="xl" fw="700" mb="lg">
+        Settings
+      </Text>
+      <Select
+        mb="xl"
+        value={panel}
+        data={OPTIONS}
+        onChange={(value) => {
+          if (!value) return;
+          setPanel(value as Option);
+        }}
+      />
+      {children}
     </PageLayout>
   );
 };

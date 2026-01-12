@@ -1,40 +1,170 @@
-import { Follower } from '@neynar/nodejs-sdk/build/api';
-import { isAddress, parseEventLogs } from 'viem';
+import { Follower, User } from '@neynar/nodejs-sdk/build/api';
+import { Address, isAddress, parseEventLogs } from 'viem';
 import z from 'zod';
 import { BeamRABI } from '../abi/BeamR';
-import { distributeFlow } from './interactions';
-import { keys } from './setup';
+import { isTestnet, keys } from './setup';
+import { cacheProfiles, getCachedProfiles } from './cache';
+import {
+  QuoteRequestParams,
+  quoteRequestSchema,
+  quoteResponseSchema,
+} from '../validation/swap';
 
 export type APIHeaders = {
   'Content-Type': string;
   authorization: string;
 };
-export const fetchUserFollowing = async (fid: number) => {
-  const cached = sessionStorage.getItem(`userFollowing_${fid}`);
 
-  if (cached) {
-    console.log('cached', JSON.parse(cached));
-    return JSON.parse(cached) as Follower[];
+export type Weightings = {
+  recast: string;
+  like: string;
+  comment: string;
+  follow: string;
+};
+
+type PoolPrefs = {
+  poolAddress: string;
+  creatorAddress: string;
+  createdAt: string;
+  updatedAt: string;
+  weightings: Weightings;
+};
+
+export type UserPrefs = {
+  fid: number;
+  preferredAddress: string;
+  pools: PoolPrefs[];
+};
+
+export const fetchUserPrefs = async (fid: number, apiHeaders: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/prefs/${fid}`, {
+      headers: apiHeaders,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(`${res.status}: Failed to fetch user preferences`);
+    }
+
+    if (!data.prefs) {
+      throw new Error('No preferences found for user');
+    }
+
+    return data.prefs as UserPrefs;
+  } catch (error) {
+    throw Error;
   }
+};
 
-  const res = await fetch(`${keys.apiUrl}/v1/user/following/${fid}/all`);
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data?.error || 'Failed to fetch user following');
+export const fetchBesties = async (fid: number, apiHeaders: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/besties/${fid}`, {
+      headers: apiHeaders,
+    });
+
+    const data = await res.json();
+
+    console.log('data', data);
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to fetch besties');
+    }
+
+    return data.besties as User[];
+  } catch (error) {
+    throw Error;
   }
+};
 
-  const following = data.following.flat() as Follower[];
+export const fetchProfiles = async (fids: string[], apiHeaders: APIHeaders) => {
+  try {
+    if (!fids || !Array.isArray(fids)) throw new Error('Invalid FIDs');
+    const uniqueFids = [...new Set(fids)];
+    if (uniqueFids.length === 0) return [];
 
-  const withPrimaryAddresses = following.filter(
-    (f) => f.user.verified_addresses.primary.eth_address
-  );
+    const { found, missing } = await getCachedProfiles(uniqueFids);
 
-  sessionStorage.setItem(
-    `userFollowing_${fid}`,
-    JSON.stringify(withPrimaryAddresses)
-  );
+    if (missing.length === 0) {
+      return found;
+    }
 
-  return withPrimaryAddresses;
+    const res = await fetch(
+      `${keys.apiUrl}/v1/user/profiles?fids=${missing.join(',')}`,
+      {
+        method: 'GET',
+        headers: apiHeaders,
+      }
+    );
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to fetch profiles');
+    }
+
+    const fetchedUsers = data.users as User[];
+
+    await cacheProfiles(fetchedUsers);
+
+    return [...found, ...fetchedUsers];
+  } catch (error) {
+    throw Error;
+  }
+};
+
+export const fetchUserFollowing = async (
+  fid: number,
+  apiHeaders: APIHeaders
+) => {
+  try {
+    const cached = sessionStorage.getItem(`userFollowing_${fid}`);
+
+    if (cached) {
+      return JSON.parse(cached) as Follower[];
+    }
+
+    const res = await fetch(`${keys.apiUrl}/v1/user/following/${fid}/all`, {
+      headers: apiHeaders,
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to fetch user following');
+    }
+
+    const following = data.following.flat() as Follower[];
+
+    const withPrimaryAddresses = following.filter(
+      (f) => f.user.verified_addresses.primary.eth_address
+    );
+
+    sessionStorage.setItem(
+      `userFollowing_${fid}`,
+      JSON.stringify(withPrimaryAddresses)
+    );
+
+    return withPrimaryAddresses;
+  } catch (error) {
+    throw Error;
+  }
+};
+
+export const fetchIsUserSubbed = async (apiHeaders: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/hook`, {
+      headers: apiHeaders,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to check subscription status');
+    }
+
+    return data;
+  } catch (error) {
+    throw Error;
+  }
 };
 
 const createPoolSchema = z.object({
@@ -93,7 +223,7 @@ export const createPool = async ({
 
     if (!json.hash) {
       console.error('No transaction hash in response', json);
-      return;
+      throw new Error('No transaction hash returned from pool creation');
     }
 
     if (typeof publicClient?.waitForTransactionReceipt !== 'function') {
@@ -105,11 +235,8 @@ export const createPool = async ({
     });
 
     if (receipt.status !== 'success') {
-      console.error('Transaction failed', receipt);
-      return;
+      throw new Error('Transaction failed');
     }
-
-    // Why does the new ABI cause type issues here?
 
     const decoded = parseEventLogs({
       abi: BeamRABI,
@@ -124,18 +251,14 @@ export const createPool = async ({
       throw new Error('PoolCreated event not found in transaction logs');
     }
 
-    // Wait five seconds
-
-    console.log('Waiting 2 seconds before proceeding to completePool...');
-
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    onSuccess(poolAddress);
+    onSuccess(poolAddress as string);
 
-    return poolAddress;
+    return poolAddress as string;
   } catch (error) {
     onError((error as Error).message);
-    console.error('Error creating pool', error);
+    throw Error;
   }
 };
 
@@ -184,13 +307,175 @@ export const completePool = async ({
 
     const data = await finalRes.json();
 
-    console.log('DATA FROM COMPLETE', data);
-
     onSuccess();
 
     return true;
   } catch (error) {
-    console.error('Error completing pool', error);
     onError((error as Error).message);
+    throw Error;
+  }
+};
+
+export const updatePoolPrefs = async ({
+  poolAddress,
+  weightings,
+  headers,
+}: {
+  poolAddress: string;
+  weightings: Weightings;
+  headers: APIHeaders;
+}) => {
+  try {
+    if (!isAddress(poolAddress)) {
+      throw new Error('Invalid pool address');
+    }
+
+    const res = await fetch(`${keys.apiUrl}/v1/pool/pool-prefs`, {
+      method: 'PUT',
+      body: JSON.stringify({ poolAddress, weightings }),
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data?.error || 'Failed to update pool preferences');
+    }
+
+    const data = await res.json();
+
+    if (!data?.success && typeof data.success !== 'boolean') {
+      throw new Error('Invalid response from server');
+    }
+
+    return data.success as boolean;
+  } catch (error) {
+    throw Error;
+  }
+};
+
+export const deleteUserSub = async (apiHeaders: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/hook`, {
+      method: 'DELETE',
+      headers: apiHeaders,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to delete user subscription');
+    }
+
+    return data;
+  } catch (error) {
+    throw Error;
+  }
+};
+
+export const getQuote = async (params: QuoteRequestParams) => {
+  if (isTestnet) {
+    console.warn(
+      'getQuote is not available on testnet, returning values for base mainnet'
+    );
+  }
+
+  const isValidParams = quoteRequestSchema.safeParse(params);
+
+  if (!isValidParams.success) {
+    throw new Error(`Invalid quote parameters: ${isValidParams.error.message}`);
+  }
+
+  const queryParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      queryParams.append(key, value.toString());
+    }
+  });
+
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/swap/quote?${queryParams}`);
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to fetch quote');
+    }
+
+    const validQuote = quoteResponseSchema.safeParse(data);
+
+    if (!validQuote.success) {
+      throw new Error(`Invalid quote response: ${validQuote.error.message}`);
+    }
+
+    return validQuote.data;
+  } catch (error) {
+    console.error('Error fetching quote:', error);
+    throw Error;
+  }
+};
+
+export const fetchActivePool = async (headers: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/pool/active-pool`, {
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data?.error || 'Failed to fetch active pool');
+    }
+
+    const data = await res.json();
+
+    if (!data?.poolAddress || !isAddress(data.poolAddress)) {
+      return null;
+    }
+
+    return data?.poolAddress as Address;
+  } catch (error) {
+    console.error('Error fetching active pool', error);
+    throw Error;
+  }
+};
+
+export const fetchIsConnected = async (headers: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/user-connected`, {
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data?.error || 'Failed to fetch active pool');
+    }
+
+    const data = await res.json();
+
+    return data?.isConnected;
+  } catch (error) {
+    console.error('Error fetching active pool', error);
+    throw Error;
+  }
+};
+
+export const connectToPool = async (headers: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/connect-user`, {
+      method: 'POST',
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data?.error || 'Failed to connect to pool');
+    }
+
+    if (res.status === 200) {
+      return true;
+    }
+  } catch (error) {
+    console.error('Error connecting to pool', error);
+    throw Error;
   }
 };
