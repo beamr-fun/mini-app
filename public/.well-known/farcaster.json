@@ -32,7 +32,7 @@
     ],
     "heroImageUrl": "https://app.beamr.fun/images/feed.png",
     "ogImageUrl": "https://app.beamr.fun/images/feed.png",
-    "noindex": true
+    "noindex": false
   },
   "baseBuilder": {
     "ownerAddress": "0x375567484B27648C7CE609425043119b3c0A7285"
