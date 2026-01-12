@@ -123,7 +123,7 @@ export const WebhookConnection = ({
           </Group>
         )}
       </Stack>
-      {isConnected && (
+      {!isConnected && (
         <Button loading={isLoading} onClick={handleConnectToWebhook}>
           Connect to Webhook
         </Button>
