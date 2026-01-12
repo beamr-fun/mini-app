@@ -5,15 +5,15 @@
     "signature": "KsTjzqlxuNDYptDN87LSe86RhjgELFZTn8HiI5kF/64IroKG/Ac3zjr1z8BXGgjcToPJO1po6K3I9Bl+iWjbVhs="
   },
   "frame": {
-    "version": "1",
-    "name": "Beamr (Cabal Access)",
-    "iconUrl": "https://staging.beamr.fun/images/icon.png",
-    "homeUrl": "https://staging.beamr.fun",
-    "imageUrl": "https://staging.beamr.fun/images/feed.png",
+    "version": "2",
+    "name": "Beamr",
+    "iconUrl": "https://app.beamr.fun/images/icon.png",
+    "homeUrl": "https://app.beamr.fun",
+    "imageUrl": "https://app.beamr.fun/images/feed.png",
     "buttonTitle": "Start Beamr",
-    "splashImageUrl": "https://staging.beamr.fun/images/splash.png",
+    "splashImageUrl": "https://app.beamr.fun/images/splash.png",
     "splashBackgroundColor": "#0F0E0E",
-    "webhookUrl": "https://staging.beamr.fun/api/webhook",
+    "webhookUrl": "https://app.beamr.fun/api/webhook",
     "subtitle": "Dynamic micro-subscriptions",
     "description": "The easiest way to sustainably reward people who make your feed worth scrolling.",
     "primaryCategory": "social",
@@ -28,10 +28,10 @@
     "ogTitle": "Beamr",
     "ogDescription": "The easiest way to sustainably reward people who make your feed worth scrolling.",
     "screenshotUrls": [
-      "https://staging.beamr.fun/images/feed.png"
+      "https://app.beamr.fun/images/feed.png"
     ],
-    "heroImageUrl": "https://staging.beamr.fun/images/feed.png",
-    "ogImageUrl": "https://staging.beamr.fun/images/feed.png",
+    "heroImageUrl": "https://app.beamr.fun/images/feed.png",
+    "ogImageUrl": "https://app.beamr.fun/images/feed.png",
     "noindex": true
   },
   "baseBuilder": {
