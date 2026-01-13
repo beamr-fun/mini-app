@@ -19,6 +19,6 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "genManifest.js"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
