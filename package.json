@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "gen": "graphql-codegen --config codegen.cjs",
-    "build": "tsc && vite build",
+    "manifest": "node genManifest",
+    "build": "node genManifest && tsc && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "tunnel": "cloudflared tunnel --url http://localhost:5173",
