@@ -1,8 +1,8 @@
 {
   "accountAssociation": {
     "header": "eyJmaWQiOjExNDk0MzcsInR5cGUiOiJhdXRoIiwia2V5IjoiMHg5OTRBZDc4MzY5NjY2ODllMjdFNjUyQjA1NDA3ZWFBOGE0NTk0ZEY0In0",
-    "payload": "eyJkb21haW4iOiJzdGFnaW5nLmJlYW1yLmZ1biJ9",
-    "signature": "KsTjzqlxuNDYptDN87LSe86RhjgELFZTn8HiI5kF/64IroKG/Ac3zjr1z8BXGgjcToPJO1po6K3I9Bl+iWjbVhs="
+    "payload": "eyJkb21haW4iOiJhcHAuYmVhbXIuZnVuIn0",
+    "signature": "n5QY+uHR+nSifzvpfklFiKbEvJGxTUc2FmEydxTuTYhXHeL5nNOnYk7K6MvOCVfSDMcFi+ZFKoFlt2hC0ix42Bw="
   },
   "frame": {
     "version": "1",
@@ -11,28 +11,20 @@
     "homeUrl": "https://staging.beamr.fun",
     "imageUrl": "https://staging.beamr.fun/images/feed.png",
     "buttonTitle": "Start Beamr",
-    "splashImageUrl": "https://staging.beamr.fun/images/splash.png",
+    "splashImageUrl": "https://app.beamr.fun/images/splash.png",
     "splashBackgroundColor": "#0F0E0E",
-    "webhookUrl": "https://staging.beamr.fun/api/webhook",
+    "webhookUrl": "https://app.beamr.fun/api/webhook",
     "subtitle": "Dynamic micro-subscriptions",
     "description": "The easiest way to sustainably reward people who make your feed worth scrolling.",
     "primaryCategory": "social",
-    "tags": [
-      "mini-app",
-      "base",
-      "creator",
-      "utility",
-      "streaming"
-    ],
+    "tags": ["mini-app", "base", "creator", "utility", "streaming"],
     "tagline": "Dynamic micro-subscriptions",
     "ogTitle": "Beamr",
     "ogDescription": "The easiest way to sustainably reward people who make your feed worth scrolling.",
-    "screenshotUrls": [
-      "https://staging.beamr.fun/images/feed.png"
-    ],
-    "heroImageUrl": "https://staging.beamr.fun/images/feed.png",
-    "ogImageUrl": "https://staging.beamr.fun/images/feed.png",
-    "noindex": true
+    "screenshotUrls": ["https://app.beamr.fun/images/feed.png"],
+    "heroImageUrl": "https://app.beamr.fun/images/feed.png",
+    "ogImageUrl": "https://app.beamr.fun/images/feed.png",
+    "noindex": false
   },
   "baseBuilder": {
     "ownerAddress": "0x375567484B27648C7CE609425043119b3c0A7285"
