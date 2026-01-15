@@ -16,6 +16,7 @@ const STAGING = {
   },
   name: 'Beamr (Cabal Access)',
   noindex: true,
+  iconImg: 'cabalIcon.png',
 };
 
 const PROD = {
@@ -29,6 +30,7 @@ const PROD = {
   },
   name: 'Beamr',
   noindex: false,
+  iconImg: 'icon.png',
 };
 
 const dynamicValues = {
@@ -47,14 +49,14 @@ function generateManifest(env) {
     process.exit(1);
   }
 
-  const { baseUrl, name, noindex, accountAssociation } = envConfig;
+  const { baseUrl, name, noindex, accountAssociation, iconImg } = envConfig;
 
   const manifest = {
     accountAssociation,
     frame: {
       version: '1',
       name,
-      iconUrl: `${baseUrl}/images/icon.png`,
+      iconUrl: `${baseUrl}/images/${iconImg}`,
       homeUrl: baseUrl,
       imageUrl: `${baseUrl}/images/feed.png`,
       buttonTitle: 'Start Beamr',
