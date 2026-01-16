@@ -38,7 +38,7 @@ export const CreateConfirm = () => {
       : distributeReady
         ? 'Distribute Flow'
         : allStepsComplete
-          ? 'View Pool'
+          ? 'View Pool & Share'
           : 'Loading...',
     onClick: distributeReady
       ? () => {
