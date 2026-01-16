@@ -22,11 +22,9 @@ import { SwapModal } from '../components/User/SwapModal';
 import { BalanceDisplay } from '../components/User/BalanceDisplay';
 import { useUser } from '../hooks/useUser';
 import { useNavigate } from 'react-router-dom';
-import { charLimit, formatUnitBalance, truncateAddress } from '../utils/common';
+import { charLimit } from '../utils/common';
 import { BeamrHeadline } from '../components/BeamrHeadline';
 import { usePoolAccount } from '../hooks/usePoolAccount';
-import { UserX } from 'lucide-react';
-import { BeamrNav } from '../components/svg/BeamrNav';
 import {
   NotPoolAddressDisplay,
   NotPrimaryDisplay,
@@ -50,7 +48,6 @@ export const User = () => {
   const navigate = useNavigate();
 
   const { setCTA, cta } = useCTA();
-  const { colors } = useMantineTheme();
 
   useCTA(
     cta && hasToggledConnect.current
