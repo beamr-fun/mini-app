@@ -8,7 +8,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useDisclosure } from '@mantine/hooks';
 import { useCTA } from '../hooks/useCTA';
@@ -29,6 +29,7 @@ import {
   NotPoolAddressDisplay,
   NotPrimaryDisplay,
 } from '../components/User/WrongAddressDisplay';
+import sdk from '@farcaster/miniapp-sdk';
 
 export const User = () => {
   const [tab, setTab] = useState('Sending');
