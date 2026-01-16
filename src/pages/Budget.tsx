@@ -26,7 +26,7 @@ import { useCTA } from '../hooks/useCTA';
 import { IconTransfer } from '../components/svg/IconTransfer';
 import { useDisclosure } from '@mantine/hooks';
 import beamrEcon from '../assets/beamrEcon.png';
-import { Info, PlusIcon } from 'lucide-react';
+import { Info, InfoIcon, PlusIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { multiConnect } from '../utils/interactions';
 import { notifications } from '@mantine/notifications';
@@ -39,7 +39,8 @@ import { SwapModal } from '../components/User/SwapModal';
 export const Budget = () => {
   const navigate = useNavigate();
   const { budget, form, userClaimable, refetchClaimable } = useOnboard();
-  const { userSubscription, userBalance, refetchUserTokenData } = useUser();
+  const { userSubscription, userBalance, refetchUserTokenData, user } =
+    useUser();
   const { address } = useAccount();
   const { colors } = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
@@ -153,6 +154,12 @@ export const Budget = () => {
     return userBalance < parseUnits(budget, 18);
   };
 
+  const notPrimary =
+    user?.verified_addresses?.primary.eth_address?.toLowerCase() !==
+    address?.toLowerCase();
+
+  const hasIncomingAndNotPrimary = hasIncomingFlow && notPrimary;
+
   return (
     <PageLayout title="Budget">
       <SwapModal opened={opened} onClose={close} />
@@ -174,13 +181,26 @@ export const Budget = () => {
           </Box>
         </Paper>
         <Paper>
-          <Text fz={'xl'} c={colors.gray[0]} mb={2}>
+          <Text fz={'xl'} c={colors.gray[0]} mb={4}>
             Beamr Wallet Selection
           </Text>
-          <Text mb="md" c={colors.gray[3]}>
-            Switch your connected wallet in the menu if you purchased or are
-            receiving $BEAMR in another wallet (likely your primary wallet).
-          </Text>
+          {hasIncomingAndNotPrimary && (
+            <Group mb={8} gap={4} wrap="nowrap" align="start">
+              <Box size={14}>
+                <InfoIcon color={colors.yellow[7]} size={14} />
+              </Box>
+              <Text c={colors.yellow[7]} fz="sm">
+                Your primary address has incoming streams. Switch to primary
+                address to sync flows.
+              </Text>
+            </Group>
+          )}
+          {!hasIncomingAndNotPrimary && (
+            <Text mb="md" fz="sm" c={colors.gray[3]}>
+              Switch your connected wallet in the menu if you purchased or are
+              receiving $BEAMR in another wallet (likely your primary wallet).
+            </Text>
+          )}
           <Group gap={6} mb={34}>
             <Box
               bg="var(--glass-thick)"
