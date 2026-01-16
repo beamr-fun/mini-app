@@ -19,6 +19,7 @@ import classes from '../../styles/effects.module.css';
 import { usePoolAccount } from '../../hooks/usePoolAccount';
 import { FlowProgressBar } from './FlowProgressBar';
 import sdk from '@farcaster/miniapp-sdk';
+import { notifications } from '@mantine/notifications';
 
 export const BalanceDisplay = ({
   openSwap,
@@ -128,9 +129,7 @@ export const BalanceDisplay = ({
     return total;
   }, [userSubscription?.outgoing, collectionFlowRate]);
 
-  const hasUnconnected = true;
-
-  // const hasUnconnected = amtUnconnected > 0;
+  const hasUnconnected = amtUnconnected > 0;
 
   const realIncomingPerMonth = connectedIncoming
     ? flowratePerSecondToMonth(connectedIncoming, 'no-label')
@@ -153,39 +152,71 @@ export const BalanceDisplay = ({
   const netMonthly = flowratePerSecondToMonth(netFlowRate, 'no-label');
 
   const shareSending = (isNewPool = false) => {
-    const top3 = userSubscription?.outgoing
-      ?.sort((a, b) => {
-        const perUnitFlowRateA =
-          BigInt(a.beamPool?.flowRate) / BigInt(a.beamPool?.totalUnits);
-        const beamFlowRateA = perUnitFlowRateA * BigInt(a.units);
+    if (!userSubscription?.outgoing || userSubscription.outgoing.length === 0) {
+      notifications.show({
+        title: 'No outgoing streams',
+        message: 'You have no outgoing streams to share.',
+        color: 'red',
+      });
+      return;
+    }
 
-        const perUnitFlowRateB =
-          BigInt(b.beamPool?.flowRate) / BigInt(b.beamPool?.totalUnits);
-        const beamFlowRateB = perUnitFlowRateB * BigInt(b.units);
+    const topOutgoing = userSubscription?.outgoing?.sort((a, b) => {
+      const perUnitFlowRateA =
+        BigInt(a.beamPool?.flowRate) / BigInt(a.beamPool?.totalUnits);
+      const beamFlowRateA = perUnitFlowRateA * BigInt(a.units);
 
-        return beamFlowRateB > beamFlowRateA ? 1 : -1;
-      })
-      .slice(0, 3);
+      const perUnitFlowRateB =
+        BigInt(b.beamPool?.flowRate) / BigInt(b.beamPool?.totalUnits);
+      const beamFlowRateB = perUnitFlowRateB * BigInt(b.units);
 
-    const top3Names = top3
-      ?.map((item) => item.to.profile?.username)
-      .filter(Boolean)
-      .join(', @');
+      return beamFlowRateB > beamFlowRateA ? 1 : -1;
+    });
 
-    sdk.actions.composeCast({
-      text: `I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to Farcasters I interact with.
-       
-@${top3Names} are my top microsubs.
+    if (isNewPool) {
+      const names = topOutgoing
+        ?.map((item) => item.to.profile?.username)
+        .filter(Boolean)
+        .join(', @');
+      sdk.actions.composeCast({
+        text: `Just launched my @beamr microsubscription pool: I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to the Farcasters I interact with.
+
+@${names} are my first microsubs.
 
 Claim your $BEAMR streams and start your own pool in the app:
 
 https://farcaster.xyz/miniapps/XCbBjajsNrdL/beamr`,
-    });
+      });
+    } else {
+      const top5 = topOutgoing?.slice(0, 5);
+
+      const top5Names = top5
+        ?.map((item) => item.to.profile?.username)
+        .filter(Boolean)
+        .join(', @');
+
+      sdk.actions.composeCast({
+        text: `I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to Farcasters I interact with.
+       
+@${top5Names} are my top microsubs.
+
+Claim your $BEAMR streams and start your own pool in the app:
+
+https://farcaster.xyz/miniapps/XCbBjajsNrdL/beamr`,
+      });
+    }
   };
 
   useEffect(() => {
-    shareSending();
-  }, []);
+    if (!userSubscription && realOutgoingPerMonth) return;
+
+    const hasCreatedNewPool = localStorage.getItem('hasOnboarded');
+
+    if (hasCreatedNewPool) {
+      shareSending(true);
+      localStorage.removeItem('beamr-new-pool');
+    }
+  }, [userSubscription, realOutgoingPerMonth]);
 
   const hasOutgoingAndPool =
     userSubscription?.outgoing &&

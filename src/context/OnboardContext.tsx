@@ -278,6 +278,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       onSuccess() {
         setCreationSteps((prev) => ({ ...prev, completePool: 'success' }));
         setIncomingOnly(false);
+        localStorage.setItem('hasOnboarded', 'true');
       },
       onError(errorMsg) {
         handleError(new Error(errorMsg), 'Error completing pool');
