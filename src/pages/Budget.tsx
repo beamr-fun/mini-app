@@ -158,9 +158,7 @@ export const Budget = () => {
     user?.verified_addresses?.primary.eth_address?.toLowerCase() !==
     address?.toLowerCase();
 
-  const hasIncomingAndNotPrimary = true;
-
-  // const hasIncomingAndNotPrimary = hasIncomingFlow && notPrimary;
+  const hasIncomingAndNotPrimary = hasIncomingFlow && notPrimary;
 
   return (
     <PageLayout title="Budget">

@@ -179,13 +179,12 @@ export const BalanceDisplay = ({
         .filter(Boolean)
         .join(', @');
       sdk.actions.composeCast({
+        embeds: ['https://app.beamr.fun'],
         text: `Just launched my @beamr microsubscription pool: I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to the Farcasters I interact with.
 
 @${names} are my first microsubs.
 
-Claim your $BEAMR streams and start your own pool in the app:
-
-https://farcaster.xyz/miniapps/XCbBjajsNrdL/beamr`,
+Claim your $BEAMR streams and start your own pool in the app:`,
       });
     } else {
       const top5 = topOutgoing?.slice(0, 5);
@@ -196,13 +195,12 @@ https://farcaster.xyz/miniapps/XCbBjajsNrdL/beamr`,
         .join(', @');
 
       sdk.actions.composeCast({
+        embeds: ['https://app.beamr.fun'],
         text: `I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to Farcasters I interact with.
        
 @${top5Names} are my top microsubs.
 
-Claim your $BEAMR streams and start your own pool in the app:
-
-https://farcaster.xyz/miniapps/XCbBjajsNrdL/beamr`,
+Claim your $BEAMR streams and start your own pool in the app:`,
       });
     }
   };
