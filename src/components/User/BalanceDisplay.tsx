@@ -214,7 +214,7 @@ https://farcaster.xyz/miniapps/XCbBjajsNrdL/beamr`,
 
     if (hasCreatedNewPool) {
       shareSending(true);
-      localStorage.removeItem('beamr-new-pool');
+      localStorage.removeItem('hasOnboarded');
     }
   }, [userSubscription, realOutgoingPerMonth]);
 

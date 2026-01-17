@@ -195,13 +195,7 @@ export const Budget = () => {
               </Text>
             </Group>
           )}
-          {!hasIncomingAndNotPrimary && (
-            <Text mb="md" fz="sm" c={colors.gray[3]}>
-              Switch your connected wallet in the menu if you purchased or are
-              receiving $BEAMR in another wallet (likely your primary wallet).
-            </Text>
-          )}
-          <Group gap={6} mb={34}>
+          <Group gap={6} mb={8}>
             <Box
               bg="var(--glass-thick)"
               py={2}
@@ -215,7 +209,13 @@ export const Budget = () => {
             </Box>
             {address && <Text>{truncateAddress(address)}</Text>}
           </Group>
-          <Text c={colors.gray[2]} ta="center" fw={500}>
+          {!hasIncomingAndNotPrimary && (
+            <Text mb="md" fz="sm" c={colors.gray[3]}>
+              Your primary address has incoming streams. We recommend switching
+              to that wallet.
+            </Text>
+          )}
+          <Text c={colors.gray[2]} ta="center" fw={500} mt={34}>
             $BEAMR
           </Text>
           <Text fz={36} ta="center" mb={12}>
