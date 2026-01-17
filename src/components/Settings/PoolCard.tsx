@@ -96,22 +96,55 @@ export const PoolCard = ({
     }
   };
 
+  const isBelowMin =
+    monthly !== '' && monthly !== '0' && BigInt(monthly) < MIN_POOL_AMT;
+
   const isWeightingOverMax = (type: keyof Weightings) => {
     const value = Number(weightingState[type]);
     return value > MAX_WEIGHTING;
   };
 
-  const isAnyWeightingOverMax = useMemo(() => {
+  const isWeightingEmpty = (type: keyof Weightings) => {
+    return weightingState[type] === '';
+  };
+
+  const isWeightingDecimal = (type: keyof Weightings) => {
+    const value = weightingState[type];
+    return value.includes('.');
+  };
+
+  const isWeightingNegative = (type: keyof Weightings) => {
+    const value = Number(weightingState[type]);
+    return value < 0;
+  };
+
+  const isWeightingNotNumber = (type: keyof Weightings) => {
+    const value = weightingState[type];
+    return isNaN(Number(value));
+  };
+
+  const isWeightingError = (type: keyof Weightings) => {
+    return isWeightingOverMax(type)
+      ? 'Max is 100'
+      : isWeightingDecimal(type)
+        ? 'No decimals'
+        : isWeightingNegative(type)
+          ? 'Cannot be negative'
+          : isWeightingNotNumber(type)
+            ? 'Must be a number'
+            : isWeightingEmpty(type)
+              ? 'Cannot be empty'
+              : undefined;
+  };
+
+  const isAnyWeightingError = useMemo(() => {
     return (
-      isWeightingOverMax('like') ||
-      isWeightingOverMax('recast') ||
-      isWeightingOverMax('follow') ||
-      isWeightingOverMax('comment')
+      !!isWeightingError('like') ||
+      !!isWeightingError('recast') ||
+      !!isWeightingError('follow') ||
+      !!isWeightingError('comment')
     );
   }, [weightingState]);
-
-  const isBelowMin =
-    monthly !== '' && monthly !== '0' && BigInt(monthly) < MIN_POOL_AMT;
 
   return (
     <Card>
@@ -130,6 +163,7 @@ export const PoolCard = ({
         ref={inputRef}
         thousandSeparator
         valueIsNumericString
+        allowDecimal={false}
         leftSectionWidth={45}
         leftSection={<Avatar src={beamrTokenLogo} size={24} />}
         description={`Fees Included: 2.5% Team + 2.5% Burn`}
@@ -181,21 +215,21 @@ export const PoolCard = ({
             value={weightingState.like}
             disabled={loadingUpdate}
             onChange={(e) => handleChangeWeighting('like', e.target.value)}
-            error={isWeightingOverMax('like') ? 'Max is 100' : undefined}
+            error={isWeightingError('like')}
           />
           <TextInput
             leftSection={<RefreshCcw size={20} color={colors.green[7]} />}
             value={weightingState.recast}
             disabled={loadingUpdate}
             onChange={(e) => handleChangeWeighting('recast', e.target.value)}
-            error={isWeightingOverMax('recast') ? 'Max is 100' : undefined}
+            error={isWeightingError('recast')}
           />
           <TextInput
             leftSection={<Users size={20} color={colors.purple[7]} />}
             value={weightingState.follow}
             disabled={loadingUpdate}
             onChange={(e) => handleChangeWeighting('follow', e.target.value)}
-            error={isWeightingOverMax('follow') ? 'Max is 100' : undefined}
+            error={isWeightingError('follow')}
           />
           <TextInput
             leftSection={
@@ -204,13 +238,13 @@ export const PoolCard = ({
             disabled={loadingUpdate}
             value={weightingState.comment}
             onChange={(e) => handleChangeWeighting('comment', e.target.value)}
-            error={isWeightingOverMax('comment') ? 'Max is 100' : undefined}
+            error={isWeightingError('comment')}
           />
         </Stack>
         <Button
           size="xs"
           mb={'sm'}
-          disabled={prefsDiff || loadingUpdate || isAnyWeightingOverMax}
+          disabled={prefsDiff || loadingUpdate || isAnyWeightingError}
           onClick={() => updatePrefs(poolAddress, weightingState)}
           loading={loadingUpdate}
         >

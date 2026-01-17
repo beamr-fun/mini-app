@@ -8,7 +8,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useDisclosure } from '@mantine/hooks';
 import { useCTA } from '../hooks/useCTA';
@@ -22,11 +22,13 @@ import { SwapModal } from '../components/User/SwapModal';
 import { BalanceDisplay } from '../components/User/BalanceDisplay';
 import { useUser } from '../hooks/useUser';
 import { useNavigate } from 'react-router-dom';
-import { charLimit, formatUnitBalance, truncateAddress } from '../utils/common';
+import { charLimit } from '../utils/common';
 import { BeamrHeadline } from '../components/BeamrHeadline';
 import { usePoolAccount } from '../hooks/usePoolAccount';
-import { UserX } from 'lucide-react';
-import { BeamrNav } from '../components/svg/BeamrNav';
+import {
+  NotPoolAddressDisplay,
+  NotPrimaryDisplay,
+} from '../components/User/WrongAddressDisplay';
 
 export const User = () => {
   const [tab, setTab] = useState('Sending');
@@ -40,13 +42,12 @@ export const User = () => {
 
   const hasToggledConnect = useRef(false);
 
-  const { incomingOnly, userBalance } = useUser();
+  const { incomingOnly, userBalance, user } = useUser();
   const { notConnectedToPoolAddress, userPoolAddress } = usePoolAccount();
 
   const navigate = useNavigate();
 
   const { setCTA, cta } = useCTA();
-  const { colors } = useMantineTheme();
 
   useCTA(
     cta && hasToggledConnect.current
@@ -133,6 +134,14 @@ export const User = () => {
   };
 
   if (incomingOnly) {
+    const primary = user?.verified_addresses?.primary.eth_address || null;
+
+    const isPrimaryAddress = primary?.toLowerCase() === address?.toLowerCase();
+
+    if (!isPrimaryAddress) {
+      return <NotPrimaryDisplay primaryAddress={primary} />;
+    }
+
     return (
       <PageLayout>
         <BeamrHeadline />
@@ -150,34 +159,7 @@ export const User = () => {
   }
 
   if (notConnectedToPoolAddress) {
-    return (
-      <PageLayout>
-        <BeamrHeadline />
-        <Stack>
-          <Paper>
-            <Stack align="center" gap="sm">
-              <UserX size={60} strokeWidth={1.5} />
-              <Text fz={'lg'} mt="md" fw={500}>
-                Re-connect to your main account
-              </Text>
-              <Text c={colors.gray[3]} ta="center">
-                Your main account is {truncateAddress(userPoolAddress || '')}.
-                Please re-connect to this account. (Usually requires refresh)
-              </Text>
-            </Stack>
-          </Paper>
-          <Paper p={'md'}>
-            <Group gap={2} c={colors.gray[3]}>
-              <BeamrNav size={18} />
-              <Text mr={6}>Beamr</Text>
-              <Text fw={500} fz={'lg'} c={colors.gray[0]} mr={'auto'}>
-                {userBalance ? formatUnitBalance(userBalance, 18, 4) : '0'}
-              </Text>
-            </Group>
-          </Paper>
-        </Stack>
-      </PageLayout>
-    );
+    return <NotPoolAddressDisplay userPoolAddress={userPoolAddress} />;
   }
 
   return (

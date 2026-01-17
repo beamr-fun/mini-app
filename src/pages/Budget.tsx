@@ -26,7 +26,7 @@ import { useCTA } from '../hooks/useCTA';
 import { IconTransfer } from '../components/svg/IconTransfer';
 import { useDisclosure } from '@mantine/hooks';
 import beamrEcon from '../assets/beamrEcon.png';
-import { Info, PlusIcon } from 'lucide-react';
+import { Info, InfoIcon, PlusIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { multiConnect } from '../utils/interactions';
 import { notifications } from '@mantine/notifications';
@@ -39,7 +39,8 @@ import { SwapModal } from '../components/User/SwapModal';
 export const Budget = () => {
   const navigate = useNavigate();
   const { budget, form, userClaimable, refetchClaimable } = useOnboard();
-  const { userSubscription, userBalance, refetchUserTokenData } = useUser();
+  const { userSubscription, userBalance, refetchUserTokenData, user } =
+    useUser();
   const { address } = useAccount();
   const { colors } = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
@@ -153,6 +154,12 @@ export const Budget = () => {
     return userBalance < parseUnits(budget, 18);
   };
 
+  const notPrimary =
+    user?.verified_addresses?.primary.eth_address?.toLowerCase() !==
+    address?.toLowerCase();
+
+  const hasIncomingAndNotPrimary = hasIncomingFlow && notPrimary;
+
   return (
     <PageLayout title="Budget">
       <SwapModal opened={opened} onClose={close} />
@@ -174,14 +181,17 @@ export const Budget = () => {
           </Box>
         </Paper>
         <Paper>
-          <Text fz={'xl'} c={colors.gray[0]} mb={2}>
+          <Text fz={'xl'} c={colors.gray[0]} mb={4}>
             Beamr Wallet Selection
           </Text>
-          <Text mb="md" c={colors.gray[3]}>
-            Switch your connected wallet in the menu if you purchased or are
-            receiving $BEAMR in another wallet (likely your primary wallet).
-          </Text>
-          <Group gap={6} mb={34}>
+
+          {!hasIncomingAndNotPrimary && (
+            <Text mb="md" fz="sm" c={colors.gray[3]}>
+              Switch your connected wallet in the menu if you purchased or are
+              receiving $BEAMR in another wallet (likely your primary wallet).
+            </Text>
+          )}
+          <Group gap={6} mb={8}>
             <Box
               bg="var(--glass-thick)"
               py={2}
@@ -195,13 +205,25 @@ export const Budget = () => {
             </Box>
             {address && <Text>{truncateAddress(address)}</Text>}
           </Group>
-          <Text c={colors.gray[2]} ta="center" fw={500}>
+
+          {hasIncomingAndNotPrimary && (
+            <Group mb={8} gap={4} wrap="nowrap" align="start">
+              <Box size={14}>
+                <InfoIcon color={colors.yellow[7]} size={14} />
+              </Box>
+              <Text c={colors.yellow[7]} fz="sm">
+                Your primary address has incoming streams. We recommend
+                switching to that wallet.
+              </Text>
+            </Group>
+          )}
+          <Text c={colors.gray[2]} ta="center" fw={500} mt={34}>
             $BEAMR
           </Text>
           <Text fz={36} ta="center" mb={12}>
             {formattedBalance}
           </Text>
-          {hasIncomingFlow && (
+          {hasIncomingFlow && !notPrimary && (
             <Text ta="center" mb={4}>
               <Text component="span" c={colors.green[6]} fw={500}>
                 + {totalIncomingPerMonth}
@@ -219,9 +241,9 @@ export const Budget = () => {
           )}
           <Group
             justify="center"
-            mt={hasClaimable || hasIncomingFlow ? 30 : 16}
+            mt={(hasClaimable || hasIncomingFlow) && !notPrimary ? 30 : 16}
           >
-            {(hasClaimable || hasIncomingFlow) && (
+            {(hasClaimable || hasIncomingFlow) && !notPrimary && (
               <Button
                 variant="inset"
                 c={colors.green[7]}

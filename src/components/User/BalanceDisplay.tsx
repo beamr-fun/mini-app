@@ -9,15 +9,17 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useUser } from '../../hooks/useUser';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { flowratePerSecondToMonth } from '../../utils/common';
 import { BeamrNav } from '../svg/BeamrNav';
 import { DancingText } from '../DancingText';
 import { IconTransfer } from '../svg/IconTransfer';
-import { CircleAlert, Info } from 'lucide-react';
+import { CircleAlert, Info, Share, Share2 } from 'lucide-react';
 import classes from '../../styles/effects.module.css';
 import { usePoolAccount } from '../../hooks/usePoolAccount';
 import { FlowProgressBar } from './FlowProgressBar';
+import sdk from '@farcaster/miniapp-sdk';
+import { notifications } from '@mantine/notifications';
 
 export const BalanceDisplay = ({
   openSwap,
@@ -149,6 +151,77 @@ export const BalanceDisplay = ({
 
   const netMonthly = flowratePerSecondToMonth(netFlowRate, 'no-label');
 
+  const shareSending = (isNewPool = false) => {
+    if (!userSubscription?.outgoing || userSubscription.outgoing.length === 0) {
+      notifications.show({
+        title: 'No outgoing streams',
+        message: 'You have no outgoing streams to share.',
+        color: 'red',
+      });
+      return;
+    }
+
+    const topOutgoing = userSubscription?.outgoing?.sort((a, b) => {
+      const perUnitFlowRateA =
+        BigInt(a.beamPool?.flowRate) / BigInt(a.beamPool?.totalUnits);
+      const beamFlowRateA = perUnitFlowRateA * BigInt(a.units);
+
+      const perUnitFlowRateB =
+        BigInt(b.beamPool?.flowRate) / BigInt(b.beamPool?.totalUnits);
+      const beamFlowRateB = perUnitFlowRateB * BigInt(b.units);
+
+      return beamFlowRateB > beamFlowRateA ? 1 : -1;
+    });
+
+    if (isNewPool) {
+      const names = topOutgoing
+        ?.map((item) => item.to.profile?.username)
+        .filter(Boolean)
+        .join(', @');
+      sdk.actions.composeCast({
+        embeds: ['https://app.beamr.fun'],
+        text: `Just launched my @beamr microsubscription pool: I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to the Farcasters I interact with.
+
+@${names} are my first microsubs.
+
+Claim your $BEAMR streams and start your own pool in the app:`,
+      });
+    } else {
+      const top5 = topOutgoing?.slice(0, 5);
+
+      const top5Names = top5
+        ?.map((item) => item.to.profile?.username)
+        .filter(Boolean)
+        .join(', @');
+
+      sdk.actions.composeCast({
+        embeds: ['https://app.beamr.fun'],
+        text: `I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to Farcasters I interact with.
+       
+@${top5Names} are my top microsubs.
+
+Claim your $BEAMR streams and start your own pool in the app:`,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!userSubscription && realOutgoingPerMonth) return;
+
+    const hasCreatedNewPool = localStorage.getItem('hasOnboarded');
+
+    if (hasCreatedNewPool) {
+      shareSending(true);
+      localStorage.removeItem('hasOnboarded');
+    }
+  }, [userSubscription, realOutgoingPerMonth]);
+
+  const hasOutgoingAndPool =
+    userSubscription?.outgoing &&
+    userSubscription?.outgoing.length > 2 &&
+    userSubscription?.pools &&
+    userSubscription?.pools.length > 0;
+
   return (
     <Card mb="md">
       <Group gap={2} c={colors.gray[3]} mb={'md'}>
@@ -235,68 +308,65 @@ export const BalanceDisplay = ({
           </Tooltip>
         </Group>
       </Group>
-      {userSubscription?.incoming && userSubscription?.incoming?.length > 0 && (
-        <Group gap={'xs'} mt="md">
-          <Tooltip
-            w={300}
-            multiline
-            label={
-              <Stack p="sm">
-                <Group wrap="nowrap" align="start" gap="xs">
-                  <Box w={16}>
-                    <Info size={16} color={colors.gray[2]} />
-                  </Box>
-                  <Text fz={'sm'} c={colors.gray[2]}>
-                    Only connected pool streams are included in your real-time
-                    $BEAMR balance. Unconnected pool funds are held in escrow.
+
+      <Group mt="md">
+        {userSubscription?.incoming &&
+          userSubscription?.incoming?.length > 0 && (
+            <Group gap={'xs'}>
+              <Tooltip
+                w={300}
+                multiline
+                label={
+                  <Stack p="sm">
+                    <Group wrap="nowrap" align="start" gap="xs">
+                      <Box w={16}>
+                        <Info size={16} color={colors.gray[2]} />
+                      </Box>
+                      <Text fz={'sm'} c={colors.gray[2]}>
+                        Only connected pool streams are included in your
+                        real-time $BEAMR balance. Unconnected pool funds are
+                        held in escrow.
+                      </Text>
+                    </Group>
+                    <Group wrap="nowrap" align="start" gap="xs">
+                      <Info size={16} color={colors.gray[3]} />
+                      <Text fz="sm" c={colors.gray[3]}>
+                        Max 256 connections per user.
+                      </Text>
+                    </Group>
+                  </Stack>
+                }
+              >
+                <Group
+                  gap={4}
+                  className={hasUnconnected ? classes.glow : undefined}
+                  onClick={() => setTab('Receiving')}
+                  style={{
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Text c={hasUnconnected ? colors.gray[0] : colors.gray[3]}>
+                    {hasUnconnected ? 'Unconnected streams' : 'All connected'} (
+                    {amtConnected}/256)
                   </Text>
+                  {hasUnconnected && (
+                    <CircleAlert
+                      size={14}
+                      // style={{ transform: 'translateY(1px)' }}
+                    />
+                  )}
                 </Group>
-                <Group wrap="nowrap" align="start" gap="xs">
-                  <Info size={16} color={colors.gray[3]} />
-                  <Text fz="sm" c={colors.gray[3]}>
-                    Max 256 connections per user.
-                  </Text>
-                </Group>
-              </Stack>
-            }
-          >
-            <Group
-              gap={4}
-              className={hasUnconnected ? classes.glow : undefined}
-              onClick={() => setTab('Receiving')}
-              style={{
-                cursor: 'pointer',
-              }}
-            >
-              <Text c={hasUnconnected ? colors.gray[0] : colors.gray[3]}>
-                {hasUnconnected ? 'Unconnected streams' : 'All connected'} (
-                {amtConnected}/256)
-              </Text>
-              {hasUnconnected && (
-                <CircleAlert
-                  size={14}
-                  // style={{ transform: 'translateY(1px)' }}
-                />
-              )}
+              </Tooltip>
             </Group>
+          )}
+        {hasOutgoingAndPool && (
+          <Tooltip label="Share your outgoing beams on Farcaster">
+            <ActionIcon ml="auto" onClick={() => shareSending(false)}>
+              <Share size={16} />
+            </ActionIcon>
           </Tooltip>
-          {/* <Tooltip
-            w={250}
-            multiline
-            label={`Max 256 connections per user. You are connected to ${amtUnconnected} beams.`}
-          >
-            <Group gap={4}>
-              <Zap
-                size={16}
-                color={colors.gray[3]}
-                style={{
-                  transform: 'translateY(-1px)',
-                }}
-              />
-            </Group>
-          </Tooltip> */}
-        </Group>
-      )}
+        )}
+      </Group>
     </Card>
   );
 };
