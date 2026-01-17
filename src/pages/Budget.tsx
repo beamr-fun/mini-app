@@ -158,7 +158,9 @@ export const Budget = () => {
     user?.verified_addresses?.primary.eth_address?.toLowerCase() !==
     address?.toLowerCase();
 
-  const hasIncomingAndNotPrimary = hasIncomingFlow && notPrimary;
+  const hasIncomingAndNotPrimary = true;
+
+  // const hasIncomingAndNotPrimary = hasIncomingFlow && notPrimary;
 
   return (
     <PageLayout title="Budget">
@@ -184,16 +186,12 @@ export const Budget = () => {
           <Text fz={'xl'} c={colors.gray[0]} mb={4}>
             Beamr Wallet Selection
           </Text>
-          {hasIncomingAndNotPrimary && (
-            <Group mb={8} gap={4} wrap="nowrap" align="start">
-              <Box size={14}>
-                <InfoIcon color={colors.yellow[7]} size={14} />
-              </Box>
-              <Text c={colors.yellow[7]} fz="sm">
-                Your primary address has incoming streams. Switch to primary
-                address to sync flows.
-              </Text>
-            </Group>
+
+          {!hasIncomingAndNotPrimary && (
+            <Text mb="md" fz="sm" c={colors.gray[3]}>
+              Switch your connected wallet in the menu if you purchased or are
+              receiving $BEAMR in another wallet (likely your primary wallet).
+            </Text>
           )}
           <Group gap={6} mb={8}>
             <Box
@@ -209,11 +207,17 @@ export const Budget = () => {
             </Box>
             {address && <Text>{truncateAddress(address)}</Text>}
           </Group>
-          {!hasIncomingAndNotPrimary && (
-            <Text mb="md" fz="sm" c={colors.gray[3]}>
-              Your primary address has incoming streams. We recommend switching
-              to that wallet.
-            </Text>
+
+          {hasIncomingAndNotPrimary && (
+            <Group mb={8} gap={4} wrap="nowrap" align="start">
+              <Box size={14}>
+                <InfoIcon color={colors.yellow[7]} size={14} />
+              </Box>
+              <Text c={colors.yellow[7]} fz="sm">
+                Your primary address has incoming streams. We recommend
+                switching to that wallet.
+              </Text>
+            </Group>
           )}
           <Text c={colors.gray[2]} ta="center" fw={500} mt={34}>
             $BEAMR
