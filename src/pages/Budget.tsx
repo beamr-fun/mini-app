@@ -223,7 +223,7 @@ export const Budget = () => {
           <Text fz={36} ta="center" mb={12}>
             {formattedBalance}
           </Text>
-          {hasIncomingFlow && (
+          {hasIncomingFlow && !notPrimary && (
             <Text ta="center" mb={4}>
               <Text component="span" c={colors.green[6]} fw={500}>
                 + {totalIncomingPerMonth}
@@ -241,9 +241,9 @@ export const Budget = () => {
           )}
           <Group
             justify="center"
-            mt={hasClaimable || hasIncomingFlow ? 30 : 16}
+            mt={(hasClaimable || hasIncomingFlow) && !notPrimary ? 30 : 16}
           >
-            {(hasClaimable || hasIncomingFlow) && (
+            {(hasClaimable || hasIncomingFlow) && !notPrimary && (
               <Button
                 variant="inset"
                 c={colors.green[7]}
