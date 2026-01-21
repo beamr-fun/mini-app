@@ -39,7 +39,7 @@ export const Header = () => {
   return (
     <Box w="100%">
       <Group w="100%" justify="space-between">
-        {data && !data?.limited && !isLoading && !error && (
+        {data && data?.limited && !isLoading && !error && (
           <Tooltip
             multiline
             label={
