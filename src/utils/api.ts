@@ -479,3 +479,33 @@ export const connectToPool = async (headers: APIHeaders) => {
     throw Error;
   }
 };
+
+export const getTipLimit = async (headers: APIHeaders) => {
+  const res = await fetch(`${keys.apiUrl}/v1/user/connect-user`, {
+    method: 'POST',
+    headers,
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data?.error || 'Failed to fetch tip limit');
+  }
+
+  const data = await res.json();
+
+  const parsed = z
+    .object({
+      limited: z.boolean(),
+      limit: z.number(),
+      remaining: z.number(),
+      resetsAt: z.string(),
+      resetsInSeconds: z.number(),
+    })
+    .safeParse(data);
+
+  if (!parsed.success) {
+    throw new Error(`Invalid tip limit response: ${parsed.error.message}`);
+  }
+
+  return parsed.data;
+};
