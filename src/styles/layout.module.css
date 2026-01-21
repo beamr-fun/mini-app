@@ -54,6 +54,13 @@
   background: rgba(244, 87, 68, 0.05) !important;
 }
 
+.glass {
+  background-color: var(--glass-pane);
+  backdrop-filter: blur(32px);
+  border: 1px solid var(--glass-edge);
+  border-radius: rem(24px);
+}
+
 .navBox {
   background-color: var(--glass-pronounced);
   border-radius: rem(18px);

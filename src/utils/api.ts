@@ -481,7 +481,7 @@ export const connectToPool = async (headers: APIHeaders) => {
 };
 
 export const getTipLimit = async (headers: APIHeaders) => {
-  const res = await fetch(`${keys.apiUrl}/v1/user/connect-user`, {
+  const res = await fetch(`${keys.apiUrl}/v1/user/tip-limit`, {
     method: 'POST',
     headers,
   });

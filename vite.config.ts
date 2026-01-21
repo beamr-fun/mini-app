@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: [
-      'change-protocol-insertion-cool.trycloudflare.com',
+      'extend-responsible-happen-add.trycloudflare.com',
       'https://mini-app-production-96b0.up.railway.app',
     ],
   },
