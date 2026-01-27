@@ -17,11 +17,22 @@ import { ConnectionIndicator } from './ConnectionIndicator';
 import { useQuery } from '@tanstack/react-query';
 import { getTipLimit, getUserSubs } from '../utils/api';
 import { Glass } from './Glass';
-import { AlertCircle, Check, CircleQuestionMark, X } from 'lucide-react';
+import {
+  AlertCircle,
+  Check,
+  CircleQuestionMark,
+  Heart,
+  MessageSquareReply,
+  RefreshCcw,
+  Users,
+  X,
+} from 'lucide-react';
 import classes from '../styles/effects.module.css';
 import { useDisclosure } from '@mantine/hooks';
 import modalClasses from '../styles/modal.module.css';
 import { BeamReceipt, ReceiptStatus } from '../validation/receipts';
+import { timeAgo } from '../utils/common';
+import sdk from '@farcaster/miniapp-sdk';
 
 export const Header = () => {
   const { address } = useAccount();
@@ -107,22 +118,42 @@ const MainIndicator = () => {
             <Drawer.CloseButton />
           </Drawer.Header>
           <Drawer.Body>
-            <Text mb="md" c={colors.gray[2]} fs="italic">
-              Pending (Last 90m)
-            </Text>
-            <Stack gap="sm" mb="xl">
-              {pending?.map((sub) => {
-                return <InteractionCard receipt={sub} />;
-              })}
-            </Stack>
-            <Text mb="md" c={colors.gray[2]} fs="italic">
-              Resolved (Last 90m)
-            </Text>
-            <Stack gap="sm">
-              {resolved?.map((sub) => {
-                return <InteractionCard receipt={sub} />;
-              })}
-            </Stack>
+            {pending && pending?.length > 0 ? (
+              <>
+                <Text mb="md" c={colors.gray[2]} fs="italic">
+                  Pending (Last 90m)
+                </Text>
+                <Stack gap="sm" mb="xl">
+                  {pending
+                    ?.sort(
+                      (a, b) =>
+                        new Date(b.updatedAt).getTime() -
+                        new Date(a.updatedAt).getTime()
+                    )
+                    .map((sub) => {
+                      return <InteractionCard receipt={sub} />;
+                    })}
+                </Stack>{' '}
+              </>
+            ) : null}
+            {resolved && resolved.length > 0 ? (
+              <>
+                <Text mb="md" c={colors.gray[2]} fs="italic">
+                  Resolved (Last 90m)
+                </Text>
+                <Stack gap="sm">
+                  {resolved
+                    ?.sort(
+                      (a, b) =>
+                        new Date(b.updatedAt).getTime() -
+                        new Date(a.updatedAt).getTime()
+                    )
+                    ?.map((sub) => {
+                      return <InteractionCard receipt={sub} />;
+                    })}
+                </Stack>
+              </>
+            ) : null}
           </Drawer.Body>
         </Drawer.Content>
       </Drawer.Root>
@@ -186,14 +217,112 @@ const getIconByStatus = (status: ReceiptStatus) => {
   return <CircleQuestionMark size={16} color="gray" />;
 };
 
+const getInteractionIcon = (receipt: BeamReceipt) => {
+  if (receipt.id.includes('like')) {
+    return (
+      <Heart
+        size={16}
+        color="var(--mantine-color-red-7)"
+        fill="var(--mantine-color-red-7)"
+      />
+    );
+  }
+  if (receipt.id.includes('recast')) {
+    return <RefreshCcw size={12} color="var(--mantine-color-green-7)" />;
+  }
+  if (receipt.id.includes('follow')) {
+    return <Users size={12} color="var(--mantine-color-purple-7)" />;
+  }
+  if (receipt.id.includes('comment')) {
+    return (
+      <MessageSquareReply size={12} color="var(--mantine-color-purple-7)" />
+    );
+  }
+};
+
+const extractCastHash = (receipt: BeamReceipt) => {
+  if (receipt.id.includes('follow')) {
+    return null;
+  }
+  const parts = receipt.id.split('_');
+  return parts[parts.length - 1];
+};
+
 const InteractionCard = ({ receipt }: { receipt: BeamReceipt }) => {
   const { colors } = useMantineTheme();
 
+  const castHash = extractCastHash(receipt);
+
+  const viewCast = (hash: string | null) => {
+    if (!hash) return;
+    sdk.actions.viewCast({ hash });
+  };
+
   return (
     <Paper>
-      <Group>
-        <Box>{getIconByStatus(ReceiptStatus.Posted)}</Box>
-        <AvatarGroup></AvatarGroup>
+      <Group w="100%" wrap="nowrap">
+        <Group align="start">
+          <Box h={50}>{getIconByStatus(ReceiptStatus.Posted)}</Box>
+        </Group>
+        <Box w={'100%'}>
+          <Group w={'100%'}>
+            <AvatarGroup>
+              <Avatar
+                src={receipt.senderProfile?.pfp_url || undefined}
+                size={32}
+              />
+              <Avatar
+                src={receipt.recipientProfile?.pfp_url || undefined}
+                size={32}
+              />
+              <Avatar size={16}>{getInteractionIcon(receipt)}</Avatar>
+            </AvatarGroup>
+
+            <Text>{receipt.params?.amount} Shares </Text>
+            <Text fz="sm" ml="auto">
+              {timeAgo(receipt.updatedAt)} ago
+            </Text>
+          </Group>
+          <Group mt="sm">
+            {castHash ? (
+              <Text
+                fz="sm"
+                td="underline"
+                style={{ cursor: 'pointer' }}
+                onClick={() => viewCast(castHash)}
+              >
+                Cast
+              </Text>
+            ) : (
+              <Tooltip label="No casts for this interaction type">
+                <Text
+                  fz="sm"
+                  td="underline"
+                  style={{ cursor: 'not-allowed' }}
+                  c={colors.gray[4]}
+                >
+                  Cast
+                </Text>
+              </Tooltip>
+            )}
+            {castHash ? (
+              <Text fz="sm" td="underline" style={{ cursor: 'pointer' }}>
+                Transaction
+              </Text>
+            ) : (
+              <Tooltip label="No casts for this interaction type">
+                <Text
+                  fz="sm"
+                  td="underline"
+                  style={{ cursor: 'not-allowed' }}
+                  c={colors.gray[4]}
+                >
+                  Transaction
+                </Text>
+              </Tooltip>
+            )}
+          </Group>
+        </Box>
       </Group>
     </Paper>
   );
