@@ -10,6 +10,7 @@ import {
   useMantineTheme,
   Stack,
   AvatarGroup,
+  Alert,
 } from '@mantine/core';
 import { useAccount } from 'wagmi';
 import { useUser } from '../hooks/useUser';
@@ -23,6 +24,7 @@ import {
   CircleQuestionMark,
   ExternalLink,
   Heart,
+  Info,
   MessageSquareReply,
   RefreshCcw,
   Users,
@@ -61,7 +63,6 @@ const MainIndicator = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const { user, getAuthHeaders } = useUser();
 
-  console.log('classes', classes);
   const {
     data: tipLimit,
     error: tipLimitError,
@@ -108,19 +109,38 @@ const MainIndicator = () => {
       sub.status === ReceiptStatus.OnchainFail
   );
 
+  const hasPending = pending && pending.length > 0;
+
+  if (recentSubLoading || !recentSubs || recentSubError) {
+    return null;
+  }
+
   return (
     <Box>
       <Drawer.Root opened={opened} onClose={close}>
         <Drawer.Overlay />
         <Drawer.Content className={modalClasses.content}>
-          <Drawer.Header className={modalClasses.header}>
-            <Drawer.Title fz={'lg'} fw={500} c={colors.gray[0]}>
-              Recent Interactions
-            </Drawer.Title>
-            <Drawer.CloseButton />
-          </Drawer.Header>
+          <Box>
+            <Drawer.Header className={modalClasses.header}>
+              <Drawer.Title fz={'lg'} fw={500} c={colors.gray[0]}>
+                Recent Activity
+              </Drawer.Title>
+              <Drawer.CloseButton />
+            </Drawer.Header>
+          </Box>
+          {limited && (
+            <Alert
+              color="yellow"
+              m="sm"
+              title="Rate Limit Exceeded"
+              icon={<Info size={16} />}
+            >
+              Microsub pools get a daily limit of 50 interactions. The limit
+              resets on a rolling 24-hour basis.
+            </Alert>
+          )}
           <Drawer.Body>
-            {pending && pending?.length > 0 ? (
+            {hasPending ? (
               <>
                 <Text mb="md" c={colors.gray[2]} fs="italic">
                   Pending (Last 90m)
@@ -160,16 +180,34 @@ const MainIndicator = () => {
         </Drawer.Content>
       </Drawer.Root>
 
-      {pending && pending.length > 0 && (
+      {hasPending && (
         <Glass py={4} px={10} onClick={open} style={{ cursor: 'pointer' }}>
           <Group wrap="nowrap" gap={8}>
             <Loader size={16} color={colors.gray[3]} />
             <Text>+{pending?.length} Pending</Text>
+            {limited && (
+              <Tooltip
+                multiline
+                label={
+                  <Box>
+                    <Text fz="sm" mb="xs">
+                      You have extended your daily tip limit ({remaining}/50)
+                    </Text>
+                  </Box>
+                }
+              >
+                <AlertCircle
+                  size={20}
+                  color={colors.yellow[7]}
+                  className={classes.glow}
+                />
+              </Tooltip>
+            )}
           </Group>
         </Glass>
       )}
 
-      {limited && (
+      {!hasPending && limited && (
         <Tooltip
           multiline
           label={
