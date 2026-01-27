@@ -1,5 +1,6 @@
 import { Address } from 'viem';
 import { isTestnet } from '../utils/setup';
+import { base, baseSepolia, sepolia } from 'viem/chains';
 
 type Addresses = {
   BEAMR: Address;
@@ -34,3 +35,6 @@ export const ADDR_PROD: Addresses = {
 } as const;
 
 export const ADDR = isTestnet ? ADDR_DEV : ADDR_PROD;
+export const SCAN_URL = isTestnet
+  ? baseSepolia.blockExplorers.default.url
+  : base.blockExplorers.default.url;

@@ -21,6 +21,7 @@ import {
   AlertCircle,
   Check,
   CircleQuestionMark,
+  ExternalLink,
   Heart,
   MessageSquareReply,
   RefreshCcw,
@@ -33,6 +34,7 @@ import modalClasses from '../styles/modal.module.css';
 import { BeamReceipt, ReceiptStatus } from '../validation/receipts';
 import { timeAgo } from '../utils/common';
 import sdk from '@farcaster/miniapp-sdk';
+import { SCAN_URL } from '../const/addresses';
 
 export const Header = () => {
   const { address } = useAccount();
@@ -258,6 +260,12 @@ const InteractionCard = ({ receipt }: { receipt: BeamReceipt }) => {
     sdk.actions.viewCast({ hash });
   };
 
+  const viewTransaction = (txHash: string | null) => {
+    if (!txHash) return;
+
+    sdk.actions.openUrl(`${SCAN_URL}/tx/${txHash}`);
+  };
+
   return (
     <Paper>
       <Group w="100%" wrap="nowrap">
@@ -297,7 +305,6 @@ const InteractionCard = ({ receipt }: { receipt: BeamReceipt }) => {
               <Tooltip label="No casts for this interaction type">
                 <Text
                   fz="sm"
-                  td="underline"
                   style={{ cursor: 'not-allowed' }}
                   c={colors.gray[4]}
                 >
@@ -305,15 +312,20 @@ const InteractionCard = ({ receipt }: { receipt: BeamReceipt }) => {
                 </Text>
               </Tooltip>
             )}
-            {castHash ? (
-              <Text fz="sm" td="underline" style={{ cursor: 'pointer' }}>
-                Transaction
-              </Text>
+            {receipt.txHash ? (
+              <Group
+                td="underline"
+                style={{ cursor: 'pointer' }}
+                gap={4}
+                onClick={() => viewTransaction(receipt.txHash)}
+              >
+                <Text fz="sm">Transaction</Text>
+                <ExternalLink size={12} />
+              </Group>
             ) : (
-              <Tooltip label="No casts for this interaction type">
+              <Tooltip label="Transaction has not been submitted yet">
                 <Text
                   fz="sm"
-                  td="underline"
                   style={{ cursor: 'not-allowed' }}
                   c={colors.gray[4]}
                 >
