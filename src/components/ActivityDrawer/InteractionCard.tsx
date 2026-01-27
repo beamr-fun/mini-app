@@ -6,6 +6,7 @@ import {
   Paper,
   Text,
   Tooltip,
+  Loader,
   useMantineTheme,
 } from '@mantine/core';
 import { BeamReceipt, ReceiptStatus } from '../../validation/receipts';
@@ -17,7 +18,6 @@ import {
   CircleQuestionMark,
   ExternalLink,
   Heart,
-  Loader,
   MessageSquareReply,
   RefreshCcw,
   Users,

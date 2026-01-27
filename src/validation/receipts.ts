@@ -32,12 +32,6 @@ const params = z.object({
   receiptKey: z.string(),
 });
 
-const senderProfile = z.object({
-  fid: z.number(),
-  username: z.string(),
-  display_nane: z.string().nullable(),
-});
-
 const beamReceiptSchema = z.object({
   id: z.string(),
   senderFid: z.number(),
