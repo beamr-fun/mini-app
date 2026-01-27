@@ -9,6 +9,7 @@ import {
   quoteRequestSchema,
   quoteResponseSchema,
 } from '../validation/swap';
+import { beamReceiptsSchema } from '../validation/receipts';
 
 export type APIHeaders = {
   'Content-Type': string;
@@ -508,4 +509,31 @@ export const getTipLimit = async (headers: APIHeaders) => {
   }
 
   return parsed.data;
+};
+
+export const getUserSubs = async (headers: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/receipts`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data?.error || 'Failed to fetch recent subs');
+    }
+
+    const data = await res.json();
+
+    const validated = beamReceiptsSchema.safeParse(data.receipts);
+
+    if (!validated.success) {
+      throw new Error(`Invalid receipts data: ${validated.error.message}`);
+    }
+
+    return validated.data;
+  } catch (error) {
+    console.error('Error fetching recent subs', error);
+    throw Error;
+  }
 };
