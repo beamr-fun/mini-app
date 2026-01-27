@@ -531,20 +531,33 @@ export const getUserSubs = async (headers: APIHeaders) => {
       throw new Error(`Invalid receipts data: ${validated.error.message}`);
     }
 
-    const withProfiles = await Promise.all(
-      validated.data.map(async (receipt) => {
-        const [senderProfile, recipientProfile] = await fetchProfiles(
-          [receipt.senderFid.toString(), receipt.recipientFid.toString()],
-          headers
-        );
+    const fidStrings = validated.data.map((receipt) => [
+      receipt.senderFid.toString(),
+      receipt.recipientFid.toString(),
+    ]);
 
-        return {
-          ...receipt,
-          senderProfile,
-          recipientProfile,
-        } as BeamReceipt;
-      })
-    );
+    const uniqueFids = Array.from(new Set(fidStrings.flat())).filter(
+      Boolean
+    ) as string[];
+
+    const profiles = await fetchProfiles(uniqueFids, headers);
+
+    const profileLookup: Record<string, User> = {};
+
+    profiles.forEach((profile) => {
+      profileLookup[profile.fid.toString()] = profile;
+    });
+
+    const withProfiles = validated.data.map((receipt) => {
+      const senderProfile = profileLookup[receipt.senderFid.toString()];
+      const recipientProfile = profileLookup[receipt.recipientFid.toString()];
+
+      return {
+        ...receipt,
+        senderProfile: senderProfile || null,
+        recipientProfile: recipientProfile || null,
+      } as BeamReceipt;
+    });
 
     return withProfiles as BeamReceipt[];
   } catch (error) {

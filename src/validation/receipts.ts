@@ -54,6 +54,6 @@ export const beamReceiptsSchema = z.array(beamReceiptSchema);
 
 export type RawReceipt = z.infer<typeof beamReceiptSchema>;
 export type BeamReceipt = RawReceipt & {
-  senderProfile: User;
-  recipientProfile: User;
+  senderProfile: User | null;
+  recipientProfile: User | null;
 };
