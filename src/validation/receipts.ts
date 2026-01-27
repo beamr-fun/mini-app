@@ -38,6 +38,7 @@ const beamReceiptSchema = z.object({
   recipientFid: z.number(),
   poolAddress: z.string(),
   txHash: z.string().nullable(),
+  failReason: z.string().nullable(),
   params: params.nullable(),
   status: z.enum(ReceiptStatus),
   createdAt: z.string(),
