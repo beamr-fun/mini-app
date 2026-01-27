@@ -9,6 +9,7 @@ import {
   Tooltip,
   useMantineTheme,
   Stack,
+  AvatarGroup,
 } from '@mantine/core';
 import { useAccount } from 'wagmi';
 import { useUser } from '../hooks/useUser';
@@ -16,11 +17,11 @@ import { ConnectionIndicator } from './ConnectionIndicator';
 import { useQuery } from '@tanstack/react-query';
 import { getTipLimit, getUserSubs } from '../utils/api';
 import { Glass } from './Glass';
-import { AlertCircle, Check } from 'lucide-react';
+import { AlertCircle, Check, CircleQuestionMark, X } from 'lucide-react';
 import classes from '../styles/effects.module.css';
 import { useDisclosure } from '@mantine/hooks';
 import modalClasses from '../styles/modal.module.css';
-import { ReceiptStatus } from '../validation/receipts';
+import { BeamReceipt, ReceiptStatus } from '../validation/receipts';
 
 export const Header = () => {
   const { address } = useAccount();
@@ -80,8 +81,6 @@ const MainIndicator = () => {
     enabled: !!user?.fid,
   });
 
-  console.log('recentSubs', recentSubs);
-
   const limited =
     !!tipLimit && tipLimit?.limited && !tipLimitLoading && !tipLimitError;
   const remaining = tipLimit?.remaining || 0;
@@ -113,7 +112,7 @@ const MainIndicator = () => {
             </Text>
             <Stack gap="sm" mb="xl">
               {pending?.map((sub) => {
-                return <InteractionCard />;
+                return <InteractionCard receipt={sub} />;
               })}
             </Stack>
             <Text mb="md" c={colors.gray[2]} fs="italic">
@@ -121,7 +120,7 @@ const MainIndicator = () => {
             </Text>
             <Stack gap="sm">
               {resolved?.map((sub) => {
-                return <InteractionCard />;
+                return <InteractionCard receipt={sub} />;
               })}
             </Stack>
           </Drawer.Body>
@@ -166,15 +165,35 @@ const MainIndicator = () => {
   );
 };
 
-const InteractionCard = () => {
+const getIconByStatus = (status: ReceiptStatus) => {
+  if (status === ReceiptStatus.Completed) {
+    return <Check size={16} color="green" />;
+  }
+  if (status === ReceiptStatus.OnchainFail) {
+    return <X size={16} color="red" />;
+  }
+  if (status === ReceiptStatus.Posted) {
+    return <Loader size={16} color={'var(--mantine-color-gray-3)'} />;
+  }
+  if (status === ReceiptStatus.Pending) {
+    return <CircleQuestionMark size={16} color="gray" />;
+  }
+
+  if (status === ReceiptStatus.Failed) {
+    return <X size={16} color="red" />;
+  }
+
+  return <CircleQuestionMark size={16} color="gray" />;
+};
+
+const InteractionCard = ({ receipt }: { receipt: BeamReceipt }) => {
   const { colors } = useMantineTheme();
+
   return (
     <Paper>
       <Group>
-        <Box>
-          <Check size={16} color={colors.green[7]} />
-        </Box>
-        <Box></Box>
+        <Box>{getIconByStatus(ReceiptStatus.Posted)}</Box>
+        <AvatarGroup></AvatarGroup>
       </Group>
     </Paper>
   );

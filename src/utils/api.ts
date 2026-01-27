@@ -9,7 +9,7 @@ import {
   quoteRequestSchema,
   quoteResponseSchema,
 } from '../validation/swap';
-import { beamReceiptsSchema } from '../validation/receipts';
+import { BeamReceipt, beamReceiptsSchema } from '../validation/receipts';
 
 export type APIHeaders = {
   'Content-Type': string;
@@ -531,7 +531,22 @@ export const getUserSubs = async (headers: APIHeaders) => {
       throw new Error(`Invalid receipts data: ${validated.error.message}`);
     }
 
-    return validated.data;
+    const withProfiles = await Promise.all(
+      validated.data.map(async (receipt) => {
+        const [senderProfile, recipientProfile] = await fetchProfiles(
+          [receipt.senderFid.toString(), receipt.recipientFid.toString()],
+          headers
+        );
+
+        return {
+          ...receipt,
+          senderProfile,
+          recipientProfile,
+        } as BeamReceipt;
+      })
+    );
+
+    return withProfiles as BeamReceipt[];
   } catch (error) {
     console.error('Error fetching recent subs', error);
     throw Error;

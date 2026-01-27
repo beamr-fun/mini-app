@@ -1,3 +1,4 @@
+import { User } from '@neynar/nodejs-sdk/build/api';
 import { Address, isAddress } from 'viem';
 import z from 'zod';
 
@@ -31,6 +32,12 @@ const params = z.object({
   receiptKey: z.string(),
 });
 
+const senderProfile = z.object({
+  fid: z.number(),
+  username: z.string(),
+  display_nane: z.string().nullable(),
+});
+
 const beamReceiptSchema = z.object({
   id: z.string(),
   senderFid: z.number(),
@@ -44,3 +51,9 @@ const beamReceiptSchema = z.object({
 });
 
 export const beamReceiptsSchema = z.array(beamReceiptSchema);
+
+export type RawReceipt = z.infer<typeof beamReceiptSchema>;
+export type BeamReceipt = RawReceipt & {
+  senderProfile: User;
+  recipientProfile: User;
+};
