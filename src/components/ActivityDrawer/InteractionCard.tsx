@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 
 const getIconByStatus = (status: ReceiptStatus) => {
+  console.log('status', status);
   if (status === ReceiptStatus.Completed) {
     return <Check size={16} color="green" />;
   }
@@ -96,7 +97,7 @@ export const InteractionCard = ({ receipt }: { receipt: BeamReceipt }) => {
     <Paper>
       <Group w="100%" wrap="nowrap">
         <Group align="start">
-          <Box h={50}>{getIconByStatus(ReceiptStatus.Posted)}</Box>
+          <Box h={50}>{getIconByStatus(receipt.status)}</Box>
         </Group>
         <Box w={'100%'}>
           <Group w={'100%'}>
