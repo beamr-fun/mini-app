@@ -23,8 +23,8 @@
 .inner {
 }
 .header {
-  height: 10px;
-  background: transparent;
+  height: 10px !important;
+  background: transparent !important;
 }
 .close {
 }
