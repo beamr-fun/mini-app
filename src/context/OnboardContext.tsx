@@ -11,7 +11,6 @@ import { distributeFlow } from '../utils/interactions';
 import { startTxPoll } from '../utils/poll';
 import { notifications } from '@mantine/notifications';
 import { charLimit } from '../utils/common';
-import { getClaimable } from '../utils/reads';
 
 type CreationSteps = {
   createPool: 'loading' | 'error' | 'success';
@@ -29,13 +28,7 @@ type OnboardContextType = {
   budget: string;
   selectedFriends?: string[];
   form?: UseFormReturnType<OnboardFormValues>;
-
-  userClaimable?: bigint;
-
-  isLoadingClaimable: boolean;
-  claimableError: Error | null;
   besties?: User[] | null;
-  refetchClaimable: () => Promise<void>;
   bestiesError: Error | null;
   creationSteps: CreationSteps;
   poolId?: Address;
@@ -48,9 +41,6 @@ export const OnboardContext = React.createContext<OnboardContextType>({
   budget: '',
   errMsg: undefined,
   bestiesError: null,
-  isLoadingClaimable: false,
-  claimableError: null,
-  refetchClaimable: async () => {},
   creationSteps: {
     createPool: 'loading',
     distributeFlow: 'loading',
@@ -77,7 +67,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
     getAuthHeaders,
     setIncomingOnly,
     userSubscription,
-    collectionFlowRate,
     refetchCollections,
   } = useUser();
 
@@ -99,22 +88,6 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       return fetchBesties(user!.fid, headers);
     },
     enabled: !!user?.fid,
-  });
-
-  const {
-    data: userClaimable,
-    isLoading: isLoadingClaimable,
-    error: claimableError,
-    refetch: refetchClaimable,
-  } = useQuery({
-    queryKey: ['userClaimable', address],
-    queryFn: async () => {
-      return getClaimable({
-        poolAddress: ADDR.PRE_BUY_POOL,
-        userAddress: address as Address,
-      });
-    },
-    enabled: !!address,
   });
 
   const form = useForm({
@@ -293,10 +266,7 @@ export const OnboardDataProvider = ({ children }: { children: ReactNode }) => {
       value={{
         budget: form.values.budget,
         form,
-        userClaimable,
-        isLoadingClaimable,
-        claimableError,
-        refetchClaimable: refetchClaimable as any as () => Promise<void>,
+
         besties,
         bestiesError,
         selectedFriends: form.values.selectedFriends,

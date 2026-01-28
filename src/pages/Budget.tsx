@@ -38,7 +38,7 @@ import { SwapModal } from '../components/User/SwapModal';
 
 export const Budget = () => {
   const navigate = useNavigate();
-  const { budget, form, userClaimable, refetchClaimable } = useOnboard();
+  const { budget, form } = useOnboard();
   const { userSubscription, userBalance, refetchUserTokenData, user } =
     useUser();
   const { address } = useAccount();
@@ -117,7 +117,6 @@ export const Budget = () => {
           });
 
           setTimeout(() => {
-            refetchClaimable?.();
             refetchUserTokenData?.();
           }, 2500);
         },
@@ -140,7 +139,6 @@ export const Budget = () => {
   };
 
   const hasIncomingFlow = totalIncomingFlowRate > 0n;
-  const hasClaimable = userClaimable && userClaimable > 0n ? true : false;
 
   const totalIncomingPerMonth = totalIncomingFlowRate
     ? flowratePerSecondToMonth(totalIncomingFlowRate)
@@ -231,19 +229,9 @@ export const Budget = () => {
               (pending connection)
             </Text>
           )}
-          {hasClaimable && (
-            <Text ta="center">
-              <Text component="span" c={colors.green[6]} fw={500}>
-                + Fair Launch Tokens
-              </Text>{' '}
-              (pending connection)
-            </Text>
-          )}
-          <Group
-            justify="center"
-            mt={(hasClaimable || hasIncomingFlow) && !notPrimary ? 30 : 16}
-          >
-            {(hasClaimable || hasIncomingFlow) && !notPrimary && (
+
+          <Group justify="center" mt={hasIncomingFlow && !notPrimary ? 30 : 16}>
+            {hasIncomingFlow && !notPrimary && (
               <Button
                 variant="inset"
                 c={colors.green[7]}

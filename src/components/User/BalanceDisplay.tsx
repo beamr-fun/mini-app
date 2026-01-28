@@ -21,6 +21,11 @@ import { FlowProgressBar } from './FlowProgressBar';
 import sdk from '@farcaster/miniapp-sdk';
 import { notifications } from '@mantine/notifications';
 
+function formatList(items: string[], separator = ', ', lastSeparator = ' & ') {
+  if (items.length <= 1) return items[0] ?? '';
+  return `${items.slice(0, -1).join(separator)}${lastSeparator}${items.at(-1)}`;
+}
+
 export const BalanceDisplay = ({
   openSwap,
   setTab,
@@ -176,13 +181,13 @@ export const BalanceDisplay = ({
     if (isNewPool) {
       const names = topOutgoing
         ?.map((item) => item.to.profile?.username)
-        .filter(Boolean)
-        .join(', @');
+        .filter(Boolean) as string[];
+
       sdk.actions.composeCast({
         embeds: ['https://app.beamr.fun'],
         text: `Just launched my @beamr microsubscription pool: I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to the Farcasters I interact with.
 
-@${names} are my first microsubs.
+${formatList(names.map((n) => `@${n}`))} are my first microsubs.
 
 Claim your $BEAMR streams and start your own pool in the app:`,
       });
@@ -191,14 +196,13 @@ Claim your $BEAMR streams and start your own pool in the app:`,
 
       const top5Names = top5
         ?.map((item) => item.to.profile?.username)
-        .filter(Boolean)
-        .join(', @');
+        .filter(Boolean) as string[];
 
       sdk.actions.composeCast({
         embeds: ['https://app.beamr.fun'],
         text: `I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to Farcasters I interact with.
        
-@${top5Names} are my top microsubs.
+${formatList(top5Names.map((name) => `@${name}`))} are my top microsubs.
 
 Claim your $BEAMR streams and start your own pool in the app:`,
       });
