@@ -24,6 +24,7 @@
     "@mantine/hooks": "8.1.0",
     "@mantine/notifications": "^8.3.10",
     "@tanstack/react-query": "^5.81.5",
+    "date-fns": "^4.1.0",
     "graphql": "^16.11.0",
     "graphql-request": "^7.4.0",
     "graphql-ws": "^6.0.6",

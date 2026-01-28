@@ -9,6 +9,7 @@ import {
   quoteRequestSchema,
   quoteResponseSchema,
 } from '../validation/swap';
+import { BeamReceipt, beamReceiptsSchema } from '../validation/receipts';
 
 export type APIHeaders = {
   'Content-Type': string;
@@ -508,4 +509,59 @@ export const getTipLimit = async (headers: APIHeaders) => {
   }
 
   return parsed.data;
+};
+
+export const getUserSubs = async (headers: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/receipts`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data?.error || 'Failed to fetch recent subs');
+    }
+
+    const data = await res.json();
+
+    const validated = beamReceiptsSchema.safeParse(data.receipts);
+
+    if (!validated.success) {
+      throw new Error(`Invalid receipts data: ${validated.error.message}`);
+    }
+
+    const fidStrings = validated.data.map((receipt) => [
+      receipt.senderFid.toString(),
+      receipt.recipientFid.toString(),
+    ]);
+
+    const uniqueFids = Array.from(new Set(fidStrings.flat())).filter(
+      Boolean
+    ) as string[];
+
+    const profiles = await fetchProfiles(uniqueFids, headers);
+
+    const profileLookup: Record<string, User> = {};
+
+    profiles.forEach((profile) => {
+      profileLookup[profile.fid.toString()] = profile;
+    });
+
+    const withProfiles = validated.data.map((receipt) => {
+      const senderProfile = profileLookup[receipt.senderFid.toString()];
+      const recipientProfile = profileLookup[receipt.recipientFid.toString()];
+
+      return {
+        ...receipt,
+        senderProfile: senderProfile || null,
+        recipientProfile: recipientProfile || null,
+      } as BeamReceipt;
+    });
+
+    return withProfiles as BeamReceipt[];
+  } catch (error) {
+    console.error('Error fetching recent subs', error);
+    throw Error;
+  }
 };

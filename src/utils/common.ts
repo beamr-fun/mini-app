@@ -1,5 +1,6 @@
-import { formatUnits, parseUnits } from 'viem';
+import { formatUnits } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { formatDistanceToNowStrict } from 'date-fns';
 
 export const truncateAddress = (address: string, length = 6): string => {
   return `${address.slice(0, length)}...${address.slice(-length)}`;
@@ -109,4 +110,29 @@ export const calculateFeeFromNet = (
   return principle - netAmount;
 };
 
-console.log('calculateFeeFromNet', calculateFeeFromNet(1000n, 2.5));
+export function timeAgo(timestamp: string | Date | number): string {
+  const date = new Date(timestamp);
+
+  const distance = formatDistanceToNowStrict(date, { addSuffix: false });
+
+  // Convert to short format
+  const shortMap: Record<string, string> = {
+    second: 's',
+    seconds: 's',
+    minute: 'm',
+    minutes: 'm',
+    hour: 'h',
+    hours: 'h',
+    day: 'd',
+    days: 'd',
+    month: 'mo',
+    months: 'mo',
+    year: 'y',
+    years: 'y',
+  };
+
+  const [value, unit] = distance.split(' ');
+  const shortUnit = shortMap[unit] || unit;
+
+  return `${value}${shortUnit}`;
+}
