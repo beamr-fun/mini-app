@@ -7,10 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: [
-      'goal-amend-programming-ireland.trycloudflare.com',
-      'https://mini-app-production-96b0.up.railway.app',
-    ],
+    allowedHosts: ['emphasis-sweet-nec-drives.trycloudflare.com'],
   },
   preview: {
     host: true,
