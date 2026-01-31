@@ -107,7 +107,10 @@ ogRoute.get('/reply.png', async (req, res) => {
     const profiles = await getUsersByFIDs(sendersFid);
     const pfpUrls = profiles.map((profile) => profile.pfp_url);
 
-    const templatePath = path.join(__dirname, `../public/img/reply-${6}.png`);
+    const templatePath = path.join(
+      __dirname,
+      `../public/img/reply-${count}.png`
+    );
 
     const pfpBuffers = await Promise.all(pfpUrls.map((url) => bufferPfp(url)));
 
