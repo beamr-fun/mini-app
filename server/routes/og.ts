@@ -47,9 +47,7 @@ const bufferPfp = async (url?: string) => {
     .toBuffer();
 };
 
-ogRoute.get('/reply', (req, res) => {
-  console.log('fired');
-
+ogRoute.get('/reply-embed', (req, res) => {
   try {
     const senders = req.query.senders as string;
 
@@ -88,8 +86,7 @@ ogRoute.get('/reply', (req, res) => {
   }
 });
 
-ogRoute.get('/reply.png', async (req, res) => {
-  console.log('fired png');
+ogRoute.get('/reply-embed.png', async (req, res) => {
   try {
     const senders = req.query.senders as string;
 

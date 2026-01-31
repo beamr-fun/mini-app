@@ -8,7 +8,7 @@
     "start": "tsx server/index.ts",
     "gen": "graphql-codegen --config codegen.cjs",
     "manifest": "node genManifest",
-    "build": "node genManifest && tsc && vite build",
+    "build": "node genManifest && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "tunnel": "cloudflared tunnel --url http://localhost:5173",
