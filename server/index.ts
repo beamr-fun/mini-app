@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
-import { ogRoute } from './routes/og';
+import { ogRoute } from './routes/ogRoutes';
 import { readFileSync } from 'fs';
 
 dotenv.config();

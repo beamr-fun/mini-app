@@ -1,53 +1,10 @@
-import { Router } from 'express';
-import { getUsersByFIDs } from '../utils/neynar';
+import { Request, Response } from 'express';
+import { bufferPfp, REPLY_COORDINATES } from '../utils/render';
 import sharp from 'sharp';
+import { getUsersByFIDs } from '../utils/neynar';
 import path from 'path';
 
-const __dirname = import.meta.dirname;
-
-export const ogRoute = Router();
-
-const COORDINATES = [
-  [153, 195],
-  [345, 83],
-  [680, 125],
-  [646, 291],
-  [556, 417],
-  [214, 434],
-];
-
-const PFP_SIZE = 50;
-
-const bufferPfp = async (url?: string) => {
-  if (!url) {
-    return sharp({
-      create: {
-        width: PFP_SIZE,
-        height: PFP_SIZE,
-        channels: 4,
-        background: { r: 50, g: 50, b: 50, alpha: 1 },
-      },
-    })
-      .png()
-      .toBuffer();
-  }
-
-  const response = await fetch(url);
-
-  const buffer = Buffer.from(await response.arrayBuffer());
-
-  const circleMask = Buffer.from(
-    `<svg><circle cx="${PFP_SIZE / 2}" cy="${PFP_SIZE / 2}" r="${PFP_SIZE / 2}" fill="white"/></svg>`
-  );
-
-  return sharp(buffer)
-    .resize(PFP_SIZE, PFP_SIZE)
-    .composite([{ input: circleMask, blend: 'dest-in' }])
-    .png()
-    .toBuffer();
-};
-
-ogRoute.get('/reply-embed', (req, res) => {
+export const getReplyEmbed = (req: Request, res: Response) => {
   try {
     const senders = req.query.senders as string;
 
@@ -83,11 +40,13 @@ ogRoute.get('/reply-embed', (req, res) => {
     </html>`);
   } catch (error) {
     console.error('Error generating OG reply:', error);
+    return res.status(500).send('Internal Server Error');
   }
-});
+};
 
-ogRoute.get('/reply-embed.png', async (req, res) => {
+export const getReplyImg = async (req: Request, res: Response) => {
   try {
+    const __dirname = import.meta.dirname;
     const senders = req.query.senders as string;
 
     if (!senders) {
@@ -113,8 +72,8 @@ ogRoute.get('/reply-embed.png', async (req, res) => {
 
     const composites = pfpBuffers.map((buffer, i) => ({
       input: buffer,
-      left: COORDINATES[i][0],
-      top: COORDINATES[i][1],
+      left: REPLY_COORDINATES[i][0],
+      top: REPLY_COORDINATES[i][1],
     }));
 
     const result = await sharp(templatePath)
@@ -124,8 +83,9 @@ ogRoute.get('/reply-embed.png', async (req, res) => {
 
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=60');
-    res.send(result);
+    return res.send(result);
   } catch (error) {
     console.error('Error generating OG reply image:', error);
+    return res.status(500).send('Internal Server Error');
   }
-});
+};
