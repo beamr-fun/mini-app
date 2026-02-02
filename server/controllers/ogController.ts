@@ -4,6 +4,47 @@ import sharp from 'sharp';
 import { getUsersByFIDs } from '../utils/neynar';
 import path from 'path';
 
+export const getShareEmbed = (req: Request, res: Response) => {
+  try {
+    const receivers = req.query.receivers as string;
+
+    if (!receivers) {
+      return res.status(400).send('Missing receivers parameter');
+    }
+
+    const baseUrl = `https://${req.get('host')}`;
+
+    const imageUrl = `${baseUrl}/og/share.png?receivers=${receivers}`;
+
+    const embed = {
+      version: '1',
+      imageUrl,
+      button: {
+        title: 'Open Beamr',
+        action: {
+          type: 'launch_miniapp',
+          name: 'Beamr',
+          url: `${baseUrl}?receivers=${receivers}`,
+          splashImageUrl: `${baseUrl}/images/splash.png`,
+          splashBackgroundColor: '#0F0E0E',
+        },
+      },
+    };
+
+    return res.type('text/html').send(`<!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="fc:miniapp" content='${JSON.stringify(embed)}' />
+      <meta name="fc:frame" content='${JSON.stringify(embed)}' />
+    </head>
+    <body></body>
+    </html>`);
+  } catch (error) {
+    console.error('Error generating OG share:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+};
+
 export const getReplyEmbed = (req: Request, res: Response) => {
   try {
     const senders = req.query.senders as string;
@@ -78,10 +119,10 @@ export const getReplyImg = async (req: Request, res: Response) => {
 
     const result = await sharp(templatePath)
       .composite(composites)
-      .png()
+      .webp()
       .toBuffer();
 
-    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Type', 'image/webp');
     res.setHeader('Cache-Control', 'public, max-age=60');
     return res.send(result);
   } catch (error) {
