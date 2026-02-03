@@ -7,10 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: [
-      'allied-employ-forecast-connections.trycloudflare.com',
-      'https://mini-app-production-96b0.up.railway.app',
-    ],
+    allowedHosts: ['collect-renew-python-missions.trycloudflare.com '],
   },
   preview: {
     host: true,
