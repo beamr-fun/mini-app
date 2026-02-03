@@ -150,8 +150,6 @@ export const getReplyImg = async (req: Request, res: Response) => {
 
 export const getFollowEmbed = async (req: Request, res: Response) => {
   try {
-    console.log('get');
-    // const __dirname = import.meta.dirname;
     const validated = followEmbedSchema.safeParse(req.query);
 
     if (!validated.success) {
@@ -163,8 +161,6 @@ export const getFollowEmbed = async (req: Request, res: Response) => {
 
     const baseUrl = `https://${req.get('host')}`;
     const imageUrl = `${baseUrl}/og/follow-embed.png?sender=${sender}&receiver=${receiver}&flowrate=${flowrate.toString()}`;
-
-    console.log('imageUrl', imageUrl);
 
     const embed = {
       version: '1',
@@ -196,7 +192,6 @@ export const getFollowEmbed = async (req: Request, res: Response) => {
 };
 
 export const getFollowImg = async (req: Request, res: Response) => {
-  console.log('img');
   try {
     const __dirname = import.meta.dirname;
     const validated = followEmbedSchema.safeParse(req.query);
