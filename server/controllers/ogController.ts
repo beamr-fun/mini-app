@@ -10,7 +10,7 @@ import {
 import sharp from 'sharp';
 import { getUsersByFIDs } from '../utils/neynar';
 import path from 'path';
-import { size, z } from 'zod';
+import { z } from 'zod';
 
 export const getShareEmbed = (req: Request, res: Response) => {
   try {
@@ -63,7 +63,7 @@ const replyEmbedSchema = z.object({
       (s) => s.split(',').every((id) => /^\d+$/.test(id)),
       'All sender FIDs must be numeric'
     )
-    .transform((s) => s.split(',').map(Number)),
+    .transform((s) => s.split(',').map(Number).slice(0, 6)),
   receiver: numericString.transform(Number),
   flowrate: numericString.transform(BigInt),
 });
@@ -95,8 +95,6 @@ export const getReplyEmbed = (req: Request, res: Response) => {
         },
       },
     };
-
-    console.log('embed', embed);
 
     return res.type('text/html').send(`<!DOCTYPE html>
     <html>
