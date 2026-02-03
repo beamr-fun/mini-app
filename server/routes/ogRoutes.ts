@@ -4,4 +4,4 @@ import { getReplyEmbed, getReplyImg } from '../controllers/ogController';
 export const ogRoute = Router();
 
 ogRoute.get('/reply-embed', getReplyEmbed);
-ogRoute.get('/reply-embed.webp', getReplyImg);
+ogRoute.get('/reply-embed.png', getReplyImg);

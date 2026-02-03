@@ -1,8 +1,16 @@
 import { Request, Response } from 'express';
-import { bufferPfp, REPLY_COORDINATES } from '../utils/render';
+import {
+  bufferPfp,
+  RECEIVER_PFP_SIZE,
+  REPLY_AVATAR_COORDINATES,
+  REPLY_TEMPLATE_COORDINATES,
+  SENDER_PFP_SIZE,
+  TOKEN_LOGO_SIZE,
+} from '../utils/render';
 import sharp from 'sharp';
 import { getUsersByFIDs } from '../utils/neynar';
 import path from 'path';
+import { size, z } from 'zod';
 
 export const getShareEmbed = (req: Request, res: Response) => {
   try {
@@ -45,16 +53,33 @@ export const getShareEmbed = (req: Request, res: Response) => {
   }
 };
 
+const numericString = z.string().regex(/^\d+$/, 'Must be a numeric string');
+
+const replyEmbedSchema = z.object({
+  senders: z
+    .string()
+    .min(1)
+    .refine(
+      (s) => s.split(',').every((id) => /^\d+$/.test(id)),
+      'All sender FIDs must be numeric'
+    )
+    .transform((s) => s.split(',').map(Number)),
+  receiver: numericString.transform(Number),
+  flowrate: numericString.transform(BigInt),
+});
+
 export const getReplyEmbed = (req: Request, res: Response) => {
   try {
-    const senders = req.query.senders as string;
+    const validated = replyEmbedSchema.safeParse(req.query);
 
-    if (!senders) {
+    if (!validated.success) {
       return res.status(400).send('Missing senders parameter');
     }
 
+    const { senders, receiver, flowrate } = validated.data;
+
     const baseUrl = `https://${req.get('host')}`;
-    const imageUrl = `${baseUrl}/og/reply.png?senders=${senders}`;
+    const imageUrl = `${baseUrl}/og/reply-embed.png?senders=${senders}&receiver=${receiver}&flowrate=${flowrate.toString()}`;
 
     const embed = {
       version: '1',
@@ -64,12 +89,14 @@ export const getReplyEmbed = (req: Request, res: Response) => {
         action: {
           type: 'launch_miniapp',
           name: 'Beamr',
-          url: `${baseUrl}?senders=${senders}`,
+          url: `${baseUrl}?senders=${senders}&receiver=${receiver}&flowrate=${flowrate.toString()}`,
           splashImageUrl: `${baseUrl}/images/splash.png`,
           splashBackgroundColor: '#0F0E0E',
         },
       },
     };
+
+    console.log('embed', embed);
 
     return res.type('text/html').send(`<!DOCTYPE html>
     <html>
@@ -88,42 +115,67 @@ export const getReplyEmbed = (req: Request, res: Response) => {
 export const getReplyImg = async (req: Request, res: Response) => {
   try {
     const __dirname = import.meta.dirname;
-    const senders = req.query.senders as string;
+    const validated = replyEmbedSchema.safeParse(req.query);
 
-    if (!senders) {
+    if (!validated.success) {
       return res.status(400).send('Missing senders parameter');
     }
+    const { senders, receiver } = validated.data;
 
-    const sendersFid = senders
-      .split(',')
-      .map((s) => Number(s.trim()))
-      .slice(0, 6);
+    const count = senders.length;
 
-    const count = sendersFid.length;
+    const profiles = await getUsersByFIDs([...senders, receiver]);
 
-    const profiles = await getUsersByFIDs(sendersFid);
     const pfpUrls = profiles.map((profile) => profile.pfp_url);
+    const senderPfpUrls = pfpUrls.slice(0, -1);
+    const receiverPfpUrl = pfpUrls[pfpUrls.length - 1];
 
     const templatePath = path.join(
       __dirname,
       `../public/img/reply-${count}.png`
     );
 
-    const pfpBuffers = await Promise.all(pfpUrls.map((url) => bufferPfp(url)));
+    const tokenLogoPath = path.join(
+      __dirname,
+      '../public/img/beamrTokenLogo.png'
+    );
 
-    const composites = pfpBuffers.map((buffer, i) => ({
-      input: buffer,
-      left: REPLY_COORDINATES[i][0],
-      top: REPLY_COORDINATES[i][1],
-    }));
+    const senderPfps = await Promise.all(
+      senderPfpUrls.map((url) => bufferPfp(url || '', SENDER_PFP_SIZE))
+    );
+
+    const receiverPfp = await bufferPfp(
+      receiverPfpUrl || '',
+      RECEIVER_PFP_SIZE
+    );
+
+    const composites = [
+      ...senderPfps.map((buffer, i) => ({
+        input: buffer,
+        left: REPLY_AVATAR_COORDINATES[i][0],
+        top: REPLY_AVATAR_COORDINATES[i][1],
+      })),
+      {
+        input: receiverPfp,
+        left: REPLY_TEMPLATE_COORDINATES.RECEIVER[0],
+        top: REPLY_TEMPLATE_COORDINATES.RECEIVER[1],
+      },
+      {
+        input: tokenLogoPath,
+        left: REPLY_TEMPLATE_COORDINATES.TOKEN_LOGO[0],
+        top: REPLY_TEMPLATE_COORDINATES.TOKEN_LOGO[1],
+        size: TOKEN_LOGO_SIZE,
+      },
+    ];
 
     const result = await sharp(templatePath)
       .composite(composites)
-      .webp()
+      .png()
       .toBuffer();
 
-    res.setHeader('Content-Type', 'image/webp');
+    res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=60');
+
     return res.send(result);
   } catch (error) {
     console.error('Error generating OG reply image:', error);
