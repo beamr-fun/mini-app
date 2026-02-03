@@ -35,6 +35,19 @@ const followEmbedSchema = z.object({
   flowrate: numericString.transform(BigInt),
 });
 
+const shareEmbedSchema = z.object({
+  receivers: z
+    .string()
+    .min(1)
+    .refine(
+      (s) => s.split(',').every((id) => /^\d+$/.test(id)),
+      'All sender FIDs must be numeric'
+    )
+    .transform((s) => s.split(',').map(Number).slice(0, 6)),
+  sender: numericString.transform(Number),
+  flowrate: numericString.transform(BigInt),
+});
+
 export const getReplyEmbed = (req: Request, res: Response) => {
   try {
     const validated = replyEmbedSchema.safeParse(req.query);
@@ -238,6 +251,49 @@ export const getFollowImg = async (req: Request, res: Response) => {
     return res.send(result);
   } catch (error) {
     console.error('Error generating OG follow image:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+};
+
+export const getShareEmbed = (req: Request, res: Response) => {
+  const validated = shareEmbedSchema.safeParse(req.query);
+
+  if (!validated.success) {
+    console.error('Invalid parameters for share embed:', validated.error);
+    return res.status(400).send('Invalid parameters');
+  }
+
+  const { sender, receivers, flowrate } = validated.data;
+
+  try {
+    const baseUrl = `https://${req.get('host')}`;
+    const imageUrl = `${baseUrl}/og/share-embed.png?sender=${sender}&receivers=${receivers}&flowrate=${flowrate}`;
+
+    const embed = {
+      version: '1',
+      imageUrl,
+      button: {
+        title: 'Open Beamr',
+        action: {
+          type: 'launch_miniapp',
+          name: 'Beamr',
+          url: baseUrl,
+          splashImageUrl: `${baseUrl}/images/splash.png`,
+          splashBackgroundColor: '#0F0E0E',
+        },
+      },
+    };
+
+    return res.type('text/html').send(`<!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="fc:miniapp" content='${JSON.stringify(embed)}' />
+      <meta name="fc:frame" content='${JSON.stringify(embed)}' />
+    </head>
+    <body></body>
+    </html>`);
+  } catch (error) {
+    console.error('Error generating OG share embed:', error);
     return res.status(500).send('Internal Server Error');
   }
 };
