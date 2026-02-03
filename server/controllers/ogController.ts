@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import {
   bufferPfp,
+  FOLLOW_AVATAR_COORDINATES,
+  FOLLOW_AVATAR_SIZE,
   RECEIVER_PFP_SIZE,
   REPLY_AVATAR_COORDINATES,
   REPLY_TEMPLATE_COORDINATES,
@@ -11,47 +13,6 @@ import sharp from 'sharp';
 import { getUsersByFIDs } from '../utils/neynar';
 import path from 'path';
 import { z } from 'zod';
-
-export const getShareEmbed = (req: Request, res: Response) => {
-  try {
-    const receivers = req.query.receivers as string;
-
-    if (!receivers) {
-      return res.status(400).send('Missing receivers parameter');
-    }
-
-    const baseUrl = `https://${req.get('host')}`;
-
-    const imageUrl = `${baseUrl}/og/share.png?receivers=${receivers}`;
-
-    const embed = {
-      version: '1',
-      imageUrl,
-      button: {
-        title: 'Open Beamr',
-        action: {
-          type: 'launch_miniapp',
-          name: 'Beamr',
-          url: `${baseUrl}?receivers=${receivers}`,
-          splashImageUrl: `${baseUrl}/images/splash.png`,
-          splashBackgroundColor: '#0F0E0E',
-        },
-      },
-    };
-
-    return res.type('text/html').send(`<!DOCTYPE html>
-    <html>
-    <head>
-      <meta name="fc:miniapp" content='${JSON.stringify(embed)}' />
-      <meta name="fc:frame" content='${JSON.stringify(embed)}' />
-    </head>
-    <body></body>
-    </html>`);
-  } catch (error) {
-    console.error('Error generating OG share:', error);
-    return res.status(500).send('Internal Server Error');
-  }
-};
 
 const numericString = z.string().regex(/^\d+$/, 'Must be a numeric string');
 
@@ -64,6 +25,12 @@ const replyEmbedSchema = z.object({
       'All sender FIDs must be numeric'
     )
     .transform((s) => s.split(',').map(Number).slice(0, 6)),
+  receiver: numericString.transform(Number),
+  flowrate: numericString.transform(BigInt),
+});
+
+const followEmbedSchema = z.object({
+  sender: numericString.transform(Number),
   receiver: numericString.transform(Number),
   flowrate: numericString.transform(BigInt),
 });
@@ -177,6 +144,105 @@ export const getReplyImg = async (req: Request, res: Response) => {
     return res.send(result);
   } catch (error) {
     console.error('Error generating OG reply image:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+};
+
+export const getFollowEmbed = async (req: Request, res: Response) => {
+  try {
+    console.log('get');
+    // const __dirname = import.meta.dirname;
+    const validated = followEmbedSchema.safeParse(req.query);
+
+    if (!validated.success) {
+      console.error('Invalid parameters for follow embed:', validated.error);
+      return res.status(400).send('Invalid parameters');
+    }
+
+    const { sender, receiver, flowrate } = validated.data;
+
+    const baseUrl = `https://${req.get('host')}`;
+    const imageUrl = `${baseUrl}/og/follow-embed.png?sender=${sender}&receiver=${receiver}&flowrate=${flowrate.toString()}`;
+
+    console.log('imageUrl', imageUrl);
+
+    const embed = {
+      version: '1',
+      imageUrl,
+      button: {
+        title: 'Open Beamr',
+        action: {
+          type: 'launch_miniapp',
+          name: 'Beamr',
+          url: baseUrl,
+          splashImageUrl: `${baseUrl}/images/splash.png`,
+          splashBackgroundColor: '#0F0E0E',
+        },
+      },
+    };
+
+    return res.type('text/html').send(`<!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="fc:miniapp" content='${JSON.stringify(embed)}' />
+      <meta name="fc:frame" content='${JSON.stringify(embed)}' />
+    </head>
+    <body></body>
+    </html>`);
+  } catch (error) {
+    console.error('Error generating OG follow embed:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+};
+
+export const getFollowImg = async (req: Request, res: Response) => {
+  console.log('img');
+  try {
+    const __dirname = import.meta.dirname;
+    const validated = followEmbedSchema.safeParse(req.query);
+
+    if (!validated.success) {
+      return res.status(400).send('Missing senders parameter');
+    }
+    const { sender, receiver } = validated.data;
+
+    const profiles = await getUsersByFIDs([sender, receiver]);
+
+    const pfpUrls = profiles.map((profile) => profile.pfp_url);
+
+    const senderPfpUrl = pfpUrls[0] || '';
+    const receiverPfpUrl = pfpUrls[1] || '';
+
+    const templatePath = path.join(__dirname, `../public/img/follow.png`);
+
+    const [senderPfp, receiverPfp] = await Promise.all([
+      bufferPfp(senderPfpUrl, FOLLOW_AVATAR_SIZE),
+      bufferPfp(receiverPfpUrl, FOLLOW_AVATAR_SIZE),
+    ]);
+
+    const composites = [
+      {
+        input: senderPfp,
+        left: FOLLOW_AVATAR_COORDINATES.SENDER[0],
+        top: FOLLOW_AVATAR_COORDINATES.SENDER[1],
+      },
+      {
+        input: receiverPfp,
+        left: FOLLOW_AVATAR_COORDINATES.RECEIVER[0],
+        top: FOLLOW_AVATAR_COORDINATES.RECEIVER[1],
+      },
+    ];
+
+    const result = await sharp(templatePath)
+      .composite(composites)
+      .png()
+      .toBuffer();
+
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    return res.send(result);
+  } catch (error) {
+    console.error('Error generating OG follow image:', error);
     return res.status(500).send('Internal Server Error');
   }
 };

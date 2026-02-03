@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['emphasis-sweet-nec-drives.trycloudflare.com'],
+    allowedHosts: ['collect-renew-python-missions.trycloudflare.com '],
   },
   preview: {
     host: true,

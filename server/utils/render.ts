@@ -9,6 +9,11 @@ export const REPLY_AVATAR_COORDINATES = [
   [214, 434],
 ];
 
+export const FOLLOW_AVATAR_COORDINATES = {
+  SENDER: [123, 357],
+  RECEIVER: [707, 357],
+};
+
 export const REPLY_TEMPLATE_COORDINATES = {
   RECEIVER: [407, 257],
   TOKEN_LOGO: [465, 315],
@@ -17,6 +22,7 @@ export const REPLY_TEMPLATE_COORDINATES = {
 export const SENDER_PFP_SIZE = 50;
 export const RECEIVER_PFP_SIZE = 86;
 export const TOKEN_LOGO_SIZE = 28;
+export const FOLLOW_AVATAR_SIZE = 70;
 
 export const bufferPfp = async (url: string, pfpSize: number) => {
   if (!url) {
