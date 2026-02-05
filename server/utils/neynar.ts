@@ -1,6 +1,7 @@
 import { Configuration, NeynarAPIClient } from '@neynar/nodejs-sdk';
 import { User } from '@neynar/nodejs-sdk/build/api';
 import { getNeynarUsers, setNeynarUsers } from './redis';
+import { withTimeout } from './render';
 
 if (!process.env.NEYNAR_API_KEY) {
   throw new Error('NEYNAR_API_KEY must be set in environment variables');
@@ -16,39 +17,45 @@ export const getNeynarClient = () => {
 };
 
 const handleGetUsersByFID = async (fids: number[]): Promise<User[]> => {
-  const client = getNeynarClient();
+  return withTimeout(
+    (async () => {
+      const client = getNeynarClient();
 
-  const cached = await getNeynarUsers(fids);
+      const cached = await getNeynarUsers(fids);
 
-  const cachedUsers = new Map<number, User>();
-  const missingFids: number[] = [];
+      const cachedUsers = new Map<number, User>();
+      const missingFids: number[] = [];
 
-  cached.forEach((value, i) => {
-    if (value) {
-      cachedUsers.set(fids[i], value as User);
-    } else {
-      missingFids.push(fids[i]);
-    }
-  });
+      cached.forEach((value, i) => {
+        if (value) {
+          cachedUsers.set(fids[i], value as User);
+        } else {
+          missingFids.push(fids[i]);
+        }
+      });
 
-  if (missingFids.length) {
-    const data = await client.fetchBulkUsers({
-      fids: missingFids,
-    });
+      if (missingFids.length) {
+        const data = await client.fetchBulkUsers({
+          fids: missingFids,
+        });
 
-    if (!data || !data.users) {
-      throw new Error('Failed to fetch users from Neynar');
-    }
+        if (!data || !data.users) {
+          throw new Error('Failed to fetch users from Neynar');
+        }
 
-    await setNeynarUsers(data.users);
-    for (const user of data.users) {
-      cachedUsers.set(user.fid, user);
-    }
-  }
+        await setNeynarUsers(data.users);
+        for (const user of data.users) {
+          cachedUsers.set(user.fid, user);
+        }
+      }
 
-  return fids
-    .map((fid) => cachedUsers.get(fid))
-    .filter((user): user is User => user !== undefined);
+      return fids
+        .map((fid) => cachedUsers.get(fid))
+        .filter((user): user is User => user !== undefined);
+    })(),
+    3000,
+    'Neynar getUsersByFIDs'
+  );
 };
 
 export const getUsersByFIDs = async (fids: number[]): Promise<User[]> => {

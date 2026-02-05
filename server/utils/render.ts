@@ -81,7 +81,7 @@ function detectImageFormat(buffer: Buffer): string | null {
   return null;
 }
 
-function withTimeout<T>(
+export function withTimeout<T>(
   promise: Promise<T>,
   ms: number,
   operation: string
