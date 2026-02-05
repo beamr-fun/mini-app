@@ -53,6 +53,7 @@ export const getReplyEmbed = (req: Request, res: Response) => {
     const validated = replyEmbedSchema.safeParse(req.query);
 
     if (!validated.success) {
+      console.error('Invalid parameters for reply embed:', validated.error);
       return res.status(400).send('Missing senders parameter');
     }
 
@@ -309,4 +310,12 @@ export const getShareImg = async (req: Request, res: Response) => {
   const { sender, receivers } = validated.data;
 
   const profiles = await getUsersByFIDs([sender, ...receivers]);
+
+  const pfpUrls = profiles.map((profile) => profile.pfp_url);
+
+  const senderPfpUrl = pfpUrls[0] || '';
+
+  const receiverPfpUrls = pfpUrls.slice(1);
+
+  const receiverCount = receiverPfpUrls.length;
 };

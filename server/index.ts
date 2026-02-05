@@ -3,14 +3,16 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { ogRoute } from './routes/ogRoutes';
 import { readFileSync } from 'fs';
+import morgan from 'morgan';
 
 dotenv.config();
 
 const __dirname = import.meta.dirname;
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
+
+app.use(morgan('dev'));
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'OK' });
