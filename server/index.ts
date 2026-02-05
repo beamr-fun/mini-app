@@ -28,6 +28,12 @@ app.use(express.static(path.join(__dirname, '../dist')));
 
 app.use('/og', ogRoute);
 
+app.use('/api/webhook', (req, res) => {
+  console.log('req.headers', req.headers);
+  console.log('req.body', req.body);
+  res.status(200).send('Webhook received');
+});
+
 app.use((req, _res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
