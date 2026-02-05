@@ -297,3 +297,16 @@ export const getShareEmbed = (req: Request, res: Response) => {
     return res.status(500).send('Internal Server Error');
   }
 };
+
+export const getShareImg = async (req: Request, res: Response) => {
+  const __dirname = import.meta.dirname;
+  const validated = shareEmbedSchema.safeParse(req.query);
+
+  if (!validated.success) {
+    return res.status(400).send('Missing senders parameter');
+  }
+
+  const { sender, receivers } = validated.data;
+
+  const profiles = await getUsersByFIDs([sender, ...receivers]);
+};
