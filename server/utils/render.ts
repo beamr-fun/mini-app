@@ -10,6 +10,11 @@ export const REPLY_AVATAR_COORDINATES = [
 ];
 
 export const SHARE_AVATAR_COORDINATES = [
+  [[306, 366]],
+  [
+    [306, 366],
+    [425, 127],
+  ],
   [
     [306, 366],
     [425, 127],
@@ -48,8 +53,8 @@ export const REPLY_TEMPLATE_COORDINATES = {
   TOKEN_LOGO: [465, 315],
 };
 
-export const SENDER_PFP_SIZE = 50;
-export const RECEIVER_PFP_SIZE = 86;
+export const SMALL_PFP_SIZE = 50;
+export const CENTRAL_PFP_SIZE = 86;
 export const TOKEN_LOGO_SIZE = 28;
 export const FOLLOW_AVATAR_SIZE = 70;
 
