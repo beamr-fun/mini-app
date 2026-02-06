@@ -3,10 +3,11 @@ import {
   bufferPfp,
   FOLLOW_AVATAR_COORDINATES,
   FOLLOW_AVATAR_SIZE,
-  RECEIVER_PFP_SIZE,
+  SMALL_PFP_SIZE,
   REPLY_AVATAR_COORDINATES,
   REPLY_TEMPLATE_COORDINATES,
-  SENDER_PFP_SIZE,
+  CENTRAL_PFP_SIZE,
+  SHARE_AVATAR_COORDINATES,
   TOKEN_LOGO_SIZE,
 } from '../utils/render';
 import sharp from 'sharp';
@@ -35,11 +36,25 @@ const followEmbedSchema = z.object({
   flowrate: numericString.transform(BigInt),
 });
 
+const shareEmbedSchema = z.object({
+  receivers: z
+    .string()
+    .min(1)
+    .refine(
+      (s) => s.split(',').every((id) => /^\d+$/.test(id)),
+      'All sender FIDs must be numeric'
+    )
+    .transform((s) => s.split(',').map(Number).slice(0, 6)),
+  sender: numericString.transform(Number),
+  flowrate: numericString.transform(BigInt),
+});
+
 export const getReplyEmbed = (req: Request, res: Response) => {
   try {
     const validated = replyEmbedSchema.safeParse(req.query);
 
     if (!validated.success) {
+      console.error('Invalid parameters for reply embed:', validated.error);
       return res.status(400).send('Missing senders parameter');
     }
 
@@ -106,13 +121,10 @@ export const getReplyImg = async (req: Request, res: Response) => {
     );
 
     const senderPfps = await Promise.all(
-      senderPfpUrls.map((url) => bufferPfp(url || '', SENDER_PFP_SIZE))
+      senderPfpUrls.map((url) => bufferPfp(url || '', SMALL_PFP_SIZE))
     );
 
-    const receiverPfp = await bufferPfp(
-      receiverPfpUrl || '',
-      RECEIVER_PFP_SIZE
-    );
+    const receiverPfp = await bufferPfp(receiverPfpUrl || '', CENTRAL_PFP_SIZE);
 
     const composites = [
       ...senderPfps.map((buffer, i) => ({
@@ -238,6 +250,123 @@ export const getFollowImg = async (req: Request, res: Response) => {
     return res.send(result);
   } catch (error) {
     console.error('Error generating OG follow image:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+};
+
+export const getShareEmbed = (req: Request, res: Response) => {
+  try {
+    const validated = shareEmbedSchema.safeParse(req.query);
+
+    if (!validated.success) {
+      console.error('Invalid parameters for share embed:', validated.error);
+      return res.status(400).send('Invalid parameters');
+    }
+
+    const { sender, receivers, flowrate } = validated.data;
+    const baseUrl = `https://${req.get('host')}`;
+    const imageUrl = `${baseUrl}/og/share-embed.png?sender=${sender}&receivers=${receivers}&flowrate=${flowrate}`;
+
+    const embed = {
+      version: '1',
+      imageUrl,
+      button: {
+        title: 'Open Beamr',
+        action: {
+          type: 'launch_miniapp',
+          name: 'Beamr',
+          url: baseUrl,
+          splashImageUrl: `${baseUrl}/images/splash.png`,
+          splashBackgroundColor: '#0F0E0E',
+        },
+      },
+    };
+
+    return res.type('text/html').send(`<!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="fc:miniapp" content='${JSON.stringify(embed)}' />
+      <meta name="fc:frame" content='${JSON.stringify(embed)}' />
+    </head>
+    <body></body>
+    </html>`);
+  } catch (error) {
+    console.error('Error generating OG share embed:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+};
+
+export const getShareImg = async (req: Request, res: Response) => {
+  try {
+    const __dirname = import.meta.dirname;
+    const validated = shareEmbedSchema.safeParse(req.query);
+
+    if (!validated.success) {
+      return res.status(400).send('Missing senders parameter');
+    }
+
+    const { sender, receivers } = validated.data;
+
+    const profiles = await getUsersByFIDs([sender, ...receivers]);
+
+    const pfpUrls = profiles.map((profile) => profile.pfp_url);
+
+    const senderPfpUrl = pfpUrls[0] || '';
+
+    const receiverPfpUrls = pfpUrls.slice(1, 7);
+
+    const receiverCount = receiverPfpUrls.length;
+
+    if (receiverCount === 0) {
+      return res.status(400).send('At least one receiver is required');
+    }
+
+    const coords = SHARE_AVATAR_COORDINATES[receiverCount - 1];
+
+    const templatePath = path.join(
+      __dirname,
+      `../public/img/share-${receiverCount < 3 ? 3 : receiverCount}.png`
+    );
+
+    const senderPfp = await bufferPfp(senderPfpUrl, CENTRAL_PFP_SIZE);
+
+    const receiverPfps = await Promise.all(
+      receiverPfpUrls.map((url) => bufferPfp(url || '', SMALL_PFP_SIZE))
+    );
+    const tokenLogoPath = path.join(
+      __dirname,
+      '../public/img/beamrTokenLogo.png'
+    );
+
+    const composites = [
+      ...receiverPfps.map((buffer, i) => ({
+        input: buffer,
+        left: coords[i][0],
+        top: coords[i][1],
+      })),
+      {
+        input: senderPfp,
+        left: REPLY_TEMPLATE_COORDINATES.RECEIVER[0],
+        top: REPLY_TEMPLATE_COORDINATES.RECEIVER[1],
+      },
+      {
+        input: tokenLogoPath,
+        left: REPLY_TEMPLATE_COORDINATES.TOKEN_LOGO[0],
+        top: REPLY_TEMPLATE_COORDINATES.TOKEN_LOGO[1],
+        size: TOKEN_LOGO_SIZE,
+      },
+    ];
+
+    const result = await sharp(templatePath)
+      .composite(composites)
+      .png()
+      .toBuffer();
+
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    return res.send(result);
+  } catch (error) {
+    console.error('Error generating OG share image:', error);
     return res.status(500).send('Internal Server Error');
   }
 };
