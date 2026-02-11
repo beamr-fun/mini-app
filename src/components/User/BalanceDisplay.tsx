@@ -39,6 +39,7 @@ export const BalanceDisplay = ({
     userBalance,
     userBalanceFetchedAt,
     collectionFlowRate,
+    user,
   } = useUser();
 
   const { userPoolAddress } = usePoolAccount();
@@ -183,8 +184,12 @@ export const BalanceDisplay = ({
         ?.map((item) => item.to.profile?.username)
         .filter(Boolean) as string[];
 
+      const fids = topOutgoing.map((item) => item.to.fid).slice(0, 6);
+
       sdk.actions.composeCast({
-        embeds: ['https://app.beamr.fun'],
+        embeds: [
+          `https://app.beamr.fun/og/share-embed?sender=${user?.fid}&receivers=${fids.join(',')}&flowrate=0`,
+        ],
         text: `Just launched my @beamr microsubscription pool: I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to the Farcasters I interact with.
 
 ${formatList(names.map((n) => `@${n}`))} are my first microsubs.
@@ -192,17 +197,21 @@ ${formatList(names.map((n) => `@${n}`))} are my first microsubs.
 Claim your $BEAMR streams and start your own pool in the app:`,
       });
     } else {
-      const top5 = topOutgoing?.slice(0, 5);
+      const top6 = topOutgoing?.slice(0, 6);
 
-      const top5Names = top5
+      const top6Names = top6
         ?.map((item) => item.to.profile?.username)
         .filter(Boolean) as string[];
 
+      const top6Fids = top6?.map((item) => item.to.fid).filter(Boolean);
+
       sdk.actions.composeCast({
-        embeds: ['https://app.beamr.fun'],
+        embeds: [
+          `https://app.beamr.fun/og/share-embed?sender=${user?.fid}&receivers=${top6Fids.join(',')}&flowrate=0`,
+        ],
         text: `I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to Farcasters I interact with.
        
-${formatList(top5Names.map((name) => `@${name}`))} are my top microsubs.
+${formatList(top6Names.map((name) => `@${name}`))} are my top microsubs.
 
 Claim your $BEAMR streams and start your own pool in the app:`,
       });

@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['collect-renew-python-missions.trycloudflare.com '],
+    allowedHosts: ['vat-phillips-institution-spies.trycloudflare.com'],
   },
   preview: {
     host: true,
