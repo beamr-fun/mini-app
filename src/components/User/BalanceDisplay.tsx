@@ -44,6 +44,21 @@ export const BalanceDisplay = ({
 
   const { userPoolAddress } = usePoolAccount();
 
+  const getOutgoingBeamFlowRate = (item: {
+    beamPool?: { creatorFlowRate?: bigint | string; totalUnits?: bigint | string } | null;
+    units?: bigint | string;
+  }) => {
+    const creatorFlowRate = BigInt(item.beamPool?.creatorFlowRate || 0);
+    const totalUnits = BigInt(item.beamPool?.totalUnits || 0);
+    const units = BigInt(item.units || 0);
+
+    if (totalUnits === 0n) {
+      return 0n;
+    }
+
+    return (creatorFlowRate / totalUnits) * units;
+  };
+
   const {
     connectedIncoming,
     amtUnconnected,
@@ -122,10 +137,7 @@ export const BalanceDisplay = ({
     let total = 0n;
 
     userSubscription.outgoing.forEach((item) => {
-      const perUnitFlowRate =
-        BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
-      const beamFlowRate = perUnitFlowRate * BigInt(item.units);
-      total += beamFlowRate;
+      total += getOutgoingBeamFlowRate(item);
     });
 
     if (collectionFlowRate) {
@@ -168,13 +180,8 @@ export const BalanceDisplay = ({
     }
 
     const topOutgoing = userSubscription?.outgoing?.sort((a, b) => {
-      const perUnitFlowRateA =
-        BigInt(a.beamPool?.flowRate) / BigInt(a.beamPool?.totalUnits);
-      const beamFlowRateA = perUnitFlowRateA * BigInt(a.units);
-
-      const perUnitFlowRateB =
-        BigInt(b.beamPool?.flowRate) / BigInt(b.beamPool?.totalUnits);
-      const beamFlowRateB = perUnitFlowRateB * BigInt(b.units);
+      const beamFlowRateA = getOutgoingBeamFlowRate(a);
+      const beamFlowRateB = getOutgoingBeamFlowRate(b);
 
       return beamFlowRateB > beamFlowRateA ? 1 : -1;
     });

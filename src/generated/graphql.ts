@@ -72,6 +72,7 @@ export type BeamPool = {
   /** An object relationship */
   creatorAccount?: Maybe<UserAccount>;
   creatorAccount_id: Scalars['String'];
+  creatorFlowRate: Scalars['numeric'];
   creator_id: Scalars['String'];
   /** An array relationship */
   distributionUpdates: Array<DistributionUpdated>;
@@ -144,6 +145,7 @@ export type BeamPool_Avg_Order_By = {
   adjustmentFlowRate?: InputMaybe<Order_By>;
   beamCount?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
+  creatorFlowRate?: InputMaybe<Order_By>;
   flowRate?: InputMaybe<Order_By>;
   lastUpdated?: InputMaybe<Order_By>;
   totalUnits?: InputMaybe<Order_By>;
@@ -165,6 +167,7 @@ export type BeamPool_Bool_Exp = {
   creator?: InputMaybe<User_Bool_Exp>;
   creatorAccount?: InputMaybe<UserAccount_Bool_Exp>;
   creatorAccount_id?: InputMaybe<String_Comparison_Exp>;
+  creatorFlowRate?: InputMaybe<Numeric_Comparison_Exp>;
   creator_id?: InputMaybe<String_Comparison_Exp>;
   distributionUpdates?: InputMaybe<DistributionUpdated_Bool_Exp>;
   flowRate?: InputMaybe<Numeric_Comparison_Exp>;
@@ -190,6 +193,7 @@ export type BeamPool_Max_Order_By = {
   beamR_id?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
   creatorAccount_id?: InputMaybe<Order_By>;
+  creatorFlowRate?: InputMaybe<Order_By>;
   creator_id?: InputMaybe<Order_By>;
   flowRate?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -209,6 +213,7 @@ export type BeamPool_Min_Order_By = {
   beamR_id?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
   creatorAccount_id?: InputMaybe<Order_By>;
+  creatorFlowRate?: InputMaybe<Order_By>;
   creator_id?: InputMaybe<Order_By>;
   flowRate?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
@@ -233,6 +238,7 @@ export type BeamPool_Order_By = {
   creator?: InputMaybe<User_Order_By>;
   creatorAccount?: InputMaybe<UserAccount_Order_By>;
   creatorAccount_id?: InputMaybe<Order_By>;
+  creatorFlowRate?: InputMaybe<Order_By>;
   creator_id?: InputMaybe<Order_By>;
   distributionUpdates_aggregate?: InputMaybe<DistributionUpdated_Aggregate_Order_By>;
   flowRate?: InputMaybe<Order_By>;
@@ -267,6 +273,8 @@ export enum BeamPool_Select_Column {
   /** column name */
   CreatorAccountId = 'creatorAccount_id',
   /** column name */
+  CreatorFlowRate = 'creatorFlowRate',
+  /** column name */
   CreatorId = 'creator_id',
   /** column name */
   FlowRate = 'flowRate',
@@ -293,6 +301,7 @@ export type BeamPool_Stddev_Order_By = {
   adjustmentFlowRate?: InputMaybe<Order_By>;
   beamCount?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
+  creatorFlowRate?: InputMaybe<Order_By>;
   flowRate?: InputMaybe<Order_By>;
   lastUpdated?: InputMaybe<Order_By>;
   totalUnits?: InputMaybe<Order_By>;
@@ -303,6 +312,7 @@ export type BeamPool_Stddev_Pop_Order_By = {
   adjustmentFlowRate?: InputMaybe<Order_By>;
   beamCount?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
+  creatorFlowRate?: InputMaybe<Order_By>;
   flowRate?: InputMaybe<Order_By>;
   lastUpdated?: InputMaybe<Order_By>;
   totalUnits?: InputMaybe<Order_By>;
@@ -313,6 +323,7 @@ export type BeamPool_Stddev_Samp_Order_By = {
   adjustmentFlowRate?: InputMaybe<Order_By>;
   beamCount?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
+  creatorFlowRate?: InputMaybe<Order_By>;
   flowRate?: InputMaybe<Order_By>;
   lastUpdated?: InputMaybe<Order_By>;
   totalUnits?: InputMaybe<Order_By>;
@@ -335,6 +346,7 @@ export type BeamPool_Stream_Cursor_Value_Input = {
   beamR_id?: InputMaybe<Scalars['String']>;
   chainId?: InputMaybe<Scalars['Int']>;
   creatorAccount_id?: InputMaybe<Scalars['String']>;
+  creatorFlowRate?: InputMaybe<Scalars['numeric']>;
   creator_id?: InputMaybe<Scalars['String']>;
   flowRate?: InputMaybe<Scalars['numeric']>;
   hasDistributed?: InputMaybe<Scalars['Boolean']>;
@@ -352,6 +364,7 @@ export type BeamPool_Sum_Order_By = {
   adjustmentFlowRate?: InputMaybe<Order_By>;
   beamCount?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
+  creatorFlowRate?: InputMaybe<Order_By>;
   flowRate?: InputMaybe<Order_By>;
   lastUpdated?: InputMaybe<Order_By>;
   totalUnits?: InputMaybe<Order_By>;
@@ -362,6 +375,7 @@ export type BeamPool_Var_Pop_Order_By = {
   adjustmentFlowRate?: InputMaybe<Order_By>;
   beamCount?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
+  creatorFlowRate?: InputMaybe<Order_By>;
   flowRate?: InputMaybe<Order_By>;
   lastUpdated?: InputMaybe<Order_By>;
   totalUnits?: InputMaybe<Order_By>;
@@ -372,6 +386,7 @@ export type BeamPool_Var_Samp_Order_By = {
   adjustmentFlowRate?: InputMaybe<Order_By>;
   beamCount?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
+  creatorFlowRate?: InputMaybe<Order_By>;
   flowRate?: InputMaybe<Order_By>;
   lastUpdated?: InputMaybe<Order_By>;
   totalUnits?: InputMaybe<Order_By>;
@@ -382,6 +397,7 @@ export type BeamPool_Variance_Order_By = {
   adjustmentFlowRate?: InputMaybe<Order_By>;
   beamCount?: InputMaybe<Order_By>;
   chainId?: InputMaybe<Order_By>;
+  creatorFlowRate?: InputMaybe<Order_By>;
   flowRate?: InputMaybe<Order_By>;
   lastUpdated?: InputMaybe<Order_By>;
   totalUnits?: InputMaybe<Order_By>;
@@ -1112,6 +1128,7 @@ export type DistributionUpdated = {
   newTotalDistributionFlowRate: Scalars['numeric'];
   oldFlowRate: Scalars['numeric'];
   operator: Scalars['String'];
+  timestamp: Scalars['Int'];
 };
 
 /** order by aggregate values of table "DistributionUpdated" */
@@ -1135,6 +1152,7 @@ export type DistributionUpdated_Avg_Order_By = {
   newFlowRateFromDistributor?: InputMaybe<Order_By>;
   newTotalDistributionFlowRate?: InputMaybe<Order_By>;
   oldFlowRate?: InputMaybe<Order_By>;
+  timestamp?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to filter rows from the table "DistributionUpdated". All fields are combined with a logical 'AND'. */
@@ -1152,6 +1170,7 @@ export type DistributionUpdated_Bool_Exp = {
   newTotalDistributionFlowRate?: InputMaybe<Numeric_Comparison_Exp>;
   oldFlowRate?: InputMaybe<Numeric_Comparison_Exp>;
   operator?: InputMaybe<String_Comparison_Exp>;
+  timestamp?: InputMaybe<Int_Comparison_Exp>;
 };
 
 /** order by max() on columns of table "DistributionUpdated" */
@@ -1165,6 +1184,7 @@ export type DistributionUpdated_Max_Order_By = {
   newTotalDistributionFlowRate?: InputMaybe<Order_By>;
   oldFlowRate?: InputMaybe<Order_By>;
   operator?: InputMaybe<Order_By>;
+  timestamp?: InputMaybe<Order_By>;
 };
 
 /** order by min() on columns of table "DistributionUpdated" */
@@ -1178,6 +1198,7 @@ export type DistributionUpdated_Min_Order_By = {
   newTotalDistributionFlowRate?: InputMaybe<Order_By>;
   oldFlowRate?: InputMaybe<Order_By>;
   operator?: InputMaybe<Order_By>;
+  timestamp?: InputMaybe<Order_By>;
 };
 
 /** Ordering options when selecting data from "DistributionUpdated". */
@@ -1192,6 +1213,7 @@ export type DistributionUpdated_Order_By = {
   newTotalDistributionFlowRate?: InputMaybe<Order_By>;
   oldFlowRate?: InputMaybe<Order_By>;
   operator?: InputMaybe<Order_By>;
+  timestamp?: InputMaybe<Order_By>;
 };
 
 /** select columns of table "DistributionUpdated" */
@@ -1213,7 +1235,9 @@ export enum DistributionUpdated_Select_Column {
   /** column name */
   OldFlowRate = 'oldFlowRate',
   /** column name */
-  Operator = 'operator'
+  Operator = 'operator',
+  /** column name */
+  Timestamp = 'timestamp'
 }
 
 /** order by stddev() on columns of table "DistributionUpdated" */
@@ -1222,6 +1246,7 @@ export type DistributionUpdated_Stddev_Order_By = {
   newFlowRateFromDistributor?: InputMaybe<Order_By>;
   newTotalDistributionFlowRate?: InputMaybe<Order_By>;
   oldFlowRate?: InputMaybe<Order_By>;
+  timestamp?: InputMaybe<Order_By>;
 };
 
 /** order by stddev_pop() on columns of table "DistributionUpdated" */
@@ -1230,6 +1255,7 @@ export type DistributionUpdated_Stddev_Pop_Order_By = {
   newFlowRateFromDistributor?: InputMaybe<Order_By>;
   newTotalDistributionFlowRate?: InputMaybe<Order_By>;
   oldFlowRate?: InputMaybe<Order_By>;
+  timestamp?: InputMaybe<Order_By>;
 };
 
 /** order by stddev_samp() on columns of table "DistributionUpdated" */
@@ -1238,6 +1264,7 @@ export type DistributionUpdated_Stddev_Samp_Order_By = {
   newFlowRateFromDistributor?: InputMaybe<Order_By>;
   newTotalDistributionFlowRate?: InputMaybe<Order_By>;
   oldFlowRate?: InputMaybe<Order_By>;
+  timestamp?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "DistributionUpdated" */
@@ -1259,6 +1286,7 @@ export type DistributionUpdated_Stream_Cursor_Value_Input = {
   newTotalDistributionFlowRate?: InputMaybe<Scalars['numeric']>;
   oldFlowRate?: InputMaybe<Scalars['numeric']>;
   operator?: InputMaybe<Scalars['String']>;
+  timestamp?: InputMaybe<Scalars['Int']>;
 };
 
 /** order by sum() on columns of table "DistributionUpdated" */
@@ -1267,6 +1295,7 @@ export type DistributionUpdated_Sum_Order_By = {
   newFlowRateFromDistributor?: InputMaybe<Order_By>;
   newTotalDistributionFlowRate?: InputMaybe<Order_By>;
   oldFlowRate?: InputMaybe<Order_By>;
+  timestamp?: InputMaybe<Order_By>;
 };
 
 /** order by var_pop() on columns of table "DistributionUpdated" */
@@ -1275,6 +1304,7 @@ export type DistributionUpdated_Var_Pop_Order_By = {
   newFlowRateFromDistributor?: InputMaybe<Order_By>;
   newTotalDistributionFlowRate?: InputMaybe<Order_By>;
   oldFlowRate?: InputMaybe<Order_By>;
+  timestamp?: InputMaybe<Order_By>;
 };
 
 /** order by var_samp() on columns of table "DistributionUpdated" */
@@ -1283,6 +1313,7 @@ export type DistributionUpdated_Var_Samp_Order_By = {
   newFlowRateFromDistributor?: InputMaybe<Order_By>;
   newTotalDistributionFlowRate?: InputMaybe<Order_By>;
   oldFlowRate?: InputMaybe<Order_By>;
+  timestamp?: InputMaybe<Order_By>;
 };
 
 /** order by variance() on columns of table "DistributionUpdated" */
@@ -1291,6 +1322,7 @@ export type DistributionUpdated_Variance_Order_By = {
   newFlowRateFromDistributor?: InputMaybe<Order_By>;
   newTotalDistributionFlowRate?: InputMaybe<Order_By>;
   oldFlowRate?: InputMaybe<Order_By>;
+  timestamp?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to compare columns of type "Int". All fields are combined with logical 'AND'. */
@@ -3531,7 +3563,7 @@ export type LoggedInUserSubscriptionVariables = Exact<{
 }>;
 
 
-export type LoggedInUserSubscription = { __typename?: 'subscription_root', User_by_pk?: { __typename?: 'User', id: string, pools: Array<{ __typename?: 'BeamPool', id: string, flowRate: any, totalUnits: any, active: boolean, hasDistributed: boolean, metadata?: { __typename?: 'PoolMetadata', name: string } | null, creatorAccount?: { __typename?: 'UserAccount', address: string } | null }>, incoming: Array<{ __typename?: 'Beam', id: string, units: any, isReceiverConnected: boolean, lastUpdated: number, beamPool?: { __typename?: 'BeamPool', flowRate: any, totalUnits: any, id: string } | null, from?: { __typename?: 'User', fid: number, id: string } | null }>, outgoing: Array<{ __typename?: 'Beam', units: any, id: string, beamPool?: { __typename?: 'BeamPool', flowRate: any, totalUnits: any, id: string } | null, to?: { __typename?: 'User', id: string, fid: number } | null }> } | null };
+export type LoggedInUserSubscription = { __typename?: 'subscription_root', User_by_pk?: { __typename?: 'User', id: string, pools: Array<{ __typename?: 'BeamPool', id: string, flowRate: any, totalUnits: any, active: boolean, hasDistributed: boolean, metadata?: { __typename?: 'PoolMetadata', name: string } | null, creatorAccount?: { __typename?: 'UserAccount', address: string } | null }>, incoming: Array<{ __typename?: 'Beam', id: string, units: any, isReceiverConnected: boolean, lastUpdated: number, beamPool?: { __typename?: 'BeamPool', flowRate: any, totalUnits: any, id: string } | null, from?: { __typename?: 'User', fid: number, id: string } | null }>, outgoing: Array<{ __typename?: 'Beam', units: any, id: string, beamPool?: { __typename?: 'BeamPool', flowRate: any, creatorFlowRate: any, totalUnits: any, id: string } | null, to?: { __typename?: 'User', id: string, fid: number } | null }> } | null };
 
 export type GetTxByIdQueryVariables = Exact<{
   id: Scalars['String'];
@@ -3543,5 +3575,5 @@ export type GetTxByIdQuery = { __typename?: 'query_root', TX_by_pk?: { __typenam
 
 export const GlobalMostRecentDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GlobalMostRecent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"Beam"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"lastUpdated"},"value":{"kind":"EnumValue","value":"desc"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"20"}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"beamPool"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"units"}},{"kind":"Field","name":{"kind":"Name","value":"lastUpdated"}},{"kind":"Field","name":{"kind":"Name","value":"beamPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}}]}},{"kind":"Field","name":{"kind":"Name","value":"from"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"to"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<GlobalMostRecentSubscription, GlobalMostRecentSubscriptionVariables>;
 export const GlobalTopDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"GlobalTop"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"BeamPool"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"flowRate"},"value":{"kind":"EnumValue","value":"desc_nulls_last"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"20"}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"creatorAccount"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GlobalTopSubscription, GlobalTopSubscriptionVariables>;
-export const LoggedInUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"LoggedInUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"User_by_pk"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pools"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"hasDistributed"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"creatorAccount"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"incoming"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"lastUpdated"},"value":{"kind":"EnumValue","value":"desc"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"beamPool"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"units"}},{"kind":"Field","name":{"kind":"Name","value":"isReceiverConnected"}},{"kind":"Field","name":{"kind":"Name","value":"lastUpdated"}},{"kind":"Field","name":{"kind":"Name","value":"beamPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"from"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"outgoing"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"lastUpdated"},"value":{"kind":"EnumValue","value":"desc"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"beamPool"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"units"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"beamPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"to"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fid"}}]}}]}}]}}]}}]} as unknown as DocumentNode<LoggedInUserSubscription, LoggedInUserSubscriptionVariables>;
+export const LoggedInUserDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"subscription","name":{"kind":"Name","value":"LoggedInUser"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"User_by_pk"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"pools"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"hasDistributed"}},{"kind":"Field","name":{"kind":"Name","value":"metadata"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"creatorAccount"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"incoming"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"lastUpdated"},"value":{"kind":"EnumValue","value":"desc"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"beamPool"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"units"}},{"kind":"Field","name":{"kind":"Name","value":"isReceiverConnected"}},{"kind":"Field","name":{"kind":"Name","value":"lastUpdated"}},{"kind":"Field","name":{"kind":"Name","value":"beamPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"from"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"fid"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"outgoing"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"order_by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"lastUpdated"},"value":{"kind":"EnumValue","value":"desc"}}]}},{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"beamPool"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"active"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"BooleanValue","value":true}}]}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"units"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"beamPool"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"flowRate"}},{"kind":"Field","name":{"kind":"Name","value":"creatorFlowRate"}},{"kind":"Field","name":{"kind":"Name","value":"totalUnits"}},{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"to"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"fid"}}]}}]}}]}}]}}]} as unknown as DocumentNode<LoggedInUserSubscription, LoggedInUserSubscriptionVariables>;
 export const GetTxByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTxById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"TX_by_pk"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<GetTxByIdQuery, GetTxByIdQueryVariables>;
