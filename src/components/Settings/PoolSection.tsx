@@ -51,7 +51,6 @@ export const PoolSection = ({
   const { data: walletClient } = useWalletClient();
   const [showInactive, setShowInactive] = useState(false);
   const publicClient = usePublicClient();
-  const isDistributeFlowDryRun = false;
 
   const pools = useMemo(() => {
     if (!userPrefs?.pools || !userSubscription?.pools) {
@@ -197,77 +196,6 @@ export const PoolSection = ({
       const otherPoolFlowRates = pools
         .filter((p) => p.id !== poolAddress)
         .map((pool) => BigInt(pool.reconstitutedFlowRate || 0));
-
-      if (isDistributeFlowDryRun) {
-        const simulatedOtherPoolFlowRates =
-          otherPoolFlowRates.length > 0
-            ? otherPoolFlowRates
-            : [
-                // Mock 2 additional pools when no other pools exist locally.
-                flowRate / 2n,
-                flowRate / 3n,
-              ].filter((rate) => rate > 0n);
-
-        const poolTargetRate = (flowRate * 95n) / 100n;
-        const totalGrossRate = [
-          flowRate,
-          ...simulatedOtherPoolFlowRates,
-        ].reduce((acc, rate) => acc + rate, 0n);
-        const globalFeeFlowRate = (totalGrossRate * 5n) / 100n;
-
-        console.group('DRY RUN: distributeFlow payload preview');
-
-        console.log('Target pool call', {
-          functionName: 'distributeFlow',
-          args: {
-            token: 'ADDR.SUPER_TOKEN',
-            user: address,
-            poolAddress,
-            flowRatePerSecond: poolTargetRate.toString(),
-            flowRatePerMonth: flowratePerSecondToMonth(
-              poolTargetRate,
-              'no-label',
-            ),
-          },
-        });
-        console.log('Collector pool call', {
-          functionName: 'distributeFlow',
-          args: {
-            token: 'ADDR.SUPER_TOKEN',
-            user: address,
-            poolAddress: 'ADDR.COLLECTOR_POOL',
-            flowRatePerSecond: globalFeeFlowRate.toString(),
-            flowRatePerMonth: flowratePerSecondToMonth(
-              globalFeeFlowRate,
-              'no-label',
-            ),
-          },
-        });
-        console.table(
-          simulatedOtherPoolFlowRates.map((rate, idx) => ({
-            poolIndex: idx + 1,
-            flowRatePerSecond: rate.toString(),
-            flowRatePerMonth: flowratePerSecondToMonth(rate, 'no-label'),
-          })),
-        );
-        console.log('Aggregate gross', {
-          flowRatePerSecond: totalGrossRate.toString(),
-          flowRatePerMonth: flowratePerSecondToMonth(
-            totalGrossRate,
-            'no-label',
-          ),
-        });
-        console.groupEnd();
-
-        notifications.show({
-          color: 'blue',
-          title: 'Dry run only',
-          message:
-            'No transaction sent. Open console for distributeFlow payload preview.',
-        });
-        setLoadingPrefs(false);
-        return;
-      }
 
       await distributeFlow({
         enableZeroFlowRate: true,
