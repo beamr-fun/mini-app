@@ -219,9 +219,10 @@ export const PoolCard = ({
         <Button
           size="xs"
           variant="danger"
-          disabled={isZero}
-          onClick={() => {
+          disabled={loadingUpdate || isZero}
+          onClick={async () => {
             setMonthly('0');
+            await handleDistributeFlow(poolAddress, '0');
           }}
         >
           Stop Flow
