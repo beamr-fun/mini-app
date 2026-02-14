@@ -5,6 +5,7 @@ import {
   Card,
   Collapse,
   Group,
+  NumberFormatter,
   NumberInput,
   Stack,
   Text,
@@ -32,6 +33,8 @@ const MAX_WEIGHTING = 100;
 
 export const PoolCard = ({
   flowRate,
+  boostedFlowRate,
+  totalOutgoingFlowRate,
   lastUpdated,
   name,
   weightings,
@@ -54,6 +57,8 @@ export const PoolCard = ({
   lastUpdated: string;
   poolAddress: string;
   flowRate: string;
+  boostedFlowRate?: string;
+  totalOutgoingFlowRate?: string;
   updatePrefs: (poolAddress: string, weightings: Weightings) => Promise<void>;
   loadingUpdate?: boolean;
   handleDistributeFlow: (poolAddress: string, monthly: string) => Promise<void>;
@@ -69,6 +74,15 @@ export const PoolCard = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const existingMonthly = flowratePerSecondToMonth(BigInt(flowRate), 'rounded');
+  const totalOutgoingMonthly = flowratePerSecondToMonth(
+    BigInt(totalOutgoingFlowRate || flowRate || 0),
+    'rounded'
+  );
+  const boostedMonthly = flowratePerSecondToMonth(
+    BigInt(boostedFlowRate || 0),
+    'rounded'
+  );
+  const hasBoost = BigInt(boostedFlowRate || 0) > 0n;
 
   const handleChangeWeighting = (
     weightType: keyof Weightings,
@@ -166,7 +180,7 @@ export const PoolCard = ({
         allowDecimal={false}
         leftSectionWidth={45}
         leftSection={<Avatar src={beamrTokenLogo} size={24} />}
-        description={`Fees Included: 2.5% Team + 2.5% Burn`}
+        description="Includes protocol fees."
         error={
           isBelowMin
             ? `Minimum monthly amount is ${formatBalance(MIN_POOL_AMT.toString())} BEAMR`
@@ -177,6 +191,15 @@ export const PoolCard = ({
         disabled={loadingUpdate}
         mb="md"
       />
+      {hasBoost && (
+        <Text fz="sm" c={colors.blue[4]} mt="-sm" mb={4}>
+          Boosted +<NumberFormatter value={boostedMonthly} thousandSeparator />
+        </Text>
+      )}
+      <Text fz="sm" c={colors.gray[3]} mb="md">
+        Total Outgoing{' '}
+        <NumberFormatter value={totalOutgoingMonthly} thousandSeparator />
+      </Text>
 
       <Group gap="sm" mb="md">
         <Button

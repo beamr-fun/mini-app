@@ -76,6 +76,41 @@ export const PoolSection = ({
       const poolFlowRate = BigInt(pool.flowRate || 0);
       let reconstitutedFlowRate = poolFlowRate;
       let proportionalRate = 0n;
+      let creatorPoolFlowRate = 0n;
+      let totalPoolOutgoingFlowRate = 0n;
+
+      const poolOutgoingBeams =
+        userSubscription.outgoing?.filter((beam) => beam.beamPool?.id === pool.id) ||
+        [];
+
+      poolOutgoingBeams.forEach((beam) => {
+        const totalUnits = BigInt(beam.beamPool?.totalUnits || 0);
+        const units = BigInt(beam.units || 0);
+
+        if (totalUnits === 0n) {
+          return;
+        }
+
+        const creatorPerUnit =
+          BigInt(beam.beamPool?.creatorFlowRate || 0) / totalUnits;
+        const totalPerUnit = BigInt(beam.beamPool?.flowRate || 0) / totalUnits;
+
+        creatorPoolFlowRate += creatorPerUnit * units;
+        totalPoolOutgoingFlowRate += totalPerUnit * units;
+      });
+
+      if (creatorPoolFlowRate === 0n) {
+        creatorPoolFlowRate = poolFlowRate;
+      }
+
+      if (totalPoolOutgoingFlowRate === 0n) {
+        totalPoolOutgoingFlowRate = creatorPoolFlowRate;
+      }
+
+      const boostedPoolFlowRate =
+        totalPoolOutgoingFlowRate > creatorPoolFlowRate
+          ? totalPoolOutgoingFlowRate - creatorPoolFlowRate
+          : 0n;
 
       if (totalUserFlowRate > 0n && collectionRate > 0n) {
         /* Calculate proportional fee: (Pool Flow * Total Fees) / Total Flow
@@ -84,6 +119,7 @@ export const PoolSection = ({
           (poolFlowRate * BigInt(collectionRate)) / totalUserFlowRate;
         reconstitutedFlowRate = poolFlowRate + proportionalRate;
       }
+      const budgetFlowRate = creatorPoolFlowRate + proportionalRate;
 
       // Return the pool object combined with any UI preferences
       const prefs = userPrefs.pools.find((p) => p.poolAddress === pool.id);
@@ -94,6 +130,10 @@ export const PoolSection = ({
         proportionalRate,
         rawFlowRate: poolFlowRate, // Original flow
         reconstitutedFlowRate: reconstitutedFlowRate.toString(), // Flow + Fees
+        budgetFlowRate: budgetFlowRate.toString(),
+        creatorFlowRate: creatorPoolFlowRate.toString(),
+        boostedFlowRate: boostedPoolFlowRate.toString(),
+        totalOutgoingFlowRate: (totalPoolOutgoingFlowRate + proportionalRate).toString(),
       };
     });
   }, [userPrefs, userSubscription, collectionFlowRate]);
@@ -238,7 +278,9 @@ export const PoolSection = ({
           {activePool ? (
             <PoolCard
               id={activePool.id}
-              flowRate={activePool.reconstitutedFlowRate}
+              flowRate={activePool.budgetFlowRate}
+              boostedFlowRate={activePool.boostedFlowRate}
+              totalOutgoingFlowRate={activePool.totalOutgoingFlowRate}
               lastUpdated={activePool.updatedAt || ''}
               creatorAddress={activePool.creatorAddress || ''}
               name={activePool.metadata.name || 'Unnamed Pool'}
@@ -284,7 +326,9 @@ export const PoolSection = ({
                   return (
                     <PoolCard
                       id={pool.id}
-                      flowRate={pool.reconstitutedFlowRate}
+                      flowRate={pool.budgetFlowRate}
+                      boostedFlowRate={pool.boostedFlowRate}
+                      totalOutgoingFlowRate={pool.totalOutgoingFlowRate}
                       lastUpdated={pool.updatedAt || ''}
                       creatorAddress={pool.creatorAddress || ''}
                       name={pool.metadata.name || 'Unnamed Pool'}
