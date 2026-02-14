@@ -5,12 +5,14 @@ type FlowProgressBarProps = {
   connected: bigint;
   notConnected: bigint;
   outgoing: bigint;
+  boosted?: bigint;
 };
 
 export const FlowProgressBar = ({
   connected,
   notConnected,
   outgoing,
+  boosted = 0n,
 }: FlowProgressBarProps) => {
   const { colors } = useMantineTheme();
 
@@ -25,9 +27,18 @@ export const FlowProgressBar = ({
   }
 
   const totalNum = Number(total);
+  const safeBoosted = boosted > 0n ? boosted : 0n;
+  // Outgoing totals in the balance card are creator-side only; map boost into
+  // that outgoing width proportionally so it remains visible without taking over.
+  const visualBoosted =
+    outgoing > 0n && safeBoosted > 0n
+      ? (outgoing * safeBoosted) / (outgoing + safeBoosted)
+      : 0n;
+  const baseOutgoing = outgoing - visualBoosted;
   const connectedPct = (Number(connected) / totalNum) * 100;
   const notConnectedPct = (Number(notConnected) / totalNum) * 100;
-  const outgoingPct = (Number(outgoing) / totalNum) * 100;
+  const baseOutgoingPct = (Number(baseOutgoing) / totalNum) * 100;
+  const boostedOutgoingPct = (Number(visualBoosted) / totalNum) * 100;
 
   return (
     <Progress.Root mb="xs" bg={colors.dark[5]}>
@@ -38,7 +49,12 @@ export const FlowProgressBar = ({
         striped
         className={classes.glow}
       />
-      <Progress.Section color={colors.purple[7]} value={outgoingPct} />
+      {baseOutgoing > 0n && (
+        <Progress.Section color={colors.purple[7]} value={baseOutgoingPct} />
+      )}
+      {visualBoosted > 0n && (
+        <Progress.Section color={colors.blue[5]} value={boostedOutgoingPct} />
+      )}
     </Progress.Root>
   );
 };
