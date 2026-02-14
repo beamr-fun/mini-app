@@ -10,16 +10,8 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { ChevronRight } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
 import { useUser } from '../../hooks/useUser';
-import {
-  fetchActivePool,
-  fetchIsConnected,
-  fetchUserPrefs,
-  updatePoolPrefs,
-  UserPrefs,
-  Weightings,
-} from '../../utils/api';
+import { updatePoolPrefs, UserPrefs, Weightings } from '../../utils/api';
 import { notifications } from '@mantine/notifications';
 import { ErrorDisplay } from '../../components/ErrorDisplay';
 import { Address, parseEther } from 'viem';
@@ -80,8 +72,9 @@ export const PoolSection = ({
       let totalPoolOutgoingFlowRate = 0n;
 
       const poolOutgoingBeams =
-        userSubscription.outgoing?.filter((beam) => beam.beamPool?.id === pool.id) ||
-        [];
+        userSubscription.outgoing?.filter(
+          (beam) => beam.beamPool?.id === pool.id,
+        ) || [];
 
       poolOutgoingBeams.forEach((beam) => {
         const totalUnits = BigInt(beam.beamPool?.totalUnits || 0);
@@ -133,14 +126,16 @@ export const PoolSection = ({
         budgetFlowRate: budgetFlowRate.toString(),
         creatorFlowRate: creatorPoolFlowRate.toString(),
         boostedFlowRate: boostedPoolFlowRate.toString(),
-        totalOutgoingFlowRate: (totalPoolOutgoingFlowRate + proportionalRate).toString(),
+        totalOutgoingFlowRate: (
+          totalPoolOutgoingFlowRate + proportionalRate
+        ).toString(),
       };
     });
   }, [userPrefs, userSubscription, collectionFlowRate]);
 
   const handleUpdatePrefs = async (
     poolAddress: string,
-    weightings: Weightings
+    weightings: Weightings,
   ) => {
     try {
       if (!user || !address || !walletClient) {
@@ -260,12 +255,12 @@ export const PoolSection = ({
 
   const activePool = pools.find(
     (pool) =>
-      pool.poolAddress?.toLowerCase() === activePoolAddress?.toLowerCase()
+      pool.poolAddress?.toLowerCase() === activePoolAddress?.toLowerCase(),
   );
 
   const inactivePools = pools.filter(
     (pool) =>
-      pool.poolAddress?.toLowerCase() !== activePoolAddress?.toLowerCase()
+      pool.poolAddress?.toLowerCase() !== activePoolAddress?.toLowerCase(),
   );
 
   return (
