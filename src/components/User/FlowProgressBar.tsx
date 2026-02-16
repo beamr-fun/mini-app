@@ -27,18 +27,13 @@ export const FlowProgressBar = ({
   }
 
   const totalNum = Number(total);
-  const safeBoosted = boosted > 0n ? boosted : 0n;
-  // Outgoing totals in the balance card are creator-side only; map boost into
-  // that outgoing width proportionally so it remains visible without taking over.
-  const visualBoosted =
-    outgoing > 0n && safeBoosted > 0n
-      ? (outgoing * safeBoosted) / (outgoing + safeBoosted)
-      : 0n;
-  const baseOutgoing = outgoing - visualBoosted;
+  const clampedBoosted =
+    boosted < 0n ? 0n : boosted > outgoing ? outgoing : boosted;
+  const baseOutgoing = outgoing - clampedBoosted;
   const connectedPct = (Number(connected) / totalNum) * 100;
   const notConnectedPct = (Number(notConnected) / totalNum) * 100;
   const baseOutgoingPct = (Number(baseOutgoing) / totalNum) * 100;
-  const boostedOutgoingPct = (Number(visualBoosted) / totalNum) * 100;
+  const boostedOutgoingPct = (Number(clampedBoosted) / totalNum) * 100;
 
   return (
     <Progress.Root mb="xs" bg={colors.dark[5]}>
@@ -52,7 +47,7 @@ export const FlowProgressBar = ({
       {baseOutgoing > 0n && (
         <Progress.Section color={colors.purple[7]} value={baseOutgoingPct} />
       )}
-      {visualBoosted > 0n && (
+      {clampedBoosted > 0n && (
         <Progress.Section color={colors.blue[5]} value={boostedOutgoingPct} />
       )}
     </Progress.Root>

@@ -363,7 +363,7 @@ Claim your $BEAMR streams and start your own pool in the app:`,
       <FlowProgressBar
         connected={connectedIncoming}
         notConnected={unconnectedIncoming}
-        outgoing={totalOutgoingFlowRate}
+        outgoing={displayedOutgoingFlowRate}
         boosted={totalBoostedFlowRate}
       />
 
