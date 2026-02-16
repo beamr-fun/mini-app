@@ -18,7 +18,6 @@ import { Address, parseEther } from 'viem';
 import { distributeFlow } from '../../utils/interactions';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
 import { PoolCard } from '../../components/Settings/PoolCard';
-import { flowratePerSecondToMonth } from '../../utils/common';
 
 export const PoolSection = ({
   userPrefs,
@@ -58,61 +57,81 @@ export const PoolSection = ({
     }
 
     const collectionRate = collectionFlowRate || 0n;
-
     const subscriptionPools = userSubscription.pools;
+    const outgoingByPool = new Map<
+      string,
+      { creatorFlowRate: bigint; totalFlowRate: bigint }
+    >();
 
-    const totalUserFlowRate = subscriptionPools.reduce((acc, pool) => {
-      return acc + BigInt(pool.flowRate || 0);
-    }, 0n);
+    userSubscription.outgoing?.forEach((beam) => {
+      const poolId = beam.beamPool?.id;
+
+      if (!poolId) {
+        return;
+      }
+
+      const totalUnits = BigInt(beam.beamPool?.totalUnits || 0);
+      const units = BigInt(beam.units || 0);
+
+      if (totalUnits === 0n) {
+        return;
+      }
+
+      const creatorPerUnit =
+        BigInt(beam.beamPool?.creatorFlowRate || 0) / totalUnits;
+      const totalPerUnit = BigInt(beam.beamPool?.flowRate || 0) / totalUnits;
+
+      const existing = outgoingByPool.get(poolId) || {
+        creatorFlowRate: 0n,
+        totalFlowRate: 0n,
+      };
+
+      outgoingByPool.set(poolId, {
+        creatorFlowRate: existing.creatorFlowRate + creatorPerUnit * units,
+        totalFlowRate: existing.totalFlowRate + totalPerUnit * units,
+      });
+    });
+
+    const creatorFlowRateByPool = new Map<string, bigint>();
+
+    subscriptionPools.forEach((pool) => {
+      const metrics = outgoingByPool.get(pool.id);
+
+      // Fallback only when there are no outgoing edges for this pool.
+      const creatorFlowRate = metrics
+        ? metrics.creatorFlowRate
+        : BigInt(pool.flowRate || 0);
+
+      creatorFlowRateByPool.set(pool.id, creatorFlowRate);
+    });
+
+    const totalCreatorFlowRate = [...creatorFlowRateByPool.values()].reduce(
+      (acc, rate) => acc + rate,
+      0n,
+    );
 
     return subscriptionPools.map((pool) => {
       const poolFlowRate = BigInt(pool.flowRate || 0);
-      let reconstitutedFlowRate = poolFlowRate;
-      let proportionalRate = 0n;
-      let creatorPoolFlowRate = 0n;
-      let totalPoolOutgoingFlowRate = 0n;
-
-      const poolOutgoingBeams =
-        userSubscription.outgoing?.filter(
-          (beam) => beam.beamPool?.id === pool.id,
-        ) || [];
-
-      poolOutgoingBeams.forEach((beam) => {
-        const totalUnits = BigInt(beam.beamPool?.totalUnits || 0);
-        const units = BigInt(beam.units || 0);
-
-        if (totalUnits === 0n) {
-          return;
-        }
-
-        const creatorPerUnit =
-          BigInt(beam.beamPool?.creatorFlowRate || 0) / totalUnits;
-        const totalPerUnit = BigInt(beam.beamPool?.flowRate || 0) / totalUnits;
-
-        creatorPoolFlowRate += creatorPerUnit * units;
-        totalPoolOutgoingFlowRate += totalPerUnit * units;
-      });
-
-      if (creatorPoolFlowRate === 0n) {
-        creatorPoolFlowRate = poolFlowRate;
-      }
-
-      if (totalPoolOutgoingFlowRate === 0n) {
-        totalPoolOutgoingFlowRate = creatorPoolFlowRate;
-      }
+      const poolMetrics = outgoingByPool.get(pool.id);
+      const creatorPoolFlowRate =
+        creatorFlowRateByPool.get(pool.id) ?? BigInt(pool.flowRate || 0);
+      const totalPoolOutgoingFlowRate =
+        poolMetrics?.totalFlowRate ?? creatorPoolFlowRate;
 
       const boostedPoolFlowRate =
         totalPoolOutgoingFlowRate > creatorPoolFlowRate
           ? totalPoolOutgoingFlowRate - creatorPoolFlowRate
           : 0n;
 
-      if (totalUserFlowRate > 0n && collectionRate > 0n) {
+      let proportionalRate = 0n;
+
+      if (totalCreatorFlowRate > 0n && collectionRate > 0n) {
         /* Calculate proportional fee: (Pool Flow * Total Fees) / Total Flow
          */
         proportionalRate =
-          (poolFlowRate * BigInt(collectionRate)) / totalUserFlowRate;
-        reconstitutedFlowRate = poolFlowRate + proportionalRate;
+          (creatorPoolFlowRate * BigInt(collectionRate)) / totalCreatorFlowRate;
       }
+
       const budgetFlowRate = creatorPoolFlowRate + proportionalRate;
 
       // Return the pool object combined with any UI preferences
@@ -123,7 +142,7 @@ export const PoolSection = ({
         ...prefs,
         proportionalRate,
         rawFlowRate: poolFlowRate, // Original flow
-        reconstitutedFlowRate: reconstitutedFlowRate.toString(), // Flow + Fees
+        reconstitutedFlowRate: budgetFlowRate.toString(), // Creator + collector
         budgetFlowRate: budgetFlowRate.toString(),
         creatorFlowRate: creatorPoolFlowRate.toString(),
         boostedFlowRate: boostedPoolFlowRate.toString(),
