@@ -32,6 +32,7 @@ subscription GlobalTop {
     flowRate
     totalUnits
     creatorAccount {
+      address
       user {
         fid
         # profile {
