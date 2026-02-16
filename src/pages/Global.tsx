@@ -15,6 +15,7 @@ import { PageLayout } from '../layouts/PageLayout';
 import beamrTokenLogo from '../assets/beamrTokenLogo.png';
 import { useMemo, useState } from 'react';
 import { flowratePerSecondToMonth } from '../utils/common';
+import { useQuery } from '@tanstack/react-query';
 import { useGqlSub } from '../hooks/useGqlSub';
 import {
   GlobalMostRecentDocument,
@@ -35,6 +36,9 @@ import {
 } from '../transforms/global';
 import { BeamrHeadline } from '../components/BeamrHeadline';
 import { MULTI_POOL_WHITELIST } from '../const/params';
+import { usePublicClient } from 'wagmi';
+import { GDAForwarderAbi } from '../abi/GDAFowarder';
+import { ADDR } from '../const/addresses';
 
 type LeaderPool = {
   pfpUrl: string;
@@ -48,6 +52,7 @@ type LeaderPool = {
 
 export const Global = () => {
   const [tab, setTab] = useState('Recent');
+  const publicClient = usePublicClient();
   const {
     getAuthHeaders,
     hasOpenPool,
@@ -82,14 +87,66 @@ export const Global = () => {
     },
   });
 
+  const { data: collectorByPoolId, isLoading: isLoadingCollectorRates } =
+    useQuery({
+      queryKey: [
+        'global-leader-collector-rates',
+        leaderRaw?.map((pool) => `${pool.id}:${pool.creatorAccount?.address}`),
+      ],
+      queryFn: async () => {
+        if (!publicClient || !leaderRaw?.length) {
+          return {};
+        }
+
+        const poolsWithAddress = leaderRaw.filter(
+          (pool) => !!pool.creatorAccount?.address,
+        );
+
+        if (poolsWithAddress.length === 0) {
+          return {};
+        }
+
+        const contracts = poolsWithAddress.map((pool) => ({
+          abi: GDAForwarderAbi,
+          address: ADDR.GDA_FORWARDER,
+          functionName: 'getFlowDistributionFlowRate',
+          args: [
+            ADDR.SUPER_TOKEN,
+            pool.creatorAccount!.address,
+            ADDR.COLLECTOR_POOL,
+          ],
+        }));
+
+        const rates = await publicClient.multicall({
+          contracts,
+        });
+
+        return poolsWithAddress.reduce<Record<string, bigint>>(
+          (acc, pool, idx) => {
+            const result = rates[idx];
+            acc[pool.id] =
+              result.status === 'success' ? (result.result as bigint) : 0n;
+            return acc;
+          },
+          {},
+        );
+      },
+      enabled: !!publicClient && !!leaderRaw?.length,
+      staleTime: 30_000,
+      refetchInterval: 30_000,
+    });
+
   const leaderboardData = useMemo(() => {
     if (!leaderRaw) return [];
 
     return leaderRaw.map((pool) => {
+      const collectorRate = collectorByPoolId?.[pool.id] || 0n;
+      const totalOutgoingFlowRate = BigInt(pool.flowRate || 0) + collectorRate;
+
       return {
         pfpUrl: pool.creatorAccount?.user?.profile?.pfp_url || '',
         username: pool.creatorAccount?.user?.profile?.username || 'Unknown',
-        flowRate: pool.flowRate,
+        flowRate: totalOutgoingFlowRate.toString(),
         totalUnits: pool.totalUnits,
         displayName:
           pool.creatorAccount?.user?.profile?.display_name || 'Unknown',
@@ -97,7 +154,7 @@ export const Global = () => {
         id: pool.id,
       } as LeaderPool;
     });
-  }, [leaderRaw]);
+  }, [leaderRaw, collectorByPoolId]);
 
   const hideButton = useMemo(() => {
     if (!user || !user.fid) return true;
@@ -161,7 +218,7 @@ export const Global = () => {
         {tab === 'Leaderboard' && (
           <Leader
             leaderboardData={leaderboardData}
-            isLoading={isLoadingLeader}
+            isLoading={isLoadingLeader || isLoadingCollectorRates}
             error={leaderError}
           />
         )}

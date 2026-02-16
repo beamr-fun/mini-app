@@ -27,6 +27,7 @@ export type RecentBeam = GlobalMostRecentSubscription['Beam'][number] & {
 
 export type LeaderPoolRaw = GlobalTopSubscription['BeamPool'][number] & {
   creatorAccount: {
+    address: string;
     user: {
       fid: number;
       profile: BasicProfile;
@@ -135,6 +136,7 @@ export const globalLeaderTransform = async (
     return {
       ...pool,
       creatorAccount: {
+        ...pool.creatorAccount,
         user: {
           ...pool.creatorAccount?.user,
           profile: {

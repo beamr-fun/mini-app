@@ -39,9 +39,54 @@ export const BalanceDisplay = ({
     userBalance,
     userBalanceFetchedAt,
     collectionFlowRate,
+    user,
   } = useUser();
 
   const { userPoolAddress } = usePoolAccount();
+
+  const getOutgoingBeamFlowRate = (item: {
+    beamPool?: {
+      creatorFlowRate?: bigint | string;
+      totalUnits?: bigint | string;
+    } | null;
+    units?: bigint | string;
+  }) => {
+    const creatorFlowRate = BigInt(item.beamPool?.creatorFlowRate || 0);
+    const totalUnits = BigInt(item.beamPool?.totalUnits || 0);
+    const units = BigInt(item.units || 0);
+
+    if (totalUnits === 0n) {
+      return 0n;
+    }
+
+    return (creatorFlowRate / totalUnits) * units;
+  };
+
+  const getOutgoingBoostFlowRate = (item: {
+    beamPool?: {
+      flowRate?: bigint | string;
+      creatorFlowRate?: bigint | string;
+      totalUnits?: bigint | string;
+    } | null;
+    units?: bigint | string;
+  }) => {
+    const flowRate = BigInt(item.beamPool?.flowRate || 0);
+    const creatorFlowRate = BigInt(item.beamPool?.creatorFlowRate || 0);
+    const totalUnits = BigInt(item.beamPool?.totalUnits || 0);
+    const units = BigInt(item.units || 0);
+
+    if (totalUnits === 0n) {
+      return 0n;
+    }
+
+    const boostedFlowRate = flowRate - creatorFlowRate;
+
+    if (boostedFlowRate <= 0n) {
+      return 0n;
+    }
+
+    return (boostedFlowRate / totalUnits) * units;
+  };
 
   const {
     connectedIncoming,
@@ -121,10 +166,7 @@ export const BalanceDisplay = ({
     let total = 0n;
 
     userSubscription.outgoing.forEach((item) => {
-      const perUnitFlowRate =
-        BigInt(item.beamPool?.flowRate) / BigInt(item.beamPool?.totalUnits);
-      const beamFlowRate = perUnitFlowRate * BigInt(item.units);
-      total += beamFlowRate;
+      total += getOutgoingBeamFlowRate(item);
     });
 
     if (collectionFlowRate) {
@@ -133,6 +175,20 @@ export const BalanceDisplay = ({
 
     return total;
   }, [userSubscription?.outgoing, collectionFlowRate]);
+
+  const totalBoostedFlowRate = useMemo(() => {
+    if (!userSubscription?.outgoing || userSubscription.outgoing.length === 0) {
+      return 0n;
+    }
+
+    let total = 0n;
+
+    userSubscription.outgoing.forEach((item) => {
+      total += getOutgoingBoostFlowRate(item);
+    });
+
+    return total;
+  }, [userSubscription?.outgoing]);
 
   const hasUnconnected = amtUnconnected > 0;
 
@@ -146,6 +202,16 @@ export const BalanceDisplay = ({
 
   const realOutgoingPerMonth = totalOutgoingFlowRate
     ? flowratePerSecondToMonth(totalOutgoingFlowRate, 'no-label')
+    : 0n;
+  const boostedPerMonth = totalBoostedFlowRate
+    ? flowratePerSecondToMonth(totalBoostedFlowRate, 'no-label')
+    : 0n;
+  const hasBoost = totalBoostedFlowRate > 0n;
+  const displayedOutgoingFlowRate = hasBoost
+    ? totalOutgoingFlowRate + totalBoostedFlowRate
+    : totalOutgoingFlowRate;
+  const displayedOutgoingPerMonth = displayedOutgoingFlowRate
+    ? flowratePerSecondToMonth(displayedOutgoingFlowRate, 'no-label')
     : 0n;
 
   const moreIncomingThanOutgoing = connectedIncoming >= totalOutgoingFlowRate;
@@ -167,13 +233,8 @@ export const BalanceDisplay = ({
     }
 
     const topOutgoing = userSubscription?.outgoing?.sort((a, b) => {
-      const perUnitFlowRateA =
-        BigInt(a.beamPool?.flowRate) / BigInt(a.beamPool?.totalUnits);
-      const beamFlowRateA = perUnitFlowRateA * BigInt(a.units);
-
-      const perUnitFlowRateB =
-        BigInt(b.beamPool?.flowRate) / BigInt(b.beamPool?.totalUnits);
-      const beamFlowRateB = perUnitFlowRateB * BigInt(b.units);
+      const beamFlowRateA = getOutgoingBeamFlowRate(a);
+      const beamFlowRateB = getOutgoingBeamFlowRate(b);
 
       return beamFlowRateB > beamFlowRateA ? 1 : -1;
     });
@@ -183,8 +244,12 @@ export const BalanceDisplay = ({
         ?.map((item) => item.to.profile?.username)
         .filter(Boolean) as string[];
 
+      const fids = topOutgoing.map((item) => item.to.fid).slice(0, 6);
+
       sdk.actions.composeCast({
-        embeds: ['https://app.beamr.fun'],
+        embeds: [
+          `https://app.beamr.fun/og/share-embed?sender=${user?.fid}&receivers=${fids.join(',')}&flowrate=0`,
+        ],
         text: `Just launched my @beamr microsubscription pool: I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to the Farcasters I interact with.
 
 ${formatList(names.map((n) => `@${n}`))} are my first microsubs.
@@ -192,17 +257,21 @@ ${formatList(names.map((n) => `@${n}`))} are my first microsubs.
 Claim your $BEAMR streams and start your own pool in the app:`,
       });
     } else {
-      const top5 = topOutgoing?.slice(0, 5);
+      const top6 = topOutgoing?.slice(0, 6);
 
-      const top5Names = top5
+      const top6Names = top6
         ?.map((item) => item.to.profile?.username)
         .filter(Boolean) as string[];
 
+      const top6Fids = top6?.map((item) => item.to.fid).filter(Boolean);
+
       sdk.actions.composeCast({
-        embeds: ['https://app.beamr.fun'],
+        embeds: [
+          `https://app.beamr.fun/og/share-embed?sender=${user?.fid}&receivers=${top6Fids.join(',')}&flowrate=0`,
+        ],
         text: `I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to Farcasters I interact with.
        
-${formatList(top5Names.map((name) => `@${name}`))} are my top microsubs.
+${formatList(top6Names.map((name) => `@${name}`))} are my top microsubs.
 
 Claim your $BEAMR streams and start your own pool in the app:`,
       });
@@ -254,7 +323,7 @@ Claim your $BEAMR streams and start your own pool in the app:`,
           </Group>
         </ActionIcon>
       </Group>
-      <Group gap={4} mb={'sm'}>
+      <Group gap={4} mb="xs">
         <Text
           fz="sm"
           c={moreIncomingThanOutgoing ? colors.green[7] : colors.purple[7]}
@@ -284,29 +353,42 @@ Claim your $BEAMR streams and start your own pool in the app:`,
           </Tooltip>
         )}
       </Group>
+      {hasBoost && (
+        <Group gap={6} mb="xs">
+          <Text fz="sm" c={colors.blue[4]}>
+            Boosted +{boostedPerMonth}
+          </Text>
+        </Group>
+      )}
       <FlowProgressBar
         connected={connectedIncoming}
         notConnected={unconnectedIncoming}
-        outgoing={totalOutgoingFlowRate}
+        outgoing={displayedOutgoingFlowRate}
+        boosted={totalBoostedFlowRate}
       />
 
       <Group justify="space-between">
         <Text c={colors.green[7]} fz="sm">
           Incoming
         </Text>
-
-        <Text c={colors.purple[7]} fz="sm">
-          Outgoing
-        </Text>
+        <Group gap={6}>
+          <Text c={colors.purple[7]} fz="sm">
+            {hasBoost ? 'Total Outgoing' : 'Outgoing'}
+          </Text>
+        </Group>
       </Group>
       <Group justify="space-between">
         <Text fz="sm">{realIncomingPerMonth}</Text>
         <Group gap={6}>
-          <Text fz="sm">{realOutgoingPerMonth}</Text>
+          <Text fz="sm">{displayedOutgoingPerMonth}</Text>
           <Tooltip
             w={250}
             multiline
-            label="Amount includes 2.5% Beamr team fee + 2.5% Beamr Burn fee"
+            label={
+              hasBoost
+                ? `Amount includes Beamr boosts (+${boostedPerMonth}) and 2.5% Beamr team fee + 2.5% Beamr Burn fee`
+                : 'Amount includes 2.5% Beamr team fee + 2.5% Beamr Burn fee'
+            }
           >
             <Info size={12} />
           </Tooltip>

@@ -41,6 +41,7 @@ subscription LoggedInUser($id: String!) {
       id
       beamPool {
         flowRate
+        creatorFlowRate
         totalUnits
         id
       }

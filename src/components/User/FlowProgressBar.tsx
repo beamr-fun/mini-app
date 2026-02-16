@@ -5,12 +5,14 @@ type FlowProgressBarProps = {
   connected: bigint;
   notConnected: bigint;
   outgoing: bigint;
+  boosted?: bigint;
 };
 
 export const FlowProgressBar = ({
   connected,
   notConnected,
   outgoing,
+  boosted = 0n,
 }: FlowProgressBarProps) => {
   const { colors } = useMantineTheme();
 
@@ -25,9 +27,13 @@ export const FlowProgressBar = ({
   }
 
   const totalNum = Number(total);
+  const clampedBoosted =
+    boosted < 0n ? 0n : boosted > outgoing ? outgoing : boosted;
+  const baseOutgoing = outgoing - clampedBoosted;
   const connectedPct = (Number(connected) / totalNum) * 100;
   const notConnectedPct = (Number(notConnected) / totalNum) * 100;
-  const outgoingPct = (Number(outgoing) / totalNum) * 100;
+  const baseOutgoingPct = (Number(baseOutgoing) / totalNum) * 100;
+  const boostedOutgoingPct = (Number(clampedBoosted) / totalNum) * 100;
 
   return (
     <Progress.Root mb="xs" bg={colors.dark[5]}>
@@ -38,7 +44,12 @@ export const FlowProgressBar = ({
         striped
         className={classes.glow}
       />
-      <Progress.Section color={colors.purple[7]} value={outgoingPct} />
+      {baseOutgoing > 0n && (
+        <Progress.Section color={colors.purple[7]} value={baseOutgoingPct} />
+      )}
+      {clampedBoosted > 0n && (
+        <Progress.Section color={colors.blue[5]} value={boostedOutgoingPct} />
+      )}
     </Progress.Root>
   );
 };

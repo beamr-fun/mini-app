@@ -53,6 +53,7 @@ export type UserTransformed = {
     beamPool?: {
       __typename?: 'BeamPool';
       flowRate: any;
+      creatorFlowRate: any;
       totalUnits: any;
       id: string;
     } | null;

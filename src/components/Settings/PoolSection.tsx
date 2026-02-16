@@ -10,16 +10,8 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { ChevronRight } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
 import { useUser } from '../../hooks/useUser';
-import {
-  fetchActivePool,
-  fetchIsConnected,
-  fetchUserPrefs,
-  updatePoolPrefs,
-  UserPrefs,
-  Weightings,
-} from '../../utils/api';
+import { updatePoolPrefs, UserPrefs, Weightings } from '../../utils/api';
 import { notifications } from '@mantine/notifications';
 import { ErrorDisplay } from '../../components/ErrorDisplay';
 import { Address, parseEther } from 'viem';
@@ -65,25 +57,82 @@ export const PoolSection = ({
     }
 
     const collectionRate = collectionFlowRate || 0n;
-
     const subscriptionPools = userSubscription.pools;
+    const outgoingByPool = new Map<
+      string,
+      { creatorFlowRate: bigint; totalFlowRate: bigint }
+    >();
 
-    const totalUserFlowRate = subscriptionPools.reduce((acc, pool) => {
-      return acc + BigInt(pool.flowRate || 0);
-    }, 0n);
+    userSubscription.outgoing?.forEach((beam) => {
+      const poolId = beam.beamPool?.id;
+
+      if (!poolId) {
+        return;
+      }
+
+      const totalUnits = BigInt(beam.beamPool?.totalUnits || 0);
+      const units = BigInt(beam.units || 0);
+
+      if (totalUnits === 0n) {
+        return;
+      }
+
+      const creatorPerUnit =
+        BigInt(beam.beamPool?.creatorFlowRate || 0) / totalUnits;
+      const totalPerUnit = BigInt(beam.beamPool?.flowRate || 0) / totalUnits;
+
+      const existing = outgoingByPool.get(poolId) || {
+        creatorFlowRate: 0n,
+        totalFlowRate: 0n,
+      };
+
+      outgoingByPool.set(poolId, {
+        creatorFlowRate: existing.creatorFlowRate + creatorPerUnit * units,
+        totalFlowRate: existing.totalFlowRate + totalPerUnit * units,
+      });
+    });
+
+    const creatorFlowRateByPool = new Map<string, bigint>();
+
+    subscriptionPools.forEach((pool) => {
+      const metrics = outgoingByPool.get(pool.id);
+
+      // Fallback only when there are no outgoing edges for this pool.
+      const creatorFlowRate = metrics
+        ? metrics.creatorFlowRate
+        : BigInt(pool.flowRate || 0);
+
+      creatorFlowRateByPool.set(pool.id, creatorFlowRate);
+    });
+
+    const totalCreatorFlowRate = [...creatorFlowRateByPool.values()].reduce(
+      (acc, rate) => acc + rate,
+      0n,
+    );
 
     return subscriptionPools.map((pool) => {
       const poolFlowRate = BigInt(pool.flowRate || 0);
-      let reconstitutedFlowRate = poolFlowRate;
+      const poolMetrics = outgoingByPool.get(pool.id);
+      const creatorPoolFlowRate =
+        creatorFlowRateByPool.get(pool.id) ?? BigInt(pool.flowRate || 0);
+      const totalPoolOutgoingFlowRate =
+        poolMetrics?.totalFlowRate ?? creatorPoolFlowRate;
+
+      const boostedPoolFlowRate =
+        totalPoolOutgoingFlowRate > creatorPoolFlowRate
+          ? totalPoolOutgoingFlowRate - creatorPoolFlowRate
+          : 0n;
+
       let proportionalRate = 0n;
 
-      if (totalUserFlowRate > 0n && collectionRate > 0n) {
+      if (totalCreatorFlowRate > 0n && collectionRate > 0n) {
         /* Calculate proportional fee: (Pool Flow * Total Fees) / Total Flow
          */
         proportionalRate =
-          (poolFlowRate * BigInt(collectionRate)) / totalUserFlowRate;
-        reconstitutedFlowRate = poolFlowRate + proportionalRate;
+          (creatorPoolFlowRate * BigInt(collectionRate)) / totalCreatorFlowRate;
       }
+
+      const budgetFlowRate = creatorPoolFlowRate + proportionalRate;
 
       // Return the pool object combined with any UI preferences
       const prefs = userPrefs.pools.find((p) => p.poolAddress === pool.id);
@@ -93,14 +142,20 @@ export const PoolSection = ({
         ...prefs,
         proportionalRate,
         rawFlowRate: poolFlowRate, // Original flow
-        reconstitutedFlowRate: reconstitutedFlowRate.toString(), // Flow + Fees
+        reconstitutedFlowRate: budgetFlowRate.toString(), // Creator + collector
+        budgetFlowRate: budgetFlowRate.toString(),
+        creatorFlowRate: creatorPoolFlowRate.toString(),
+        boostedFlowRate: boostedPoolFlowRate.toString(),
+        totalOutgoingFlowRate: (
+          totalPoolOutgoingFlowRate + proportionalRate
+        ).toString(),
       };
     });
   }, [userPrefs, userSubscription, collectionFlowRate]);
 
   const handleUpdatePrefs = async (
     poolAddress: string,
-    weightings: Weightings
+    weightings: Weightings,
   ) => {
     try {
       if (!user || !address || !walletClient) {
@@ -157,12 +212,9 @@ export const PoolSection = ({
 
       setLoadingPrefs(true);
       const flowRate = parseEther(monthly) / 30n / 24n / 60n / 60n;
-
       const otherPoolFlowRates = pools
         .filter((p) => p.id !== poolAddress)
-        .map((pool) => {
-          return BigInt(pool.reconstitutedFlowRate || 0);
-        });
+        .map((pool) => BigInt(pool.reconstitutedFlowRate || 0));
 
       await distributeFlow({
         enableZeroFlowRate: true,
@@ -220,12 +272,12 @@ export const PoolSection = ({
 
   const activePool = pools.find(
     (pool) =>
-      pool.poolAddress?.toLowerCase() === activePoolAddress?.toLowerCase()
+      pool.poolAddress?.toLowerCase() === activePoolAddress?.toLowerCase(),
   );
 
   const inactivePools = pools.filter(
     (pool) =>
-      pool.poolAddress?.toLowerCase() !== activePoolAddress?.toLowerCase()
+      pool.poolAddress?.toLowerCase() !== activePoolAddress?.toLowerCase(),
   );
 
   return (
@@ -238,7 +290,9 @@ export const PoolSection = ({
           {activePool ? (
             <PoolCard
               id={activePool.id}
-              flowRate={activePool.reconstitutedFlowRate}
+              flowRate={activePool.budgetFlowRate}
+              boostedFlowRate={activePool.boostedFlowRate}
+              totalOutgoingFlowRate={activePool.totalOutgoingFlowRate}
               lastUpdated={activePool.updatedAt || ''}
               creatorAddress={activePool.creatorAddress || ''}
               name={activePool.metadata.name || 'Unnamed Pool'}
@@ -284,7 +338,9 @@ export const PoolSection = ({
                   return (
                     <PoolCard
                       id={pool.id}
-                      flowRate={pool.reconstitutedFlowRate}
+                      flowRate={pool.budgetFlowRate}
+                      boostedFlowRate={pool.boostedFlowRate}
+                      totalOutgoingFlowRate={pool.totalOutgoingFlowRate}
                       lastUpdated={pool.updatedAt || ''}
                       creatorAddress={pool.creatorAddress || ''}
                       name={pool.metadata.name || 'Unnamed Pool'}
