@@ -13,7 +13,7 @@
     "buttonTitle": "Start Beamr",
     "splashImageUrl": "https://app.beamr.fun/images/splash.png",
     "splashBackgroundColor": "#0F0E0E",
-    "webhookUrl": "https://app.beamr.fun/api/webhook",
+    "webhookUrl": "https://beamr.ngrok.app/v1/webhook/sub",
     "subtitle": "Dynamic micro-subscriptions",
     "description": "The easiest way to sustainably reward people who make your feed worth scrolling.",
     "primaryCategory": "social",

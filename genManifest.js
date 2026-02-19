@@ -44,7 +44,7 @@ function generateManifest(env) {
   if (!envConfig) {
     console.error(`Unknown environment: ${env}`);
     console.error(
-      `Available environments: ${Object.keys(environments).join(', ')}`
+      `Available environments: ${Object.keys(environments).join(', ')}`,
     );
     process.exit(1);
   }
@@ -62,7 +62,7 @@ function generateManifest(env) {
       buttonTitle: 'Start Beamr',
       splashImageUrl: `${baseUrl}/images/splash.png`,
       splashBackgroundColor: '#0F0E0E',
-      webhookUrl: `${baseUrl}/api/webhook`,
+      webhookUrl: `https://beamr.ngrok.app/v1/webhook/sub`,
       subtitle: 'Dynamic micro-subscriptions',
       description:
         'The easiest way to sustainably reward people who make your feed worth scrolling.',

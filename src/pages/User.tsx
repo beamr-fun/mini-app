@@ -1,4 +1,5 @@
 import {
+  Button,
   Card,
   Group,
   Paper,
@@ -29,6 +30,7 @@ import {
   NotPoolAddressDisplay,
   NotPrimaryDisplay,
 } from '../components/User/WrongAddressDisplay';
+import sdk from '@farcaster/miniapp-sdk';
 
 export const User = () => {
   const [tab, setTab] = useState('Sending');
@@ -62,7 +64,7 @@ export const User = () => {
               ? () => navigate('/create-pool/1')
               : undefined,
           extraDeps: [incomingOnly, poolsToConnect.length],
-        }
+        },
   );
 
   const handleConnectStage = (poolId: string) => {
@@ -162,9 +164,18 @@ export const User = () => {
     return <NotPoolAddressDisplay userPoolAddress={userPoolAddress} />;
   }
 
+  const handleAddNotification = async () => {
+    const res = await sdk.actions.addMiniApp();
+
+    console.log('res', res);
+  };
+
   return (
     <PageLayout>
       <BeamrHeadline />
+      {user?.fid === 11650 && (
+        <Button onClick={handleAddNotification}>Add Notif</Button>
+      )}
       <SwapModal opened={opened} onClose={close} />
       <BalanceDisplay openSwap={open} setTab={setTab} />
       <Card>
