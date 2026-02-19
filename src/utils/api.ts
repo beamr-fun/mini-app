@@ -37,6 +37,16 @@ export type UserPrefs = {
   pools: PoolPrefs[];
 };
 
+export type NotificationDetails = {
+  token: string;
+  url: string;
+};
+
+export type UserNotificationStatus = {
+  enabled: boolean;
+  notificationDetails: NotificationDetails | null;
+};
+
 export const fetchUserPrefs = async (fid: number, apiHeaders: APIHeaders) => {
   try {
     const res = await fetch(`${keys.apiUrl}/v1/user/prefs/${fid}`, {
@@ -160,6 +170,72 @@ export const fetchIsUserSubbed = async (apiHeaders: APIHeaders) => {
 
     if (!res.ok) {
       throw new Error(data?.error || 'Failed to check subscription status');
+    }
+
+    return data;
+  } catch (error) {
+    throw Error;
+  }
+};
+
+export const getUserNotificationStatus = async (headers: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/notifications/status`, {
+      method: 'GET',
+      headers,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        data?.error || 'Failed to fetch user notification status'
+      );
+    }
+
+    return data as UserNotificationStatus;
+  } catch (error) {
+    throw Error;
+  }
+};
+
+export const registerUserNotifications = async ({
+  headers,
+  notificationDetails,
+}: {
+  headers: APIHeaders;
+  notificationDetails: NotificationDetails;
+}) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/notifications/register`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(notificationDetails),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to register notifications');
+    }
+
+    return data;
+  } catch (error) {
+    throw Error;
+  }
+};
+
+export const unregisterUserNotifications = async (headers: APIHeaders) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/notifications/unregister`, {
+      method: 'POST',
+      headers,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to unregister notifications');
     }
 
     return data;

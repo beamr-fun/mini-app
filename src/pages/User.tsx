@@ -1,16 +1,6 @@
-import {
-  Button,
-  Card,
-  Group,
-  Paper,
-  SegmentedControl,
-  Stack,
-  Text,
-  useMantineTheme,
-} from '@mantine/core';
+import { Button, Card, SegmentedControl } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
-import { useEffect, useRef, useState } from 'react';
-
+import { useRef, useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { useCTA } from '../hooks/useCTA';
 import { Address, isAddress } from 'viem';
