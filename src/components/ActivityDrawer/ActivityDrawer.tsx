@@ -1,5 +1,6 @@
 import {
   Alert,
+  Button,
   Box,
   Drawer,
   Group,
@@ -12,18 +13,26 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { useUser } from '../../hooks/useUser';
 import { useQuery } from '@tanstack/react-query';
-import { getTipLimit, getUserSubs } from '../../utils/api';
+import {
+  getTipLimit,
+  getUserNotificationStatus,
+  getUserSubs,
+  registerUserNotifications,
+} from '../../utils/api';
 import { ReceiptStatus } from '../../validation/receipts';
-import { AlertCircle, Info } from 'lucide-react';
+import { AlertCircle, BellRing, Info } from 'lucide-react';
 import { Glass } from '../Glass';
 import classes from '../../styles/effects.module.css';
 import modalClasses from '../../styles/modal.module.css';
 import { InteractionCard } from './InteractionCard';
+import { useState } from 'react';
+import sdk from '@farcaster/miniapp-sdk';
 
 export const ActivityDrawer = () => {
   const { colors } = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
   const { user, getAuthHeaders } = useUser();
+  const [isEnablingNotifications, setIsEnablingNotifications] = useState(false);
 
   const {
     data: tipLimit,
@@ -57,9 +66,36 @@ export const ActivityDrawer = () => {
     enabled: !!user?.fid,
   });
 
+  const {
+    data: notificationStatus,
+    isLoading: notificationStatusLoading,
+    error: notificationStatusError,
+    refetch: refetchNotificationStatus,
+  } = useQuery({
+    queryKey: ['notification-status', user?.fid],
+    queryFn: async () => {
+      const headers = await getAuthHeaders();
+
+      if (!headers) return null;
+
+      return getUserNotificationStatus(headers);
+    },
+    enabled: !!user?.fid,
+  });
+
   const limited =
     !!tipLimit && tipLimit?.limited && !tipLimitLoading && !tipLimitError;
+  const notificationsDisabled =
+    !!notificationStatus &&
+    notificationStatus.enabled === false &&
+    !notificationStatusLoading &&
+    !notificationStatusError;
   const remaining = tipLimit?.remaining || 0;
+  const activeNotice = limited
+    ? 'rate_limited'
+    : notificationsDisabled
+      ? 'notifications_disabled'
+      : null;
 
   const pending = recentSubs?.filter(
     (sub) => sub.status === ReceiptStatus.Posted
@@ -72,6 +108,40 @@ export const ActivityDrawer = () => {
   );
 
   const hasPending = pending && pending.length > 0;
+
+  const handleEnableNotifications = async () => {
+    try {
+      if (isEnablingNotifications) return;
+      setIsEnablingNotifications(true);
+
+      const addMiniAppResponse = await sdk.actions.addMiniApp();
+      const notificationDetails = addMiniAppResponse.notificationDetails;
+
+      if (!notificationDetails?.token || !notificationDetails?.url) {
+        return;
+      }
+
+      const headers = await getAuthHeaders();
+
+      if (!headers) {
+        throw new Error('Failed to get auth headers');
+      }
+
+      await registerUserNotifications({
+        headers,
+        notificationDetails: {
+          token: notificationDetails.token,
+          url: notificationDetails.url,
+        },
+      });
+
+      await refetchNotificationStatus();
+    } catch (error) {
+      console.error('Failed to enable notifications', error);
+    } finally {
+      setIsEnablingNotifications(false);
+    }
+  };
 
   if (recentSubLoading || !recentSubs || recentSubError) {
     return null;
@@ -90,7 +160,7 @@ export const ActivityDrawer = () => {
               <Drawer.CloseButton />
             </Drawer.Header>
           </Box>
-          {limited && (
+          {activeNotice === 'rate_limited' && (
             <Alert
               color="yellow"
               m="sm"
@@ -99,6 +169,26 @@ export const ActivityDrawer = () => {
             >
               Microsub pools get a daily limit of 50 interactions. The limit
               resets on a rolling 24-hour basis.
+            </Alert>
+          )}
+          {activeNotice === 'notifications_disabled' && (
+            <Alert
+              color="blue"
+              m="sm"
+              title="Enable Notifications"
+              icon={<BellRing size={16} />}
+            >
+              <Text mb="sm">
+                Enable Farcaster notifications to get your daily Incoming beam
+                summaries.
+              </Text>
+              <Button
+                size="xs"
+                onClick={handleEnableNotifications}
+                loading={isEnablingNotifications}
+              >
+                Enable Notifications
+              </Button>
             </Alert>
           )}
           <Drawer.Body>
@@ -147,20 +237,26 @@ export const ActivityDrawer = () => {
           <Group wrap="nowrap" gap={8}>
             <Loader size={16} color={colors.gray[3]} />
             <Text>+{pending?.length} Pending</Text>
-            {limited && (
+            {activeNotice && (
               <Tooltip
                 multiline
                 label={
                   <Box>
                     <Text fz="sm" mb="xs">
-                      You have extended your daily tip limit ({remaining}/50)
+                      {activeNotice === 'rate_limited'
+                        ? `You have extended your daily tip limit (${remaining}/50)`
+                        : 'Notifications are disabled. Open activity to enable daily summaries.'}
                     </Text>
                   </Box>
                 }
               >
                 <AlertCircle
                   size={20}
-                  color={colors.yellow[7]}
+                  color={
+                    activeNotice === 'rate_limited'
+                      ? colors.yellow[7]
+                      : colors.blue[7]
+                  }
                   className={classes.glow}
                 />
               </Tooltip>
@@ -169,13 +265,15 @@ export const ActivityDrawer = () => {
         </Glass>
       )}
 
-      {!hasPending && limited && (
+      {!hasPending && activeNotice && (
         <Tooltip
           multiline
           label={
             <Box>
               <Text fz="sm" mb="xs">
-                You have extended your daily tip limit ({remaining}/50)
+                {activeNotice === 'rate_limited'
+                  ? `You have extended your daily tip limit (${remaining}/50)`
+                  : 'Notifications are disabled. Open activity to enable daily summaries.'}
               </Text>
             </Box>
           }
@@ -188,7 +286,11 @@ export const ActivityDrawer = () => {
           >
             <AlertCircle
               size={20}
-              color={colors.yellow[7]}
+              color={
+                activeNotice === 'rate_limited'
+                  ? colors.yellow[7]
+                  : colors.blue[7]
+              }
               className={classes.glow}
             />
           </Glass>

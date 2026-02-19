@@ -154,18 +154,9 @@ export const User = () => {
     return <NotPoolAddressDisplay userPoolAddress={userPoolAddress} />;
   }
 
-  const handleAddNotification = async () => {
-    const res = await sdk.actions.addMiniApp();
-
-    console.log('res', res);
-  };
-
   return (
     <PageLayout>
       <BeamrHeadline />
-      {user?.fid === 11650 && (
-        <Button onClick={handleAddNotification}>Add Notif</Button>
-      )}
       <SwapModal opened={opened} onClose={close} />
       <BalanceDisplay openSwap={open} setTab={setTab} />
       <Card>
