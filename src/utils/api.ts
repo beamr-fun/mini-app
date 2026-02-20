@@ -43,8 +43,10 @@ export type NotificationDetails = {
 };
 
 export type UserNotificationStatus = {
+  success: boolean;
+  fid: number;
   enabled: boolean;
-  notificationDetails: NotificationDetails | null;
+  url: string | null;
 };
 
 export const fetchUserPrefs = async (fid: number, apiHeaders: APIHeaders) => {
@@ -106,7 +108,7 @@ export const fetchProfiles = async (fids: string[], apiHeaders: APIHeaders) => {
       {
         method: 'GET',
         headers: apiHeaders,
-      }
+      },
     );
 
     const data = await res.json();
@@ -126,7 +128,7 @@ export const fetchProfiles = async (fids: string[], apiHeaders: APIHeaders) => {
 
 export const fetchUserFollowing = async (
   fid: number,
-  apiHeaders: APIHeaders
+  apiHeaders: APIHeaders,
 ) => {
   try {
     const cached = sessionStorage.getItem(`userFollowing_${fid}`);
@@ -146,12 +148,12 @@ export const fetchUserFollowing = async (
     const following = data.following.flat() as Follower[];
 
     const withPrimaryAddresses = following.filter(
-      (f) => f.user.verified_addresses.primary.eth_address
+      (f) => f.user.verified_addresses.primary.eth_address,
     );
 
     sessionStorage.setItem(
       `userFollowing_${fid}`,
-      JSON.stringify(withPrimaryAddresses)
+      JSON.stringify(withPrimaryAddresses),
     );
 
     return withPrimaryAddresses;
@@ -189,7 +191,7 @@ export const getUserNotificationStatus = async (headers: APIHeaders) => {
 
     if (!res.ok) {
       throw new Error(
-        data?.error || 'Failed to fetch user notification status'
+        data?.error || 'Failed to fetch user notification status',
       );
     }
 
@@ -201,16 +203,22 @@ export const getUserNotificationStatus = async (headers: APIHeaders) => {
 
 export const registerUserNotifications = async ({
   headers,
+  fid,
   notificationDetails,
 }: {
   headers: APIHeaders;
+  fid: number;
   notificationDetails: NotificationDetails;
 }) => {
   try {
     const res = await fetch(`${keys.apiUrl}/v1/user/notifications/register`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(notificationDetails),
+      body: JSON.stringify({
+        fid,
+        token: notificationDetails.token,
+        url: notificationDetails.url,
+      }),
     });
 
     const data = await res.json();
@@ -225,11 +233,18 @@ export const registerUserNotifications = async ({
   }
 };
 
-export const unregisterUserNotifications = async (headers: APIHeaders) => {
+export const unregisterUserNotifications = async ({
+  headers,
+  fid,
+}: {
+  headers: APIHeaders;
+  fid?: number;
+}) => {
   try {
     const res = await fetch(`${keys.apiUrl}/v1/user/notifications/unregister`, {
       method: 'POST',
       headers,
+      body: JSON.stringify(fid ? { fid } : {}),
     });
 
     const data = await res.json();
@@ -257,7 +272,7 @@ const createPoolSchema = z.object({
   selectedFriends: z.array(
     z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
       message: 'FID string must be a positive number',
-    })
+    }),
   ),
 });
 
@@ -321,7 +336,7 @@ export const createPool = async ({
     }) as any;
 
     const poolAddress = decoded.find(
-      (log: any) => log.eventName === 'PoolCreated'
+      (log: any) => log.eventName === 'PoolCreated',
     )?.args.pool;
 
     if (!poolAddress) {
@@ -452,7 +467,7 @@ export const deleteUserSub = async (apiHeaders: APIHeaders) => {
 export const getQuote = async (params: QuoteRequestParams) => {
   if (isTestnet) {
     console.warn(
-      'getQuote is not available on testnet, returning values for base mainnet'
+      'getQuote is not available on testnet, returning values for base mainnet',
     );
   }
 
@@ -613,7 +628,7 @@ export const getUserSubs = async (headers: APIHeaders) => {
     ]);
 
     const uniqueFids = Array.from(new Set(fidStrings.flat())).filter(
-      Boolean
+      Boolean,
     ) as string[];
 
     const profiles = await fetchProfiles(uniqueFids, headers);

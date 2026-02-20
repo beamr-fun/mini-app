@@ -83,8 +83,6 @@ export const ActivityDrawer = () => {
     enabled: !!user?.fid,
   });
 
-  console.log('notificationStatus', notificationStatus);
-
   const limited =
     !!tipLimit && tipLimit?.limited && !tipLimitLoading && !tipLimitError;
   const notificationsDisabled =
@@ -124,13 +122,15 @@ export const ActivityDrawer = () => {
       }
 
       const headers = await getAuthHeaders();
+      const fid = user?.fid;
 
-      if (!headers) {
+      if (!headers || !fid) {
         throw new Error('Failed to get auth headers');
       }
 
       await registerUserNotifications({
         headers,
+        fid,
         notificationDetails: {
           token: notificationDetails.token,
           url: notificationDetails.url,
@@ -175,7 +175,7 @@ export const ActivityDrawer = () => {
           )}
           {activeNotice === 'notifications_disabled' && (
             <Alert
-              color="blue"
+              color="yellow"
               m="sm"
               title="Enable Notifications"
               icon={<BellRing size={16} />}
@@ -257,7 +257,7 @@ export const ActivityDrawer = () => {
                   color={
                     activeNotice === 'rate_limited'
                       ? colors.yellow[7]
-                      : colors.blue[7]
+                      : colors.yellow[7]
                   }
                   className={classes.glow}
                 />
@@ -291,7 +291,7 @@ export const ActivityDrawer = () => {
               color={
                 activeNotice === 'rate_limited'
                   ? colors.yellow[7]
-                  : colors.blue[7]
+                  : colors.yellow[7]
               }
               className={classes.glow}
             />
