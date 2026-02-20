@@ -28,6 +28,7 @@ import { InteractionCard } from './InteractionCard';
 import { useState } from 'react';
 import sdk from '@farcaster/miniapp-sdk';
 import { isProd } from '../../utils/setup';
+import { notifications } from '@mantine/notifications';
 
 export const ActivityDrawer = () => {
   const { colors } = useMantineTheme();
@@ -84,6 +85,8 @@ export const ActivityDrawer = () => {
     enabled: !!user?.fid && isProd,
   });
 
+  console.log('notificationStatus', notificationStatus);
+
   const limited =
     !!tipLimit && tipLimit?.limited && !tipLimitLoading && !tipLimitError;
   const notificationsDisabled =
@@ -114,6 +117,11 @@ export const ActivityDrawer = () => {
   const handleEnableNotifications = async () => {
     try {
       if (!isProd) {
+        notifications.show({
+          title: 'Not Supported',
+          message: 'Notifications are only supported in production.',
+          color: 'red',
+        });
         return;
       }
 
@@ -124,6 +132,11 @@ export const ActivityDrawer = () => {
       const notificationDetails = addMiniAppResponse.notificationDetails;
 
       if (!notificationDetails?.token || !notificationDetails?.url) {
+        notifications.show({
+          title: 'Failed to Enable Notifications',
+          message: 'Unable to retrieve notification details.',
+          color: 'red',
+        });
         return;
       }
 
@@ -131,7 +144,12 @@ export const ActivityDrawer = () => {
       const fid = user?.fid;
 
       if (!headers || !fid) {
-        throw new Error('Failed to get auth headers');
+        notifications.show({
+          title: 'Failed to Enable Notifications',
+          message: 'Authentication failed. Please try again.',
+          color: 'red',
+        });
+        return;
       }
 
       await registerUserNotifications({
@@ -146,6 +164,11 @@ export const ActivityDrawer = () => {
       await refetchNotificationStatus();
     } catch (error) {
       console.error('Failed to enable notifications', error);
+      notifications.show({
+        title: 'Failed to Enable Notifications',
+        message: 'An error occurred while enabling notifications.',
+        color: 'red',
+      });
     } finally {
       setIsEnablingNotifications(false);
     }
