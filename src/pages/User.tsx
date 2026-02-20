@@ -1,15 +1,6 @@
-import {
-  Card,
-  Group,
-  Paper,
-  SegmentedControl,
-  Stack,
-  Text,
-  useMantineTheme,
-} from '@mantine/core';
+import { Button, Card, SegmentedControl } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
-import { useEffect, useRef, useState } from 'react';
-
+import { useRef, useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { useCTA } from '../hooks/useCTA';
 import { Address, isAddress } from 'viem';
@@ -29,6 +20,7 @@ import {
   NotPoolAddressDisplay,
   NotPrimaryDisplay,
 } from '../components/User/WrongAddressDisplay';
+import sdk from '@farcaster/miniapp-sdk';
 
 export const User = () => {
   const [tab, setTab] = useState('Sending');
@@ -62,7 +54,7 @@ export const User = () => {
               ? () => navigate('/create-pool/1')
               : undefined,
           extraDeps: [incomingOnly, poolsToConnect.length],
-        }
+        },
   );
 
   const handleConnectStage = (poolId: string) => {

@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['barbie-heritage-von-cups.trycloudflare.com'],
+    allowedHosts: ['reach-exhaust-aquatic-norman.trycloudflare.com'],
   },
   preview: {
     host: true,
