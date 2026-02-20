@@ -83,6 +83,8 @@ export const ActivityDrawer = () => {
     enabled: !!user?.fid,
   });
 
+  console.log('notificationStatus', notificationStatus);
+
   const limited =
     !!tipLimit && tipLimit?.limited && !tipLimitLoading && !tipLimitError;
   const notificationsDisabled =
@@ -98,13 +100,13 @@ export const ActivityDrawer = () => {
       : null;
 
   const pending = recentSubs?.filter(
-    (sub) => sub.status === ReceiptStatus.Posted
+    (sub) => sub.status === ReceiptStatus.Posted,
   );
 
   const resolved = recentSubs?.filter(
     (sub) =>
       sub.status === ReceiptStatus.Completed ||
-      sub.status === ReceiptStatus.OnchainFail
+      sub.status === ReceiptStatus.OnchainFail,
   );
 
   const hasPending = pending && pending.length > 0;
@@ -202,7 +204,7 @@ export const ActivityDrawer = () => {
                     ?.sort(
                       (a, b) =>
                         new Date(b.updatedAt).getTime() -
-                        new Date(a.updatedAt).getTime()
+                        new Date(a.updatedAt).getTime(),
                     )
                     .map((sub) => {
                       return <InteractionCard receipt={sub} />;
@@ -220,7 +222,7 @@ export const ActivityDrawer = () => {
                     ?.sort(
                       (a, b) =>
                         new Date(b.updatedAt).getTime() -
-                        new Date(a.updatedAt).getTime()
+                        new Date(a.updatedAt).getTime(),
                     )
                     ?.map((sub) => {
                       return <InteractionCard receipt={sub} />;
