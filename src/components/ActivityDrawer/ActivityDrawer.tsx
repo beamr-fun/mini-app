@@ -27,6 +27,7 @@ import modalClasses from '../../styles/modal.module.css';
 import { InteractionCard } from './InteractionCard';
 import { useState } from 'react';
 import sdk from '@farcaster/miniapp-sdk';
+import { isProd } from '../../utils/setup';
 
 export const ActivityDrawer = () => {
   const { colors } = useMantineTheme();
@@ -80,12 +81,13 @@ export const ActivityDrawer = () => {
 
       return getUserNotificationStatus(headers);
     },
-    enabled: !!user?.fid,
+    enabled: !!user?.fid && isProd,
   });
 
   const limited =
     !!tipLimit && tipLimit?.limited && !tipLimitLoading && !tipLimitError;
   const notificationsDisabled =
+    isProd &&
     !!notificationStatus &&
     notificationStatus.enabled === false &&
     !notificationStatusLoading &&
@@ -111,6 +113,10 @@ export const ActivityDrawer = () => {
 
   const handleEnableNotifications = async () => {
     try {
+      if (!isProd) {
+        return;
+      }
+
       if (isEnablingNotifications) return;
       setIsEnablingNotifications(true);
 
