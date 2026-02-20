@@ -51,6 +51,10 @@ function generateManifest(env) {
 
   const { baseUrl, name, noindex, accountAssociation, iconImg } = envConfig;
 
+  const prodAPIUrl = 'https://mini-app-api-production-9c89.up.railway.app/';
+
+  const webhookUrl = `${env === 'prod' ? prodAPIUrl : baseUrl}/v1/webhook/sub`;
+
   const manifest = {
     accountAssociation,
     frame: {
@@ -62,7 +66,7 @@ function generateManifest(env) {
       buttonTitle: 'Start Beamr',
       splashImageUrl: `${baseUrl}/images/splash.png`,
       splashBackgroundColor: '#0F0E0E',
-      webhookUrl: `https://beamr.ngrok.app/v1/webhook/sub`,
+      webhookUrl: webhookUrl,
       subtitle: 'Dynamic micro-subscriptions',
       description:
         'The easiest way to sustainably reward people who make your feed worth scrolling.',
