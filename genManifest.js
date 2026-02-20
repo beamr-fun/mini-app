@@ -51,7 +51,7 @@ function generateManifest(env) {
 
   const { baseUrl, name, noindex, accountAssociation, iconImg } = envConfig;
 
-  const prodAPIUrl = 'https://mini-app-api-production-9c89.up.railway.app/';
+  const prodAPIUrl = 'https://mini-app-api-production-9c89.up.railway.app';
 
   const webhookUrl = `${env === 'prod' ? prodAPIUrl : baseUrl}/v1/webhook/sub`;
 
