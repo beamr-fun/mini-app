@@ -26,6 +26,8 @@ function formatList(items: string[], separator = ', ', lastSeparator = ' & ') {
   return `${items.slice(0, -1).join(separator)}${lastSeparator}${items.at(-1)}`;
 }
 
+const SHARE_TAG_LIMIT = 5;
+
 export const BalanceDisplay = ({
   openSwap,
   setTab,
@@ -242,9 +244,10 @@ export const BalanceDisplay = ({
     if (isNewPool) {
       const names = topOutgoing
         ?.map((item) => item.to.profile?.username)
-        .filter(Boolean) as string[];
+        .filter(Boolean)
+        .slice(0, SHARE_TAG_LIMIT) as string[];
 
-      const fids = topOutgoing.map((item) => item.to.fid).slice(0, 6);
+      const fids = topOutgoing.map((item) => item.to.fid).slice(0, SHARE_TAG_LIMIT);
 
       sdk.actions.composeCast({
         embeds: [
@@ -257,21 +260,21 @@ ${formatList(names.map((n) => `@${n}`))} are my first microsubs.
 Claim your $BEAMR streams and start your own pool in the app:`,
       });
     } else {
-      const top6 = topOutgoing?.slice(0, 6);
+      const top5 = topOutgoing?.slice(0, SHARE_TAG_LIMIT);
 
-      const top6Names = top6
+      const top5Names = top5
         ?.map((item) => item.to.profile?.username)
         .filter(Boolean) as string[];
 
-      const top6Fids = top6?.map((item) => item.to.fid).filter(Boolean);
+      const top5Fids = top5?.map((item) => item.to.fid).filter(Boolean);
 
       sdk.actions.composeCast({
         embeds: [
-          `https://app.beamr.fun/og/share-embed?sender=${user?.fid}&receivers=${top6Fids.join(',')}&flowrate=0`,
+          `https://app.beamr.fun/og/share-embed?sender=${user?.fid}&receivers=${top5Fids.join(',')}&flowrate=0`,
         ],
         text: `I'm streaming ${realOutgoingPerMonth} $BEAMR/mo to Farcasters I interact with.
        
-${formatList(top6Names.map((name) => `@${name}`))} are my top microsubs.
+${formatList(top5Names.map((name) => `@${name}`))} are my top microsubs.
 
 Claim your $BEAMR streams and start your own pool in the app:`,
       });
