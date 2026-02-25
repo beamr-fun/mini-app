@@ -10,7 +10,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { flowratePerSecondToMonth } from '../utils/common';
 import { PageLayout } from '../layouts/PageLayout';
@@ -18,12 +18,19 @@ import { ErrorDisplay } from '../components/ErrorDisplay';
 import { TableHeader, TableRow } from '../components/User/TableItems';
 import { FlowProgressBar } from '../components/User/FlowProgressBar';
 import { useUser } from '../hooks/useUser';
-import { fetchProfiles } from '../utils/api';
+import { fetchProfiles, fetchUserPrefs } from '../utils/api';
 import { gqlClient } from '../utils/envio';
 import { network } from '../utils/setup';
 import { transformUserByPk, UserTransformed } from '../transforms/user';
 import { LoggedInUserSubscription } from '../generated/graphql';
 import { useCTA } from '../hooks/useCTA';
+import { BeamrNav } from '../components/svg/BeamrNav';
+import { DancingText } from '../components/DancingText';
+import { ADDR } from '../const/addresses';
+import { useToken } from '../hooks/useToken';
+import { Abi, Address, isAddress } from 'viem';
+import { poolAbi } from '../abi/Pool';
+import { usePublicClient } from 'wagmi';
 
 const VIEW_USER_QUERY = `
   query ViewUser($id: String!) {
@@ -98,7 +105,15 @@ const getBeamFlowRate = (item: {
   return perUnitFlowRate * BigInt(item.units || 0);
 };
 
-const ViewBalanceDisplay = ({ data }: { data: UserTransformed }) => {
+const ViewBalanceDisplay = ({
+  data,
+  userBalance,
+  userBalanceFetchedAt,
+}: {
+  data: UserTransformed;
+  userBalance: bigint;
+  userBalanceFetchedAt: Date;
+}) => {
   const { colors } = useMantineTheme();
 
   const totalIncomingFlowRate = useMemo(() => {
@@ -117,9 +132,23 @@ const ViewBalanceDisplay = ({ data }: { data: UserTransformed }) => {
   const netFlowRate = moreIncomingThanOutgoing
     ? totalIncomingFlowRate - totalOutgoingFlowRate
     : totalOutgoingFlowRate - totalIncomingFlowRate;
+  const signedNetFlowRate = totalIncomingFlowRate - totalOutgoingFlowRate;
 
   return (
     <Card mb="md">
+      <Group gap={2} c={colors.gray[3]} mb="md">
+        <BeamrNav size={18} />
+        <Text mr={6}>Beamr</Text>
+        <DancingText
+          userBalance={userBalance}
+          fetchedAt={userBalanceFetchedAt}
+          flowRate={signedNetFlowRate}
+          fw={500}
+          fz="lg"
+          c={colors.gray[0]}
+          mr="auto"
+        />
+      </Group>
       <Group gap={4} mb="xs">
         <Text
           fz="sm"
@@ -153,6 +182,7 @@ const ViewBalanceDisplay = ({ data }: { data: UserTransformed }) => {
 
 const ViewSending = ({ data }: { data: UserTransformed }) => {
   const { colors } = useMantineTheme();
+  const navigate = useNavigate();
 
   const sorted = useMemo(() => {
     if (!data?.outgoing?.length) return [];
@@ -199,6 +229,9 @@ const ViewSending = ({ data }: { data: UserTransformed }) => {
               flowRate={beamFlowRate}
               percentage={percentage}
               pfpUrl={item.to?.profile?.pfp_url || ''}
+              avatarOnClick={
+                item.to?.fid ? () => navigate(`/user/${item.to.fid}`) : undefined
+              }
             />
           );
         })}
@@ -209,6 +242,7 @@ const ViewSending = ({ data }: { data: UserTransformed }) => {
 
 const ViewReceiving = ({ data }: { data: UserTransformed }) => {
   const { colors } = useMantineTheme();
+  const navigate = useNavigate();
 
   const sorted = useMemo(() => {
     if (!data?.incoming?.length) return [];
@@ -256,6 +290,11 @@ const ViewReceiving = ({ data }: { data: UserTransformed }) => {
               flowRate={beamFlowRate}
               percentage={percentage}
               pfpUrl={item.from?.profile?.pfp_url || ''}
+              avatarOnClick={
+                item.from?.fid
+                  ? () => navigate(`/user/${item.from.fid}`)
+                  : undefined
+              }
             />
           );
         })}
@@ -267,7 +306,9 @@ const ViewReceiving = ({ data }: { data: UserTransformed }) => {
 export const ViewUser = () => {
   const { fid } = useParams();
   const [tab, setTab] = useState('Outgoing');
+  const [fallbackBalanceFetchedAt] = useState(() => new Date());
   const { getAuthHeaders } = useUser();
+  const publicClient = usePublicClient();
 
   useCTA({
     label: undefined,
@@ -325,6 +366,93 @@ export const ViewUser = () => {
     staleTime: 60_000,
   });
 
+  const { data: viewedUserPrefs } = useQuery({
+    queryKey: ['view-user-prefs', parsedFid],
+    queryFn: async () => {
+      const headers = await getAuthHeaders();
+
+      if (!headers || !parsedFid) {
+        throw new Error('Failed to authenticate user');
+      }
+
+      try {
+        return await fetchUserPrefs(parsedFid, headers);
+      } catch {
+        return null;
+      }
+    },
+    enabled: isValidFid,
+    staleTime: 60_000,
+  });
+
+  const preferredAddress = viewedUserPrefs?.preferredAddress;
+  const neynarPrimaryAddress =
+    viewedProfile?.verified_addresses?.primary?.eth_address;
+  const resolvedAddress = preferredAddress || neynarPrimaryAddress;
+  const parsedViewedAddress =
+    resolvedAddress && isAddress(resolvedAddress)
+      ? (resolvedAddress as Address)
+      : undefined;
+
+  const { data: viewedTokenData } = useToken({
+    userAddress: parsedViewedAddress,
+    tokenAddress: ADDR.SUPER_TOKEN,
+    calls: { balanceOf: true },
+    enabled: !!parsedViewedAddress,
+  });
+
+  const viewedUserBalance = (viewedTokenData?.balanceOf as bigint) || 0n;
+  const viewedUserBalanceFetchedAt =
+    viewedTokenData?.fetchedAt || fallbackBalanceFetchedAt;
+
+  const unconnectedPoolAddresses = useMemo(() => {
+    if (!viewedUser?.incoming?.length) return [];
+
+    const pools = viewedUser.incoming
+      .filter((beam) => !beam.isReceiverConnected)
+      .map((beam) => beam.beamPool?.id)
+      .filter((id): id is string => !!id && isAddress(id));
+
+    return [...new Set(pools)] as Address[];
+  }, [viewedUser]);
+
+  const { data: unconnectedClaimable = 0n } = useQuery({
+    queryKey: [
+      'view-user-unconnected-claimable',
+      parsedViewedAddress,
+      unconnectedPoolAddresses,
+    ],
+    queryFn: async () => {
+      if (!publicClient || !parsedViewedAddress || !unconnectedPoolAddresses.length) {
+        return 0n;
+      }
+
+      const contracts = unconnectedPoolAddresses.map((pool) => ({
+        address: pool,
+        abi: poolAbi as Abi,
+        functionName: 'getClaimableNow',
+        args: [parsedViewedAddress],
+      }));
+
+      const results = await publicClient.multicall({
+        contracts,
+      });
+
+      return results.reduce((total, result) => {
+        if (result.status !== 'success') return total;
+
+        const [claimable] = result.result as [bigint, bigint];
+        return claimable > 0n ? total + claimable : total;
+      }, 0n);
+    },
+    enabled:
+      !!publicClient &&
+      !!parsedViewedAddress &&
+      unconnectedPoolAddresses.length > 0,
+    staleTime: 30_000,
+    refetchInterval: 30_000,
+  });
+
   if (!isValidFid) {
     return (
       <PageLayout>
@@ -372,7 +500,11 @@ export const ViewUser = () => {
           radius="xl"
         />
       </Group>
-      <ViewBalanceDisplay data={viewedUser} />
+      <ViewBalanceDisplay
+        data={viewedUser}
+        userBalance={viewedUserBalance + unconnectedClaimable}
+        userBalanceFetchedAt={viewedUserBalanceFetchedAt}
+      />
       <Card>
         <SegmentedControl
           w="100%"

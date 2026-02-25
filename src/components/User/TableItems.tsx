@@ -8,6 +8,7 @@ export const TableRow = ({
   pfpUrl,
   flowRate,
   percentage,
+  avatarOnClick,
   sending,
   showConnection = !sending,
   isConnected,
@@ -21,6 +22,7 @@ export const TableRow = ({
   pfpUrl: string;
   flowRate: bigint;
   percentage: number;
+  avatarOnClick?: () => void;
   isConnected?: boolean;
   connectOnClick?: () => void;
   isConnectSelected?: boolean;
@@ -31,7 +33,13 @@ export const TableRow = ({
 
   return (
     <Group justify="space-between">
-      <Avatar size={sizes[0]} radius="xl" src={pfpUrl} />
+      <Avatar
+        size={sizes[0]}
+        radius="xl"
+        src={pfpUrl}
+        style={{ cursor: avatarOnClick ? 'pointer' : 'default' }}
+        onClick={avatarOnClick}
+      />
       <Box w={sizes[1]} ta="left">
         <Avatar src={beamrTokenLogo} size={24} />
       </Box>
