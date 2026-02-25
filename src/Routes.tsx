@@ -17,6 +17,7 @@ import { Loader } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import { network } from './utils/setup';
 import { WrongNetwork } from './components/WrongNetwork';
+import { ViewUser } from './pages/ViewUser';
 
 const ConditionalRedirect = () => {
   const { startingRoute } = useUser();
@@ -45,6 +46,7 @@ export const ClientRoutes = () => {
     <Routes>
       <Route path="/" element={<ConditionalRedirect />} />
       <Route path="/home" element={<User />} />
+      <Route path="/user/:fid" element={<ViewUser />} />
       <Route path="/global" element={<Global />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/info" element={<Strategy />} />

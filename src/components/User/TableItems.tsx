@@ -9,6 +9,7 @@ export const TableRow = ({
   flowRate,
   percentage,
   sending,
+  showConnection = !sending,
   isConnected,
   connectOnClick,
   isConnectSelected,
@@ -16,6 +17,7 @@ export const TableRow = ({
 }: {
   isLoadingConnect?: boolean;
   sending?: boolean;
+  showConnection?: boolean;
   pfpUrl: string;
   flowRate: bigint;
   percentage: number;
@@ -25,7 +27,7 @@ export const TableRow = ({
 }) => {
   const { colors } = useMantineTheme();
 
-  const sizes = !sending ? [32, 32, 65, 44] : [32, 32, 75, 48];
+  const sizes = !sending && showConnection ? [32, 32, 65, 44] : [32, 32, 75, 48];
 
   return (
     <Group justify="space-between">
@@ -33,7 +35,7 @@ export const TableRow = ({
       <Box w={sizes[1]} ta="left">
         <Avatar src={beamrTokenLogo} size={24} />
       </Box>
-      {!sending && (
+      {!sending && showConnection && (
         <Box
           w={24}
           style={{
@@ -74,7 +76,13 @@ export const TableRow = ({
   );
 };
 
-export const TableHeader = ({ sending }: { sending: boolean }) => {
+export const TableHeader = ({
+  sending,
+  showConnection = !sending,
+}: {
+  sending: boolean;
+  showConnection?: boolean;
+}) => {
   const { colors } = useMantineTheme();
   return (
     <Group justify="space-between" c={colors.gray[0]} mb="12px">
@@ -84,7 +92,7 @@ export const TableHeader = ({ sending }: { sending: boolean }) => {
       <Text w={32} fz="sm" fw={500} ta="left">
         Token
       </Text>
-      {!sending && (
+      {!sending && showConnection && (
         <Text w={32} fz="sm" fw={500} ta="right">
           Conn.
         </Text>
