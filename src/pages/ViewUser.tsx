@@ -654,6 +654,19 @@ export const ViewUser = () => {
     });
   };
 
+  const onAvatarClick = async () => {
+    if (!parsedFid) return;
+
+    try {
+      await sdk.actions.viewProfile({ fid: parsedFid });
+    } catch (error) {
+      const fallbackUrl = viewedUsername
+        ? `https://warpcast.com/${viewedUsername}`
+        : `https://warpcast.com/~/profiles/${parsedFid}`;
+      await sdk.actions.openUrl(fallbackUrl);
+    }
+  };
+
   useEffect(() => {
     if (!viewedUser) return;
 
@@ -722,12 +735,16 @@ export const ViewUser = () => {
       </Glass>
       <Group justify="center" mb="xl">
         <Stack align="center" gap={8}>
-          <Avatar
-            src={viewedProfile?.pfp_url}
-            alt={viewedDisplayName}
-            size={80}
-            radius="xl"
-          />
+          <Tooltip label="View Farcaster Profile">
+            <Avatar
+              src={viewedProfile?.pfp_url}
+              alt={viewedDisplayName}
+              size={80}
+              radius="xl"
+              onClick={onAvatarClick}
+              style={{ cursor: parsedFid ? 'pointer' : 'default' }}
+            />
+          </Tooltip>
           <Stack gap={0} align="center">
             <Text fw={600}>{viewedDisplayName}</Text>
             {viewedProfile?.display_name &&
