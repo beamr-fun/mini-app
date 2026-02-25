@@ -31,6 +31,7 @@ import { useToken } from '../hooks/useToken';
 import { Abi, Address, isAddress } from 'viem';
 import { poolAbi } from '../abi/Pool';
 import { usePublicClient } from 'wagmi';
+import { getFlowDistributionRate } from '../utils/reads';
 
 const VIEW_USER_QUERY = `
   query ViewUser($id: String!) {
@@ -105,17 +106,57 @@ const getBeamFlowRate = (item: {
   return perUnitFlowRate * BigInt(item.units || 0);
 };
 
+const getOutgoingBeamFlowRate = (item: {
+  beamPool?: {
+    creatorFlowRate?: bigint | string;
+    totalUnits?: bigint | string;
+  } | null;
+  units?: bigint | string;
+}) => {
+  const totalUnits = BigInt(item.beamPool?.totalUnits || 0);
+
+  if (totalUnits === 0n) return 0n;
+
+  const perUnitFlowRate =
+    BigInt(item.beamPool?.creatorFlowRate || 0) / totalUnits;
+
+  return perUnitFlowRate * BigInt(item.units || 0);
+};
+
+const getOutgoingBoostFlowRate = (item: {
+  beamPool?: {
+    flowRate?: bigint | string;
+    creatorFlowRate?: bigint | string;
+    totalUnits?: bigint | string;
+  } | null;
+  units?: bigint | string;
+}) => {
+  const totalUnits = BigInt(item.beamPool?.totalUnits || 0);
+
+  if (totalUnits === 0n) return 0n;
+
+  const flowRate = BigInt(item.beamPool?.flowRate || 0);
+  const creatorFlowRate = BigInt(item.beamPool?.creatorFlowRate || 0);
+  const boostedFlowRate = flowRate - creatorFlowRate;
+
+  if (boostedFlowRate <= 0n) return 0n;
+
+  return (boostedFlowRate / totalUnits) * BigInt(item.units || 0);
+};
+
 const ViewBalanceDisplay = ({
   data,
   userBalance,
   connectedBalance,
   unconnectedBalance,
+  collectionFlowRate,
   userBalanceFetchedAt,
 }: {
   data: UserTransformed;
   userBalance: bigint;
   connectedBalance: bigint;
   unconnectedBalance: bigint;
+  collectionFlowRate: bigint;
   userBalanceFetchedAt: Date;
 }) => {
   const { colors } = useMantineTheme();
@@ -127,10 +168,33 @@ const ViewBalanceDisplay = ({
   }, [data]);
 
   const totalOutgoingFlowRate = useMemo(() => {
+    if (!data?.outgoing?.length && !collectionFlowRate) return 0n;
+
+    let total = data.outgoing.reduce(
+      (total, item) => total + getOutgoingBeamFlowRate(item),
+      0n
+    );
+
+    if (collectionFlowRate) {
+      total += collectionFlowRate;
+    }
+
+    return total;
+  }, [data, collectionFlowRate]);
+
+  const totalBoostedFlowRate = useMemo(() => {
     if (!data?.outgoing?.length) return 0n;
 
-    return data.outgoing.reduce((total, item) => total + getBeamFlowRate(item), 0n);
+    return data.outgoing.reduce(
+      (total, item) => total + getOutgoingBoostFlowRate(item),
+      0n
+    );
   }, [data]);
+
+  const hasBoost = totalBoostedFlowRate > 0n;
+  const displayedOutgoingFlowRate = hasBoost
+    ? totalOutgoingFlowRate + totalBoostedFlowRate
+    : totalOutgoingFlowRate;
 
   const moreIncomingThanOutgoing = totalIncomingFlowRate >= totalOutgoingFlowRate;
   const netFlowRate = moreIncomingThanOutgoing
@@ -165,20 +229,22 @@ const ViewBalanceDisplay = ({
       <FlowProgressBar
         connected={totalIncomingFlowRate}
         notConnected={0n}
-        outgoing={totalOutgoingFlowRate}
-        boosted={0n}
+        outgoing={displayedOutgoingFlowRate}
+        boosted={totalBoostedFlowRate}
       />
       <Group justify="space-between">
         <Text c={colors.green[7]} fz="sm">
           Incoming
         </Text>
         <Text c={colors.purple[7]} fz="sm">
-          Outgoing
+          {hasBoost ? 'Total Outgoing' : 'Outgoing'}
         </Text>
       </Group>
       <Group justify="space-between">
         <Text fz="sm">{flowratePerSecondToMonth(totalIncomingFlowRate, 'no-label')}</Text>
-        <Text fz="sm">{flowratePerSecondToMonth(totalOutgoingFlowRate, 'no-label')}</Text>
+        <Text fz="sm">
+          {flowratePerSecondToMonth(displayedOutgoingFlowRate, 'no-label')}
+        </Text>
       </Group>
       <Group mt="md" justify="space-between">
         <Text c={colors.gray[3]} fz="sm">
@@ -417,6 +483,22 @@ export const ViewUser = () => {
   const viewedUserBalanceFetchedAt =
     viewedTokenData?.fetchedAt || fallbackBalanceFetchedAt;
 
+  const { data: collectionFlowRate = 0n } = useQuery({
+    queryKey: ['view-user-collector-flow-rate', parsedViewedAddress],
+    queryFn: async () => {
+      if (!parsedViewedAddress) return 0n;
+
+      return getFlowDistributionRate({
+        userAddress: parsedViewedAddress,
+        poolAddress: ADDR.COLLECTOR_POOL,
+        tokenAddress: ADDR.SUPER_TOKEN,
+      });
+    },
+    enabled: !!parsedViewedAddress,
+    staleTime: 30_000,
+    refetchInterval: 30_000,
+  });
+
   const unconnectedPoolAddresses = useMemo(() => {
     if (!viewedUser?.incoming?.length) return [];
 
@@ -523,6 +605,7 @@ export const ViewUser = () => {
         userBalance={viewedUserBalance + unconnectedClaimable}
         connectedBalance={viewedUserBalance}
         unconnectedBalance={unconnectedClaimable}
+        collectionFlowRate={collectionFlowRate}
         userBalanceFetchedAt={viewedUserBalanceFetchedAt}
       />
       <Card>
