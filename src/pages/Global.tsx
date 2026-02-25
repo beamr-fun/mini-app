@@ -9,6 +9,7 @@ import {
   SegmentedControl,
   Stack,
   Text,
+  Tooltip,
   useMantineTheme,
 } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
@@ -289,6 +290,7 @@ const Leader = ({
               pfpUrl={pool.pfpUrl}
               place={leaderboardData.indexOf(pool) + 1}
               displayName={pool.displayName}
+              username={pool.username}
               fid={pool.fid}
               onViewUser={onViewUser}
             />
@@ -365,6 +367,8 @@ const Recent = ({
               flowRate={beamFlowRate}
               senderUrl={beam.from?.profile?.pfp_url || ''}
               receiverUrl={beam.to?.profile?.pfp_url || ''}
+              senderUsername={beam.from?.profile?.username || undefined}
+              receiverUsername={beam.to?.profile?.username || undefined}
               percentage={percentage}
               senderFid={beam.from?.fid}
               receiverFid={beam.to?.fid}
@@ -380,6 +384,8 @@ const Recent = ({
 const GlobalRow = ({
   senderUrl,
   receiverUrl,
+  senderUsername,
+  receiverUsername,
   flowRate,
   percentage,
   senderFid,
@@ -388,6 +394,8 @@ const GlobalRow = ({
 }: {
   senderUrl: string;
   receiverUrl: string;
+  senderUsername?: string;
+  receiverUsername?: string;
   flowRate: bigint;
   percentage: number;
   senderFid?: number;
@@ -397,20 +405,30 @@ const GlobalRow = ({
   return (
     <Group justify="space-between">
       <AvatarGroup>
-        <Avatar
-          size={32}
-          radius="xl"
-          src={senderUrl}
-          style={{ cursor: senderFid ? 'pointer' : 'default' }}
-          onClick={senderFid ? () => onViewUser(senderFid) : undefined}
-        />
-        <Avatar
-          size={32}
-          radius="xl"
-          src={receiverUrl}
-          style={{ cursor: receiverFid ? 'pointer' : 'default' }}
-          onClick={receiverFid ? () => onViewUser(receiverFid) : undefined}
-        />
+        <Tooltip
+          label={senderUsername ? `@${senderUsername}` : undefined}
+          disabled={!senderUsername}
+        >
+          <Avatar
+            size={32}
+            radius="xl"
+            src={senderUrl}
+            style={{ cursor: senderFid ? 'pointer' : 'default' }}
+            onClick={senderFid ? () => onViewUser(senderFid) : undefined}
+          />
+        </Tooltip>
+        <Tooltip
+          label={receiverUsername ? `@${receiverUsername}` : undefined}
+          disabled={!receiverUsername}
+        >
+          <Avatar
+            size={32}
+            radius="xl"
+            src={receiverUrl}
+            style={{ cursor: receiverFid ? 'pointer' : 'default' }}
+            onClick={receiverFid ? () => onViewUser(receiverFid) : undefined}
+          />
+        </Tooltip>
       </AvatarGroup>
       <Box w={32} ta="left">
         <Avatar src={beamrTokenLogo} size={24} />
@@ -465,6 +483,7 @@ const LeaderRow = ({
   place,
   flowRate,
   displayName,
+  username,
   fid,
   onViewUser,
 }: {
@@ -472,6 +491,7 @@ const LeaderRow = ({
   place: number;
   flowRate: bigint;
   displayName: string;
+  username?: string;
   fid?: number;
   onViewUser: (fid?: number) => void;
 }) => {
@@ -493,14 +513,16 @@ const LeaderRow = ({
           />
         )}
       </Box>
-      <Avatar
-        size={32}
-        radius="xl"
-        src={pfpUrl}
-        mr="sm"
-        style={{ cursor: fid ? 'pointer' : 'default' }}
-        onClick={fid ? () => onViewUser(fid) : undefined}
-      />
+      <Tooltip label={username ? `@${username}` : undefined} disabled={!username}>
+        <Avatar
+          size={32}
+          radius="xl"
+          src={pfpUrl}
+          mr="sm"
+          style={{ cursor: fid ? 'pointer' : 'default' }}
+          onClick={fid ? () => onViewUser(fid) : undefined}
+        />
+      </Tooltip>
       <Text
         w={75}
         lineClamp={1}

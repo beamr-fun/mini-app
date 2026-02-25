@@ -32,6 +32,8 @@ import { Abi, Address, isAddress } from 'viem';
 import { poolAbi } from '../abi/Pool';
 import { usePublicClient } from 'wagmi';
 import { getFlowDistributionRate } from '../utils/reads';
+import { ArrowLeft } from 'lucide-react';
+import { Glass } from '../components/Glass';
 
 const VIEW_USER_QUERY = `
   query ViewUser($id: String!) {
@@ -307,6 +309,11 @@ const ViewSending = ({ data }: { data: UserTransformed }) => {
               flowRate={beamFlowRate}
               percentage={percentage}
               pfpUrl={item.to?.profile?.pfp_url || ''}
+              avatarTooltip={
+                item.to?.profile?.username
+                  ? `@${item.to.profile.username}`
+                  : undefined
+              }
               avatarOnClick={
                 item.to?.fid ? () => navigate(`/user/${item.to.fid}`) : undefined
               }
@@ -368,6 +375,11 @@ const ViewReceiving = ({ data }: { data: UserTransformed }) => {
               flowRate={beamFlowRate}
               percentage={percentage}
               pfpUrl={item.from?.profile?.pfp_url || ''}
+              avatarTooltip={
+                item.from?.profile?.username
+                  ? `@${item.from.profile.username}`
+                  : undefined
+              }
               avatarOnClick={
                 item.from?.fid
                   ? () => navigate(`/user/${item.from.fid}`)
@@ -387,6 +399,7 @@ export const ViewUser = () => {
   const [fallbackBalanceFetchedAt] = useState(() => new Date());
   const { getAuthHeaders } = useUser();
   const publicClient = usePublicClient();
+  const navigate = useNavigate();
 
   useCTA({
     label: undefined,
@@ -466,6 +479,11 @@ export const ViewUser = () => {
   const preferredAddress = viewedUserPrefs?.preferredAddress;
   const neynarPrimaryAddress =
     viewedProfile?.verified_addresses?.primary?.eth_address;
+  const viewedDisplayName =
+    viewedProfile?.display_name ||
+    viewedProfile?.username ||
+    'Farcaster user';
+  const viewedUsername = viewedProfile?.username;
   const resolvedAddress = preferredAddress || neynarPrimaryAddress;
   const parsedViewedAddress =
     resolvedAddress && isAddress(resolvedAddress)
@@ -590,15 +608,48 @@ export const ViewUser = () => {
     );
   }
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+
+    navigate('/global');
+  };
+
   return (
     <PageLayout>
+      <Glass
+        px="sm"
+        py={6}
+        mb="sm"
+        onClick={handleBack}
+        style={{ width: 'fit-content', cursor: 'pointer' }}
+      >
+        <Group wrap="nowrap" gap={6}>
+          <ArrowLeft size={14} />
+          <Text fz="sm">Back</Text>
+        </Group>
+      </Glass>
       <Group justify="center" mb="xl">
-        <Avatar
-          src={viewedProfile?.pfp_url}
-          alt={viewedProfile?.display_name || viewedProfile?.username || 'User'}
-          size={80}
-          radius="xl"
-        />
+        <Stack align="center" gap={8}>
+          <Avatar
+            src={viewedProfile?.pfp_url}
+            alt={viewedDisplayName}
+            size={80}
+            radius="xl"
+          />
+          <Stack gap={0} align="center">
+            <Text fw={600}>{viewedDisplayName}</Text>
+            {viewedProfile?.display_name &&
+              viewedUsername &&
+              viewedProfile.display_name !== viewedUsername && (
+                <Text c="dimmed" fz="sm">
+                  @{viewedUsername}
+                </Text>
+              )}
+          </Stack>
+        </Stack>
       </Group>
       <ViewBalanceDisplay
         data={viewedUser}

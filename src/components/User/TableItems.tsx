@@ -1,4 +1,11 @@
-import { Avatar, Box, Group, Text, useMantineTheme } from '@mantine/core';
+import {
+  Avatar,
+  Box,
+  Group,
+  Text,
+  Tooltip,
+  useMantineTheme,
+} from '@mantine/core';
 import { flowratePerSecondToMonth } from '../../utils/common';
 import beamrTokenLogo from '../../assets/beamrTokenLogo.png';
 import { Check, ZapIcon, ZapOff } from 'lucide-react';
@@ -9,6 +16,7 @@ export const TableRow = ({
   flowRate,
   percentage,
   avatarOnClick,
+  avatarTooltip,
   sending,
   showConnection = !sending,
   isConnected,
@@ -23,6 +31,7 @@ export const TableRow = ({
   flowRate: bigint;
   percentage: number;
   avatarOnClick?: () => void;
+  avatarTooltip?: string;
   isConnected?: boolean;
   connectOnClick?: () => void;
   isConnectSelected?: boolean;
@@ -33,13 +42,15 @@ export const TableRow = ({
 
   return (
     <Group justify="space-between">
-      <Avatar
-        size={sizes[0]}
-        radius="xl"
-        src={pfpUrl}
-        style={{ cursor: avatarOnClick ? 'pointer' : 'default' }}
-        onClick={avatarOnClick}
-      />
+      <Tooltip label={avatarTooltip} disabled={!avatarTooltip}>
+        <Avatar
+          size={sizes[0]}
+          radius="xl"
+          src={pfpUrl}
+          style={{ cursor: avatarOnClick ? 'pointer' : 'default' }}
+          onClick={avatarOnClick}
+        />
+      </Tooltip>
       <Box w={sizes[1]} ta="left">
         <Avatar src={beamrTokenLogo} size={24} />
       </Box>

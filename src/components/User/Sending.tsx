@@ -68,6 +68,11 @@ export const Sending = () => {
               flowRate={beamFlowRate}
               percentage={percentage}
               pfpUrl={item.to?.profile?.pfp_url || ''}
+              avatarTooltip={
+                item.to?.profile?.username
+                  ? `@${item.to.profile.username}`
+                  : undefined
+              }
               avatarOnClick={
                 item.to?.fid ? () => navigate(`/user/${item.to.fid}`) : undefined
               }
