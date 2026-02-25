@@ -7,6 +7,7 @@ import {
   SegmentedControl,
   Stack,
   Text,
+  Tooltip,
   useMantineTheme,
 } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
@@ -34,6 +35,8 @@ import { usePublicClient } from 'wagmi';
 import { getFlowDistributionRate } from '../utils/reads';
 import { ArrowLeft } from 'lucide-react';
 import { Glass } from '../components/Glass';
+import classes from '../styles/effects.module.css';
+import sdk from '@farcaster/miniapp-sdk';
 
 const VIEW_USER_QUERY = `
   query ViewUser($id: String!) {
@@ -153,6 +156,9 @@ const ViewBalanceDisplay = ({
   unconnectedBalance,
   collectionFlowRate,
   userBalanceFetchedAt,
+  canNag,
+  nagTooltipLabel,
+  onNagClick,
 }: {
   data: UserTransformed;
   userBalance: bigint;
@@ -160,6 +166,9 @@ const ViewBalanceDisplay = ({
   unconnectedBalance: bigint;
   collectionFlowRate: bigint;
   userBalanceFetchedAt: Date;
+  canNag: boolean;
+  nagTooltipLabel: string;
+  onNagClick: () => void;
 }) => {
   const { colors } = useMantineTheme();
 
@@ -252,9 +261,22 @@ const ViewBalanceDisplay = ({
         <Text c={colors.gray[3]} fz="sm">
           Connected Balance {formatUnitBalance(connectedBalance)}
         </Text>
-        <Text c={colors.gray[3]} fz="sm">
-          Unconnected {formatUnitBalance(unconnectedBalance)}
-        </Text>
+        <Tooltip
+          label={nagTooltipLabel}
+          disabled={!canNag}
+          multiline
+          w={260}
+        >
+          <Text
+            c={canNag ? colors.gray[0] : colors.gray[3]}
+            fz="sm"
+            className={canNag ? classes.glow : undefined}
+            style={{ cursor: canNag ? 'pointer' : 'default' }}
+            onClick={canNag ? onNagClick : undefined}
+          >
+            Unconnected {formatUnitBalance(unconnectedBalance)}
+          </Text>
+        </Tooltip>
       </Group>
     </Card>
   );
@@ -565,6 +587,73 @@ export const ViewUser = () => {
     refetchInterval: 30_000,
   });
 
+  const unconnectedIncoming = useMemo(() => {
+    if (!viewedUser?.incoming?.length) return 0n;
+
+    return viewedUser.incoming.reduce((total, beam) => {
+      if (beam.isReceiverConnected) return total;
+      return total + getBeamFlowRate(beam);
+    }, 0n);
+  }, [viewedUser]);
+
+  const nagSenderFids = useMemo(() => {
+    if (!viewedUser?.incoming?.length) return [];
+
+    const senders = viewedUser.incoming
+      .filter((beam) => !beam.isReceiverConnected)
+      .map((beam) => beam.from?.fid)
+      .filter((fid): fid is number => !!fid);
+
+    return [...new Set(senders)].slice(0, 6);
+  }, [viewedUser]);
+
+  const nagSenderNames = useMemo(() => {
+    if (!viewedUser?.incoming?.length) return [];
+
+    const names = viewedUser.incoming
+      .filter((beam) => !beam.isReceiverConnected)
+      .map((beam) => beam.from?.profile?.username)
+      .filter((name): name is string => !!name);
+
+    return [...new Set(names)];
+  }, [viewedUser]);
+
+  const canNagUser =
+    nagSenderFids.length > 0 &&
+    nagSenderNames.length > 0 &&
+    unconnectedIncoming > 0n &&
+    !!parsedFid &&
+    !!viewedUsername;
+
+  const nagTooltipLabel = viewedUsername
+    ? `Nag @${viewedUsername} to connect and claim`
+    : 'Nag this user to connect and claim';
+
+  const onNagClick = () => {
+    if (!canNagUser || !parsedFid || !viewedUsername) return;
+
+    const monthlyUnconnected = flowratePerSecondToMonth(
+      unconnectedIncoming,
+      'no-label'
+    );
+
+    const text =
+      nagSenderNames.length === 1
+        ? `Hey @${viewedUsername}, @${nagSenderNames[0]} is streaming ${monthlyUnconnected} $BEAMR/mo to you. Open the Beamr Mini app to claim.`
+        : nagSenderNames.length === 2
+          ? `Hey @${viewedUsername}, @${nagSenderNames[0]} and @${nagSenderNames[1]} are streaming ${monthlyUnconnected} $BEAMR/mo to you. Open the Beamr Mini app to claim.`
+          : nagSenderNames.length > 2
+            ? `Hey @${viewedUsername}, @${nagSenderNames[0]}, @${nagSenderNames[1]}, and others are streaming ${monthlyUnconnected} $BEAMR/mo to you. Open the Beamr Mini app to claim.`
+            : `Hey @${viewedUsername}, people are streaming ${monthlyUnconnected} $BEAMR/mo to you. Open the Beamr Mini app to claim.`;
+
+    sdk.actions.composeCast({
+      embeds: [
+        `https://app.beamr.fun/og/reply-embed?senders=${nagSenderFids.join(',')}&receiver=${parsedFid}&flowrate=0`,
+      ],
+      text,
+    });
+  };
+
   useEffect(() => {
     if (!viewedUser) return;
 
@@ -658,6 +747,9 @@ export const ViewUser = () => {
         unconnectedBalance={unconnectedClaimable}
         collectionFlowRate={collectionFlowRate}
         userBalanceFetchedAt={viewedUserBalanceFetchedAt}
+        canNag={canNagUser}
+        nagTooltipLabel={nagTooltipLabel}
+        onNagClick={onNagClick}
       />
       <Card>
         <SegmentedControl
