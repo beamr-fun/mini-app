@@ -9,10 +9,10 @@ import {
   Text,
   useMantineTheme,
 } from '@mantine/core';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { flowratePerSecondToMonth } from '../utils/common';
+import { flowratePerSecondToMonth, formatUnitBalance } from '../utils/common';
 import { PageLayout } from '../layouts/PageLayout';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { TableHeader, TableRow } from '../components/User/TableItems';
@@ -108,10 +108,14 @@ const getBeamFlowRate = (item: {
 const ViewBalanceDisplay = ({
   data,
   userBalance,
+  connectedBalance,
+  unconnectedBalance,
   userBalanceFetchedAt,
 }: {
   data: UserTransformed;
   userBalance: bigint;
+  connectedBalance: bigint;
+  unconnectedBalance: bigint;
   userBalanceFetchedAt: Date;
 }) => {
   const { colors } = useMantineTheme();
@@ -175,6 +179,14 @@ const ViewBalanceDisplay = ({
       <Group justify="space-between">
         <Text fz="sm">{flowratePerSecondToMonth(totalIncomingFlowRate, 'no-label')}</Text>
         <Text fz="sm">{flowratePerSecondToMonth(totalOutgoingFlowRate, 'no-label')}</Text>
+      </Group>
+      <Group mt="md" justify="space-between">
+        <Text c={colors.gray[3]} fz="sm">
+          Connected Balance {formatUnitBalance(connectedBalance)}
+        </Text>
+        <Text c={colors.gray[3]} fz="sm">
+          Unconnected {formatUnitBalance(unconnectedBalance)}
+        </Text>
       </Group>
     </Card>
   );
@@ -453,6 +465,12 @@ export const ViewUser = () => {
     refetchInterval: 30_000,
   });
 
+  useEffect(() => {
+    if (!viewedUser) return;
+
+    setTab(viewedUser.outgoing.length === 0 ? 'Incoming' : 'Outgoing');
+  }, [fid, viewedUser?.outgoing.length]);
+
   if (!isValidFid) {
     return (
       <PageLayout>
@@ -503,6 +521,8 @@ export const ViewUser = () => {
       <ViewBalanceDisplay
         data={viewedUser}
         userBalance={viewedUserBalance + unconnectedClaimable}
+        connectedBalance={viewedUserBalance}
+        unconnectedBalance={unconnectedClaimable}
         userBalanceFetchedAt={viewedUserBalanceFetchedAt}
       />
       <Card>
