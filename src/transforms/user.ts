@@ -111,9 +111,11 @@ export const transformUserByPk = async (
   });
 
   const user = data?.User_by_pk;
+  const filteredPools = user.pools.filter((pool) => pool.hasDistributed);
 
   return {
     ...data?.User_by_pk,
+    pools: filteredPools,
     incoming: user.incoming.map((beam) => {
       const profile = profileLookup[beam.from?.fid || 0];
 
