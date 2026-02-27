@@ -1,32 +1,22 @@
 import {
-  Avatar,
   Card,
-  Flex,
   Group,
   Loader,
   SegmentedControl,
-  Stack,
   Text,
-  Tooltip,
-  useMantineTheme,
 } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { flowratePerSecondToMonth, formatUnitBalance } from '../utils/common';
+import { flowratePerSecondToMonth } from '../utils/common';
 import { PageLayout } from '../layouts/PageLayout';
 import { ErrorDisplay } from '../components/ErrorDisplay';
-import { TableHeader, TableRow } from '../components/User/TableItems';
-import { FlowProgressBar } from '../components/User/FlowProgressBar';
 import { useUser } from '../hooks/useUser';
 import { fetchProfiles, fetchUserPrefs } from '../utils/api';
 import { gqlClient } from '../utils/envio';
 import { network } from '../utils/setup';
 import { transformUserByPk, UserTransformed } from '../transforms/user';
 import { ViewUserDocument } from '../generated/graphql';
-
-import { BeamrNav } from '../components/svg/BeamrNav';
-import { DancingText } from '../components/DancingText';
 import { ADDR } from '../const/addresses';
 import { useToken } from '../hooks/useToken';
 import { Abi, Address, isAddress } from 'viem';
@@ -35,341 +25,12 @@ import { usePublicClient } from 'wagmi';
 import { getFlowDistributionRate } from '../utils/reads';
 import { ArrowLeft } from 'lucide-react';
 import { Glass } from '../components/Glass';
-import classes from '../styles/effects.module.css';
 import sdk from '@farcaster/miniapp-sdk';
-
-const getBeamFlowRate = (item: {
-  beamPool?: {
-    flowRate?: bigint | string;
-    totalUnits?: bigint | string;
-  } | null;
-  units?: bigint | string;
-}) => {
-  const totalUnits = BigInt(item.beamPool?.totalUnits || 0);
-
-  if (totalUnits === 0n) return 0n;
-
-  const perUnitFlowRate = BigInt(item.beamPool?.flowRate || 0) / totalUnits;
-
-  return perUnitFlowRate * BigInt(item.units || 0);
-};
-
-const getOutgoingBeamFlowRate = (item: {
-  beamPool?: {
-    creatorFlowRate?: bigint | string;
-    totalUnits?: bigint | string;
-  } | null;
-  units?: bigint | string;
-}) => {
-  const totalUnits = BigInt(item.beamPool?.totalUnits || 0);
-
-  if (totalUnits === 0n) return 0n;
-
-  const perUnitFlowRate =
-    BigInt(item.beamPool?.creatorFlowRate || 0) / totalUnits;
-
-  return perUnitFlowRate * BigInt(item.units || 0);
-};
-
-const getOutgoingBoostFlowRate = (item: {
-  beamPool?: {
-    flowRate?: bigint | string;
-    creatorFlowRate?: bigint | string;
-    totalUnits?: bigint | string;
-  } | null;
-  units?: bigint | string;
-}) => {
-  const totalUnits = BigInt(item.beamPool?.totalUnits || 0);
-
-  if (totalUnits === 0n) return 0n;
-
-  const flowRate = BigInt(item.beamPool?.flowRate || 0);
-  const creatorFlowRate = BigInt(item.beamPool?.creatorFlowRate || 0);
-  const boostedFlowRate = flowRate - creatorFlowRate;
-
-  if (boostedFlowRate <= 0n) return 0n;
-
-  return (boostedFlowRate / totalUnits) * BigInt(item.units || 0);
-};
-
-const ViewBalanceDisplay = ({
-  data,
-  userBalance,
-  connectedBalance,
-  unconnectedBalance,
-  collectionFlowRate,
-  userBalanceFetchedAt,
-  canNag,
-  nagTooltipLabel,
-  onNagClick,
-}: {
-  data: UserTransformed;
-  userBalance: bigint;
-  connectedBalance: bigint;
-  unconnectedBalance: bigint;
-  collectionFlowRate: bigint;
-  userBalanceFetchedAt: Date;
-  canNag: boolean;
-  nagTooltipLabel: string;
-  onNagClick: () => void;
-}) => {
-  const { colors } = useMantineTheme();
-
-  const totalIncomingFlowRate = useMemo(() => {
-    if (!data?.incoming?.length) return 0n;
-
-    return data.incoming.reduce(
-      (total, item) => total + getBeamFlowRate(item),
-      0n,
-    );
-  }, [data]);
-
-  const totalOutgoingFlowRate = useMemo(() => {
-    if (!data?.outgoing?.length && !collectionFlowRate) return 0n;
-
-    let total = data.outgoing.reduce(
-      (total, item) => total + getOutgoingBeamFlowRate(item),
-      0n,
-    );
-
-    if (collectionFlowRate) {
-      total += collectionFlowRate;
-    }
-
-    return total;
-  }, [data, collectionFlowRate]);
-
-  const totalBoostedFlowRate = useMemo(() => {
-    if (!data?.outgoing?.length) return 0n;
-
-    return data.outgoing.reduce(
-      (total, item) => total + getOutgoingBoostFlowRate(item),
-      0n,
-    );
-  }, [data]);
-
-  const hasBoost = totalBoostedFlowRate > 0n;
-  const displayedOutgoingFlowRate = hasBoost
-    ? totalOutgoingFlowRate + totalBoostedFlowRate
-    : totalOutgoingFlowRate;
-
-  const moreIncomingThanOutgoing =
-    totalIncomingFlowRate >= totalOutgoingFlowRate;
-  const netFlowRate = moreIncomingThanOutgoing
-    ? totalIncomingFlowRate - totalOutgoingFlowRate
-    : totalOutgoingFlowRate - totalIncomingFlowRate;
-  const signedNetFlowRate = totalIncomingFlowRate - totalOutgoingFlowRate;
-
-  return (
-    <Card mb="md">
-      <Group gap={2} c={colors.gray[3]} mb="md">
-        <BeamrNav size={18} />
-        <Text mr={6}>Beamr</Text>
-        <DancingText
-          userBalance={userBalance}
-          fetchedAt={userBalanceFetchedAt}
-          flowRate={signedNetFlowRate}
-          fw={500}
-          fz="lg"
-          c={colors.gray[0]}
-          mr="auto"
-        />
-      </Group>
-      <Group gap={4} mb="xs">
-        <Text
-          fz="sm"
-          c={moreIncomingThanOutgoing ? colors.green[7] : colors.purple[7]}
-        >
-          Net Monthly Rate {moreIncomingThanOutgoing ? '+' : '-'}
-          {flowratePerSecondToMonth(netFlowRate, 'no-label')}
-        </Text>
-      </Group>
-      <FlowProgressBar
-        connected={totalIncomingFlowRate}
-        notConnected={0n}
-        outgoing={displayedOutgoingFlowRate}
-        boosted={totalBoostedFlowRate}
-      />
-      <Group justify="space-between">
-        <Text c={colors.green[7]} fz="sm">
-          Incoming
-        </Text>
-        <Text c={colors.purple[7]} fz="sm">
-          {hasBoost ? 'Total Outgoing' : 'Outgoing'}
-        </Text>
-      </Group>
-      <Group justify="space-between">
-        <Text fz="sm">
-          {flowratePerSecondToMonth(totalIncomingFlowRate, 'no-label')}
-        </Text>
-        <Text fz="sm">
-          {flowratePerSecondToMonth(displayedOutgoingFlowRate, 'no-label')}
-        </Text>
-      </Group>
-      <Group mt="md" justify="space-between">
-        <Text c={colors.gray[3]} fz="sm">
-          Connected Balance {formatUnitBalance(connectedBalance)}
-        </Text>
-        <Tooltip label={nagTooltipLabel} disabled={!canNag} multiline w={260}>
-          <Text
-            c={canNag ? colors.gray[0] : colors.gray[3]}
-            fz="sm"
-            className={canNag ? classes.glow : undefined}
-            style={{ cursor: canNag ? 'pointer' : 'default' }}
-            onClick={canNag ? onNagClick : undefined}
-          >
-            Unconnected {formatUnitBalance(unconnectedBalance)}
-          </Text>
-        </Tooltip>
-      </Group>
-    </Card>
-  );
-};
-
-const ViewSending = ({ data }: { data: UserTransformed }) => {
-  const { colors } = useMantineTheme();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const sorted = useMemo(() => {
-    if (!data?.outgoing?.length) return [];
-
-    return [...data.outgoing].sort((a, b) => {
-      const aBeamFlowRate = getBeamFlowRate(a);
-      const bBeamFlowRate = getBeamFlowRate(b);
-
-      return bBeamFlowRate > aBeamFlowRate ? 1 : -1;
-    });
-  }, [data]);
-
-  if (sorted.length === 0) {
-    return (
-      <Stack gap="sm" px="xs">
-        <TableHeader sending={true} />
-        <Flex justify="center" align="center" h={100} direction="column">
-          <Text size="xl" mb="md">
-            No outgoing streams
-          </Text>
-          <Text c={colors.gray[2]}>No outgoing beams for this user yet.</Text>
-        </Flex>
-      </Stack>
-    );
-  }
-
-  return (
-    <Stack gap="sm">
-      <TableHeader sending={true} />
-      <Stack gap="12px">
-        {sorted.map((item) => {
-          const beamFlowRate = getBeamFlowRate(item);
-          const percentage = Number(
-            (
-              (Number(item.units || 0) /
-                Number(item.beamPool?.totalUnits || 1)) *
-              100
-            ).toFixed(2),
-          );
-
-          return (
-            <TableRow
-              sending={true}
-              key={item.id}
-              flowRate={beamFlowRate}
-              percentage={percentage}
-              pfpUrl={item.to?.profile?.pfp_url || ''}
-              avatarTooltip={
-                item.to?.profile?.username
-                  ? `@${item.to.profile.username}`
-                  : undefined
-              }
-              avatarOnClick={
-                item.to?.fid
-                  ? () =>
-                      navigate(`/user/${item.to.fid}`, {
-                        state: { backTo: location.pathname + location.search },
-                      })
-                  : undefined
-              }
-            />
-          );
-        })}
-      </Stack>
-    </Stack>
-  );
-};
-
-const ViewReceiving = ({ data }: { data: UserTransformed }) => {
-  const { colors } = useMantineTheme();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const sorted = useMemo(() => {
-    if (!data?.incoming?.length) return [];
-
-    return [...data.incoming].sort((a, b) => {
-      const aBeamFlowRate = getBeamFlowRate(a);
-      const bBeamFlowRate = getBeamFlowRate(b);
-
-      return bBeamFlowRate > aBeamFlowRate ? 1 : -1;
-    });
-  }, [data]);
-
-  if (sorted.length === 0) {
-    return (
-      <Stack gap="sm" px="xs">
-        <TableHeader sending={false} showConnection={false} />
-        <Flex justify="center" align="center" h={100} direction="column">
-          <Text size="xl" mb="md">
-            No incoming streams
-          </Text>
-          <Text c={colors.gray[2]}>No one has beamed to this user yet.</Text>
-        </Flex>
-      </Stack>
-    );
-  }
-
-  return (
-    <Stack gap="sm">
-      <TableHeader sending={false} showConnection={false} />
-      <Stack gap="sm">
-        {sorted.map((item) => {
-          const beamFlowRate = getBeamFlowRate(item);
-          const percentage = Number(
-            (
-              (Number(item.units || 0) /
-                Number(item.beamPool?.totalUnits || 1)) *
-              100
-            ).toFixed(2),
-          );
-
-          return (
-            <TableRow
-              sending={false}
-              showConnection={false}
-              key={item.id}
-              flowRate={beamFlowRate}
-              percentage={percentage}
-              pfpUrl={item.from?.profile?.pfp_url || ''}
-              avatarTooltip={
-                item.from?.profile?.username
-                  ? `@${item.from.profile.username}`
-                  : undefined
-              }
-              avatarOnClick={
-                item.from?.fid
-                  ? () =>
-                      navigate(`/user/${item.from.fid}`, {
-                        state: { backTo: location.pathname + location.search },
-                      })
-                  : undefined
-              }
-            />
-          );
-        })}
-      </Stack>
-    </Stack>
-  );
-};
+import { BalanceDisplay } from '../components/ViewUser/BalanceDisplay';
+import { ProfileHeader } from '../components/ViewUser/ProfileHeader';
+import { Receiving } from '../components/ViewUser/Receiving';
+import { Sending } from '../components/ViewUser/Sending';
+import { getBeamFlowRate } from '../components/ViewUser/flowRates';
 
 export const ViewUser = () => {
   const { fid } = useParams();
@@ -397,7 +58,11 @@ export const ViewUser = () => {
         throw new Error('Failed to authenticate user');
       }
 
-      const data = await gqlClient.request(ViewUserDocument, { id: userId }, headers);
+      const data = await gqlClient.request(
+        ViewUserDocument,
+        { id: userId },
+        headers,
+      );
 
       return transformUserByPk(
         data,
@@ -694,31 +359,13 @@ Open the Beamr Mini app to claim.`;
           <Text fz="sm">Back</Text>
         </Group>
       </Glass>
-      <Group justify="center" mb="xl">
-        <Stack align="center" gap={8}>
-          <Tooltip label="View Farcaster Profile">
-            <Avatar
-              src={viewedProfile?.pfp_url}
-              alt={viewedDisplayName}
-              size={80}
-              radius="xl"
-              onClick={onAvatarClick}
-              style={{ cursor: parsedFid ? 'pointer' : 'default' }}
-            />
-          </Tooltip>
-          <Stack gap={0} align="center">
-            <Text fw={600}>{viewedDisplayName}</Text>
-            {viewedProfile?.display_name &&
-              viewedUsername &&
-              viewedProfile.display_name !== viewedUsername && (
-                <Text c="dimmed" fz="sm">
-                  @{viewedUsername}
-                </Text>
-              )}
-          </Stack>
-        </Stack>
-      </Group>
-      <ViewBalanceDisplay
+      <ProfileHeader
+        displayName={viewedDisplayName}
+        username={viewedUsername}
+        pfpUrl={viewedProfile?.pfp_url}
+        onAvatarClick={onAvatarClick}
+      />
+      <BalanceDisplay
         data={viewedUser}
         userBalance={viewedUserBalance + unconnectedClaimable}
         connectedBalance={viewedUserBalance}
@@ -737,8 +384,8 @@ Open the Beamr Mini app to claim.`;
           data={['Outgoing', 'Incoming']}
           mb="md"
         />
-        {tab === 'Outgoing' && <ViewSending data={viewedUser} />}
-        {tab === 'Incoming' && <ViewReceiving data={viewedUser} />}
+        {tab === 'Outgoing' && <Sending data={viewedUser} />}
+        {tab === 'Incoming' && <Receiving data={viewedUser} />}
       </Card>
     </PageLayout>
   );

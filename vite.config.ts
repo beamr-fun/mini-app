@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['ref-label-beaches-level.trycloudflare.com'],
+    allowedHosts: ['pan-amplifier-prompt-charleston.trycloudflare.com'],
   },
   preview: {
     host: true,
