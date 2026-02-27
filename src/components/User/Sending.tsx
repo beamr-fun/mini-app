@@ -2,12 +2,13 @@ import { Flex, Stack, Text, useMantineTheme } from '@mantine/core';
 import { useUser } from '../../hooks/useUser';
 import { TableHeader, TableRow } from './TableItems';
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const Sending = () => {
   const { userSubscription } = useUser();
   const { colors } = useMantineTheme();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const sorted = useMemo(() => {
     if (!userSubscription) return [];
@@ -74,7 +75,12 @@ export const Sending = () => {
                   : undefined
               }
               avatarOnClick={
-                item.to?.fid ? () => navigate(`/user/${item.to.fid}`) : undefined
+                item.to?.fid
+                  ? () =>
+                      navigate(`/user/${item.to.fid}`, {
+                        state: { backTo: location.pathname + location.search },
+                      })
+                  : undefined
               }
             />
           );

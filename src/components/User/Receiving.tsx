@@ -3,7 +3,7 @@ import { useUser } from '../../hooks/useUser';
 import { TableHeader, TableRow } from './TableItems';
 import { usePoolAccount } from '../../hooks/usePoolAccount';
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const Receiving = ({
   onConnectClick,
@@ -18,6 +18,7 @@ export const Receiving = ({
   const { colors } = useMantineTheme();
   const { userPoolAddress } = usePoolAccount();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const processedIncoming = useMemo(() => {
     if (!userSubscription) return null;
@@ -100,7 +101,10 @@ export const Receiving = ({
               }
               avatarOnClick={
                 item.from?.fid
-                  ? () => navigate(`/user/${item.from.fid}`)
+                  ? () =>
+                      navigate(`/user/${item.from.fid}`, {
+                        state: { backTo: location.pathname + location.search },
+                      })
                   : undefined
               }
               isConnectSelected={poolsToConnect.includes(

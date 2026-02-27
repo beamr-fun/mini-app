@@ -26,7 +26,7 @@ import {
 } from '../generated/graphql';
 import { useUser } from '../hooks/useUser';
 import { useCTA } from '../hooks/useCTA';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Ribbon, Trophy } from 'lucide-react';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import {
@@ -66,9 +66,12 @@ export const Global = () => {
   const highlevelError = apiError || userSubError;
 
   const navigate = useNavigate();
+  const location = useLocation();
   const viewUser = (fid?: number) => {
     if (!fid) return;
-    navigate(`/user/${fid}`);
+    navigate(`/user/${fid}`, {
+      state: { backTo: location.pathname + location.search },
+    });
   };
 
   const {

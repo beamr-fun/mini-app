@@ -11,7 +11,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { flowratePerSecondToMonth, formatUnitBalance } from '../utils/common';
 import { PageLayout } from '../layouts/PageLayout';
@@ -289,6 +289,7 @@ const ViewBalanceDisplay = ({
 const ViewSending = ({ data }: { data: UserTransformed }) => {
   const { colors } = useMantineTheme();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const sorted = useMemo(() => {
     if (!data?.outgoing?.length) return [];
@@ -343,7 +344,10 @@ const ViewSending = ({ data }: { data: UserTransformed }) => {
               }
               avatarOnClick={
                 item.to?.fid
-                  ? () => navigate(`/user/${item.to.fid}`)
+                  ? () =>
+                      navigate(`/user/${item.to.fid}`, {
+                        state: { backTo: location.pathname + location.search },
+                      })
                   : undefined
               }
             />
@@ -357,6 +361,7 @@ const ViewSending = ({ data }: { data: UserTransformed }) => {
 const ViewReceiving = ({ data }: { data: UserTransformed }) => {
   const { colors } = useMantineTheme();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const sorted = useMemo(() => {
     if (!data?.incoming?.length) return [];
@@ -412,7 +417,10 @@ const ViewReceiving = ({ data }: { data: UserTransformed }) => {
               }
               avatarOnClick={
                 item.from?.fid
-                  ? () => navigate(`/user/${item.from.fid}`)
+                  ? () =>
+                      navigate(`/user/${item.from.fid}`, {
+                        state: { backTo: location.pathname + location.search },
+                      })
                   : undefined
               }
             />
@@ -427,9 +435,10 @@ export const ViewUser = () => {
   const { fid } = useParams();
   const [tab, setTab] = useState('Outgoing');
   const [fallbackBalanceFetchedAt] = useState(() => new Date());
-  const { getAuthHeaders, user: loggedInUser } = useUser();
+  const { getAuthHeaders, startingRoute, user: loggedInUser } = useUser();
   const publicClient = usePublicClient();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const parsedFid = Number(fid);
   const isValidFid = !!fid && Number.isInteger(parsedFid) && parsedFid > 0;
@@ -731,12 +740,8 @@ Open the Beamr Mini app to claim.`;
   }
 
   const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-      return;
-    }
-
-    navigate('/global');
+    const backTo = (location.state as { backTo?: string } | null)?.backTo;
+    navigate(backTo || startingRoute || '/global', { replace: true });
   };
 
   return (
