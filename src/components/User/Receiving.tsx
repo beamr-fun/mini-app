@@ -82,7 +82,7 @@ export const Receiving = ({
             (
               (Number(item.units) / Number(item.beamPool?.totalUnits)) *
               100
-            ).toFixed(2)
+            ).toFixed(2),
           );
 
           return (
@@ -108,7 +108,7 @@ export const Receiving = ({
                   : undefined
               }
               isConnectSelected={poolsToConnect.includes(
-                item?.beamPool?.id as string
+                item?.beamPool?.id as string,
               )}
               connectOnClick={
                 item?.beamPool?.id

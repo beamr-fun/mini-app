@@ -1,5 +1,5 @@
 import { User } from '@neynar/nodejs-sdk/build/api';
-import { LoggedInUserSubscription } from '../generated/graphql';
+import { LoggedInUserSubscription, ViewUserQuery } from '../generated/graphql';
 import { APIHeaders, fetchProfiles } from '../utils/api';
 
 type BasicProfile = {
@@ -73,7 +73,12 @@ export const userProfileTransform = async (
 };
 
 export const transformUserByPk = async (
-  data: { User_by_pk?: LoggedInUserSubscription['User_by_pk'] | null },
+  data: {
+    User_by_pk?:
+      | LoggedInUserSubscription['User_by_pk']
+      | ViewUserQuery['User_by_pk']
+      | null;
+  },
   getHeaders: () => Promise<APIHeaders | false>,
   extraFids: string[] = []
 ) => {

@@ -23,7 +23,7 @@ import { fetchProfiles, fetchUserPrefs } from '../utils/api';
 import { gqlClient } from '../utils/envio';
 import { network } from '../utils/setup';
 import { transformUserByPk, UserTransformed } from '../transforms/user';
-import { LoggedInUserSubscription } from '../generated/graphql';
+import { ViewUserDocument } from '../generated/graphql';
 
 import { BeamrNav } from '../components/svg/BeamrNav';
 import { DancingText } from '../components/DancingText';
@@ -37,66 +37,6 @@ import { ArrowLeft } from 'lucide-react';
 import { Glass } from '../components/Glass';
 import classes from '../styles/effects.module.css';
 import sdk from '@farcaster/miniapp-sdk';
-
-const VIEW_USER_QUERY = `
-  query ViewUser($id: String!) {
-    User_by_pk(id: $id) {
-      id
-      pools {
-        id
-        flowRate
-        totalUnits
-        active
-        hasDistributed
-        metadata {
-          name
-        }
-        creatorAccount {
-          address
-        }
-      }
-      incoming(
-        order_by: { lastUpdated: desc }
-        where: { beamPool: { active: { _eq: true } } }
-      ) {
-        id
-        units
-        isReceiverConnected
-        lastUpdated
-        beamPool {
-          flowRate
-          totalUnits
-          id
-        }
-        from {
-          fid
-          id
-        }
-      }
-      outgoing(
-        order_by: { lastUpdated: desc }
-        where: { beamPool: { active: { _eq: true } } }
-      ) {
-        units
-        id
-        beamPool {
-          flowRate
-          creatorFlowRate
-          totalUnits
-          id
-        }
-        to {
-          id
-          fid
-        }
-      }
-    }
-  }
-`;
-
-type ViewUserQueryResponse = {
-  User_by_pk?: LoggedInUserSubscription['User_by_pk'] | null;
-};
 
 const getBeamFlowRate = (item: {
   beamPool?: {
@@ -457,11 +397,7 @@ export const ViewUser = () => {
         throw new Error('Failed to authenticate user');
       }
 
-      const data = await gqlClient.request<ViewUserQueryResponse>(
-        VIEW_USER_QUERY,
-        { id: userId },
-        headers,
-      );
+      const data = await gqlClient.request(ViewUserDocument, { id: userId }, headers);
 
       return transformUserByPk(
         data,
