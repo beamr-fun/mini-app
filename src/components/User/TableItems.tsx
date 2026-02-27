@@ -1,4 +1,11 @@
-import { Avatar, Box, Group, Text, useMantineTheme } from '@mantine/core';
+import {
+  Avatar,
+  Box,
+  Group,
+  Text,
+  Tooltip,
+  useMantineTheme,
+} from '@mantine/core';
 import { flowratePerSecondToMonth } from '../../utils/common';
 import beamrTokenLogo from '../../assets/beamrTokenLogo.png';
 import { Check, ZapIcon, ZapOff } from 'lucide-react';
@@ -8,7 +15,10 @@ export const TableRow = ({
   pfpUrl,
   flowRate,
   percentage,
+  avatarOnClick,
+  avatarTooltip,
   sending,
+  showConnection = !sending,
   isConnected,
   connectOnClick,
   isConnectSelected,
@@ -16,24 +26,35 @@ export const TableRow = ({
 }: {
   isLoadingConnect?: boolean;
   sending?: boolean;
+  showConnection?: boolean;
   pfpUrl: string;
   flowRate: bigint;
   percentage: number;
+  avatarOnClick?: () => void;
+  avatarTooltip?: string;
   isConnected?: boolean;
   connectOnClick?: () => void;
   isConnectSelected?: boolean;
 }) => {
   const { colors } = useMantineTheme();
 
-  const sizes = !sending ? [32, 32, 65, 44] : [32, 32, 75, 48];
+  const sizes = !sending && showConnection ? [32, 32, 65, 44] : [32, 32, 75, 48];
 
   return (
     <Group justify="space-between">
-      <Avatar size={sizes[0]} radius="xl" src={pfpUrl} />
+      <Tooltip label={avatarTooltip} disabled={!avatarTooltip}>
+        <Avatar
+          size={sizes[0]}
+          radius="xl"
+          src={pfpUrl}
+          style={{ cursor: avatarOnClick ? 'pointer' : 'default' }}
+          onClick={avatarOnClick}
+        />
+      </Tooltip>
       <Box w={sizes[1]} ta="left">
         <Avatar src={beamrTokenLogo} size={24} />
       </Box>
-      {!sending && (
+      {!sending && showConnection && (
         <Box
           w={24}
           style={{
@@ -74,7 +95,13 @@ export const TableRow = ({
   );
 };
 
-export const TableHeader = ({ sending }: { sending: boolean }) => {
+export const TableHeader = ({
+  sending,
+  showConnection = !sending,
+}: {
+  sending: boolean;
+  showConnection?: boolean;
+}) => {
   const { colors } = useMantineTheme();
   return (
     <Group justify="space-between" c={colors.gray[0]} mb="12px">
@@ -84,7 +111,7 @@ export const TableHeader = ({ sending }: { sending: boolean }) => {
       <Text w={32} fz="sm" fw={500} ta="left">
         Token
       </Text>
-      {!sending && (
+      {!sending && showConnection && (
         <Text w={32} fz="sm" fw={500} ta="right">
           Conn.
         </Text>

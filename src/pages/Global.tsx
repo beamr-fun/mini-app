@@ -9,6 +9,7 @@ import {
   SegmentedControl,
   Stack,
   Text,
+  Tooltip,
   useMantineTheme,
 } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
@@ -25,7 +26,7 @@ import {
 } from '../generated/graphql';
 import { useUser } from '../hooks/useUser';
 import { useCTA } from '../hooks/useCTA';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Ribbon, Trophy } from 'lucide-react';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import {
@@ -46,7 +47,7 @@ type LeaderPool = {
   flowRate: string;
   totalUnits: string;
   displayName: string;
-  fid: number;
+  fid?: number;
   id: string;
 };
 
@@ -65,6 +66,13 @@ export const Global = () => {
   const highlevelError = apiError || userSubError;
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const viewUser = (fid?: number) => {
+    if (!fid) return;
+    navigate(`/user/${fid}`, {
+      state: { backTo: location.pathname + location.search },
+    });
+  };
 
   const {
     data: recentBeams,
@@ -213,6 +221,7 @@ export const Global = () => {
             beams={recentBeams || []}
             isLoading={isLoadingRecent}
             error={recentError}
+            onViewUser={viewUser}
           />
         )}
         {tab === 'Leaderboard' && (
@@ -220,6 +229,7 @@ export const Global = () => {
             leaderboardData={leaderboardData}
             isLoading={isLoadingLeader || isLoadingCollectorRates}
             error={leaderError}
+            onViewUser={viewUser}
           />
         )}
       </Card>
@@ -231,10 +241,12 @@ const Leader = ({
   leaderboardData,
   isLoading,
   error,
+  onViewUser,
 }: {
   leaderboardData: LeaderPool[];
   isLoading: boolean;
   error: Error | null;
+  onViewUser: (fid?: number) => void;
 }) => {
   const { colors } = useMantineTheme();
 
@@ -281,6 +293,9 @@ const Leader = ({
               pfpUrl={pool.pfpUrl}
               place={leaderboardData.indexOf(pool) + 1}
               displayName={pool.displayName}
+              username={pool.username}
+              fid={pool.fid}
+              onViewUser={onViewUser}
             />
           );
         })}
@@ -293,10 +308,12 @@ const Recent = ({
   beams,
   isLoading,
   error,
+  onViewUser,
 }: {
   beams: RecentBeam[];
   isLoading: boolean;
   error: Error | null;
+  onViewUser: (fid?: number) => void;
 }) => {
   const { colors } = useMantineTheme();
 
@@ -353,7 +370,12 @@ const Recent = ({
               flowRate={beamFlowRate}
               senderUrl={beam.from?.profile?.pfp_url || ''}
               receiverUrl={beam.to?.profile?.pfp_url || ''}
+              senderUsername={beam.from?.profile?.username || undefined}
+              receiverUsername={beam.to?.profile?.username || undefined}
               percentage={percentage}
+              senderFid={beam.from?.fid}
+              receiverFid={beam.to?.fid}
+              onViewUser={onViewUser}
             />
           );
         })}
@@ -365,19 +387,51 @@ const Recent = ({
 const GlobalRow = ({
   senderUrl,
   receiverUrl,
+  senderUsername,
+  receiverUsername,
   flowRate,
   percentage,
+  senderFid,
+  receiverFid,
+  onViewUser,
 }: {
   senderUrl: string;
   receiverUrl: string;
+  senderUsername?: string;
+  receiverUsername?: string;
   flowRate: bigint;
   percentage: number;
+  senderFid?: number;
+  receiverFid?: number;
+  onViewUser: (fid?: number) => void;
 }) => {
   return (
     <Group justify="space-between">
       <AvatarGroup>
-        <Avatar size={32} radius="xl" src={senderUrl} />
-        <Avatar size={32} radius="xl" src={receiverUrl} />
+        <Tooltip
+          label={senderUsername ? `@${senderUsername}` : undefined}
+          disabled={!senderUsername}
+        >
+          <Avatar
+            size={32}
+            radius="xl"
+            src={senderUrl}
+            style={{ cursor: senderFid ? 'pointer' : 'default' }}
+            onClick={senderFid ? () => onViewUser(senderFid) : undefined}
+          />
+        </Tooltip>
+        <Tooltip
+          label={receiverUsername ? `@${receiverUsername}` : undefined}
+          disabled={!receiverUsername}
+        >
+          <Avatar
+            size={32}
+            radius="xl"
+            src={receiverUrl}
+            style={{ cursor: receiverFid ? 'pointer' : 'default' }}
+            onClick={receiverFid ? () => onViewUser(receiverFid) : undefined}
+          />
+        </Tooltip>
       </AvatarGroup>
       <Box w={32} ta="left">
         <Avatar src={beamrTokenLogo} size={24} />
@@ -432,11 +486,17 @@ const LeaderRow = ({
   place,
   flowRate,
   displayName,
+  username,
+  fid,
+  onViewUser,
 }: {
   pfpUrl: string;
   place: number;
   flowRate: bigint;
   displayName: string;
+  username?: string;
+  fid?: number;
+  onViewUser: (fid?: number) => void;
 }) => {
   const { colors } = useMantineTheme();
   return (
@@ -456,8 +516,23 @@ const LeaderRow = ({
           />
         )}
       </Box>
-      <Avatar size={32} radius="xl" src={pfpUrl} mr="sm" />
-      <Text w={75} lineClamp={1} mr="auto">
+      <Tooltip label={username ? `@${username}` : undefined} disabled={!username}>
+        <Avatar
+          size={32}
+          radius="xl"
+          src={pfpUrl}
+          mr="sm"
+          style={{ cursor: fid ? 'pointer' : 'default' }}
+          onClick={fid ? () => onViewUser(fid) : undefined}
+        />
+      </Tooltip>
+      <Text
+        w={75}
+        lineClamp={1}
+        mr="auto"
+        style={{ cursor: fid ? 'pointer' : 'default' }}
+        onClick={fid ? () => onViewUser(fid) : undefined}
+      >
         {displayName}
       </Text>
       {/* </Group> */}

@@ -137,6 +137,7 @@ export const ActivityDrawer = () => {
           message: 'Unable to retrieve notification details.',
           color: 'red',
         });
+        console.error(addMiniAppResponse);
         return;
       }
 

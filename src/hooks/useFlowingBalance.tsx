@@ -65,12 +65,18 @@ export const useFlowingBalance = (
 
   const startingBalanceTime = startingBalanceDate.getTime();
   useEffect(() => {
+    setFlowingBalance(startingBalance);
+
     if (flowRate === BigInt(0)) return;
 
+    let isActive = true;
+    let animationFrameId: number | null = null;
     let lastAnimationTimestamp = 0;
 
     const animationStep = (currentAnimationTimestamp: number) => {
-      const animationFrameId = window.requestAnimationFrame(animationStep);
+      if (!isActive) return;
+
+      animationFrameId = window.requestAnimationFrame(animationStep);
       if (
         currentAnimationTimestamp - lastAnimationTimestamp >
         ANIMATION_MINIMUM_STEP_TIME
@@ -86,13 +92,16 @@ export const useFlowingBalance = (
 
         lastAnimationTimestamp = currentAnimationTimestamp;
       }
-
-      return () => window.cancelAnimationFrame(animationFrameId);
     };
 
-    let animationFrameId = window.requestAnimationFrame(animationStep);
+    animationFrameId = window.requestAnimationFrame(animationStep);
 
-    return () => window.cancelAnimationFrame(animationFrameId);
+    return () => {
+      isActive = false;
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, [startingBalance, startingBalanceTime, flowRate]);
 
   return flowingBalance;

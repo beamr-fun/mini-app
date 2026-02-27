@@ -66,7 +66,16 @@ export type UserTransformed = {
 };
 export const userProfileTransform = async (
   data: LoggedInUserSubscription,
-  getHeaders: () => Promise<APIHeaders | false>
+  getHeaders: () => Promise<APIHeaders | false>,
+  extraFids: string[] = []
+) => {
+  return transformUserByPk(data, getHeaders, extraFids);
+};
+
+export const transformUserByPk = async (
+  data: { User_by_pk?: LoggedInUserSubscription['User_by_pk'] | null },
+  getHeaders: () => Promise<APIHeaders | false>,
+  extraFids: string[] = []
 ) => {
   if (
     !data.User_by_pk ||
@@ -82,7 +91,7 @@ export const userProfileTransform = async (
   const toFids =
     data.User_by_pk?.outgoing.map((b) => b.to?.fid?.toString()) || [];
 
-  const uniqueFids = [...new Set([...fromFids, ...toFids])].filter(
+  const uniqueFids = [...new Set([...fromFids, ...toFids, ...extraFids])].filter(
     Boolean
   ) as string[];
 
@@ -105,6 +114,7 @@ export const userProfileTransform = async (
 
   return {
     ...data?.User_by_pk,
+    pools: user.pools,
     incoming: user.incoming.map((beam) => {
       const profile = profileLookup[beam.from?.fid || 0];
 

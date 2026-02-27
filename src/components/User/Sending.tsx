@@ -2,10 +2,13 @@ import { Flex, Stack, Text, useMantineTheme } from '@mantine/core';
 import { useUser } from '../../hooks/useUser';
 import { TableHeader, TableRow } from './TableItems';
 import { useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const Sending = () => {
   const { userSubscription } = useUser();
   const { colors } = useMantineTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const sorted = useMemo(() => {
     if (!userSubscription) return [];
@@ -66,6 +69,19 @@ export const Sending = () => {
               flowRate={beamFlowRate}
               percentage={percentage}
               pfpUrl={item.to?.profile?.pfp_url || ''}
+              avatarTooltip={
+                item.to?.profile?.username
+                  ? `@${item.to.profile.username}`
+                  : undefined
+              }
+              avatarOnClick={
+                item.to?.fid
+                  ? () =>
+                      navigate(`/user/${item.to.fid}`, {
+                        state: { backTo: location.pathname + location.search },
+                      })
+                  : undefined
+              }
             />
           );
         })}

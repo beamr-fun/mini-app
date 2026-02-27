@@ -3,6 +3,7 @@ import { useUser } from '../../hooks/useUser';
 import { TableHeader, TableRow } from './TableItems';
 import { usePoolAccount } from '../../hooks/usePoolAccount';
 import { useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const Receiving = ({
   onConnectClick,
@@ -16,6 +17,8 @@ export const Receiving = ({
   const { userSubscription } = useUser();
   const { colors } = useMantineTheme();
   const { userPoolAddress } = usePoolAccount();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const processedIncoming = useMemo(() => {
     if (!userSubscription) return null;
@@ -91,6 +94,19 @@ export const Receiving = ({
               flowRate={beamFlowRate}
               percentage={percentage}
               pfpUrl={item.from?.profile?.pfp_url || ''}
+              avatarTooltip={
+                item.from?.profile?.username
+                  ? `@${item.from.profile.username}`
+                  : undefined
+              }
+              avatarOnClick={
+                item.from?.fid
+                  ? () =>
+                      navigate(`/user/${item.from.fid}`, {
+                        state: { backTo: location.pathname + location.search },
+                      })
+                  : undefined
+              }
               isConnectSelected={poolsToConnect.includes(
                 item?.beamPool?.id as string
               )}

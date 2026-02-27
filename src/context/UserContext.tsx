@@ -213,8 +213,10 @@ export const UserProvider = ({
         }
         return userProfileTransform(data, getAuthHeaders);
       },
-    }
+    },
   );
+
+  console.log('userSubscription', userSubscription);
 
   const {
     data: collectionFlowRate,
@@ -260,7 +262,7 @@ export const UserProvider = ({
     } else {
       if (currentSub.pools.length > 0) {
         const openPools = currentSub.pools.filter(
-          (pool) => pool.hasDistributed
+          (pool) => pool.hasDistributed,
         );
         setHasOpenPool(openPools.length > 0);
         setStartingRoute('/home');

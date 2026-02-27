@@ -26,6 +26,9 @@ function formatList(items: string[], separator = ', ', lastSeparator = ' & ') {
   return `${items.slice(0, -1).join(separator)}${lastSeparator}${items.at(-1)}`;
 }
 
+const NEW_SHARE_TAG_LIMIT = 10;
+const SHARE_TAG_LIMIT = 6;
+
 export const BalanceDisplay = ({
   openSwap,
   setTab,
@@ -242,9 +245,12 @@ export const BalanceDisplay = ({
     if (isNewPool) {
       const names = topOutgoing
         ?.map((item) => item.to.profile?.username)
-        .filter(Boolean) as string[];
+        .filter(Boolean)
+        .slice(0, SHARE_TAG_LIMIT) as string[];
 
-      const fids = topOutgoing.map((item) => item.to.fid).slice(0, 6);
+      const fids = topOutgoing
+        .map((item) => item.to.fid)
+        .slice(0, NEW_SHARE_TAG_LIMIT);
 
       sdk.actions.composeCast({
         embeds: [
@@ -257,7 +263,7 @@ ${formatList(names.map((n) => `@${n}`))} are my first microsubs.
 Claim your $BEAMR streams and start your own pool in the app:`,
       });
     } else {
-      const top6 = topOutgoing?.slice(0, 6);
+      const top6 = topOutgoing?.slice(0, SHARE_TAG_LIMIT);
 
       const top6Names = top6
         ?.map((item) => item.to.profile?.username)
