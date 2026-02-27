@@ -24,7 +24,7 @@ import { gqlClient } from '../utils/envio';
 import { network } from '../utils/setup';
 import { transformUserByPk, UserTransformed } from '../transforms/user';
 import { LoggedInUserSubscription } from '../generated/graphql';
-import { useCTA } from '../hooks/useCTA';
+
 import { BeamrNav } from '../components/svg/BeamrNav';
 import { DancingText } from '../components/DancingText';
 import { ADDR } from '../const/addresses';
@@ -99,7 +99,10 @@ type ViewUserQueryResponse = {
 };
 
 const getBeamFlowRate = (item: {
-  beamPool?: { flowRate?: bigint | string; totalUnits?: bigint | string } | null;
+  beamPool?: {
+    flowRate?: bigint | string;
+    totalUnits?: bigint | string;
+  } | null;
   units?: bigint | string;
 }) => {
   const totalUnits = BigInt(item.beamPool?.totalUnits || 0);
@@ -175,7 +178,10 @@ const ViewBalanceDisplay = ({
   const totalIncomingFlowRate = useMemo(() => {
     if (!data?.incoming?.length) return 0n;
 
-    return data.incoming.reduce((total, item) => total + getBeamFlowRate(item), 0n);
+    return data.incoming.reduce(
+      (total, item) => total + getBeamFlowRate(item),
+      0n,
+    );
   }, [data]);
 
   const totalOutgoingFlowRate = useMemo(() => {
@@ -183,7 +189,7 @@ const ViewBalanceDisplay = ({
 
     let total = data.outgoing.reduce(
       (total, item) => total + getOutgoingBeamFlowRate(item),
-      0n
+      0n,
     );
 
     if (collectionFlowRate) {
@@ -198,7 +204,7 @@ const ViewBalanceDisplay = ({
 
     return data.outgoing.reduce(
       (total, item) => total + getOutgoingBoostFlowRate(item),
-      0n
+      0n,
     );
   }, [data]);
 
@@ -207,7 +213,8 @@ const ViewBalanceDisplay = ({
     ? totalOutgoingFlowRate + totalBoostedFlowRate
     : totalOutgoingFlowRate;
 
-  const moreIncomingThanOutgoing = totalIncomingFlowRate >= totalOutgoingFlowRate;
+  const moreIncomingThanOutgoing =
+    totalIncomingFlowRate >= totalOutgoingFlowRate;
   const netFlowRate = moreIncomingThanOutgoing
     ? totalIncomingFlowRate - totalOutgoingFlowRate
     : totalOutgoingFlowRate - totalIncomingFlowRate;
@@ -252,7 +259,9 @@ const ViewBalanceDisplay = ({
         </Text>
       </Group>
       <Group justify="space-between">
-        <Text fz="sm">{flowratePerSecondToMonth(totalIncomingFlowRate, 'no-label')}</Text>
+        <Text fz="sm">
+          {flowratePerSecondToMonth(totalIncomingFlowRate, 'no-label')}
+        </Text>
         <Text fz="sm">
           {flowratePerSecondToMonth(displayedOutgoingFlowRate, 'no-label')}
         </Text>
@@ -261,12 +270,7 @@ const ViewBalanceDisplay = ({
         <Text c={colors.gray[3]} fz="sm">
           Connected Balance {formatUnitBalance(connectedBalance)}
         </Text>
-        <Tooltip
-          label={nagTooltipLabel}
-          disabled={!canNag}
-          multiline
-          w={260}
-        >
+        <Tooltip label={nagTooltipLabel} disabled={!canNag} multiline w={260}>
           <Text
             c={canNag ? colors.gray[0] : colors.gray[3]}
             fz="sm"
@@ -319,9 +323,10 @@ const ViewSending = ({ data }: { data: UserTransformed }) => {
           const beamFlowRate = getBeamFlowRate(item);
           const percentage = Number(
             (
-              (Number(item.units || 0) / Number(item.beamPool?.totalUnits || 1)) *
+              (Number(item.units || 0) /
+                Number(item.beamPool?.totalUnits || 1)) *
               100
-            ).toFixed(2)
+            ).toFixed(2),
           );
 
           return (
@@ -337,7 +342,9 @@ const ViewSending = ({ data }: { data: UserTransformed }) => {
                   : undefined
               }
               avatarOnClick={
-                item.to?.fid ? () => navigate(`/user/${item.to.fid}`) : undefined
+                item.to?.fid
+                  ? () => navigate(`/user/${item.to.fid}`)
+                  : undefined
               }
             />
           );
@@ -384,9 +391,10 @@ const ViewReceiving = ({ data }: { data: UserTransformed }) => {
           const beamFlowRate = getBeamFlowRate(item);
           const percentage = Number(
             (
-              (Number(item.units || 0) / Number(item.beamPool?.totalUnits || 1)) *
+              (Number(item.units || 0) /
+                Number(item.beamPool?.totalUnits || 1)) *
               100
-            ).toFixed(2)
+            ).toFixed(2),
           );
 
           return (
@@ -419,15 +427,9 @@ export const ViewUser = () => {
   const { fid } = useParams();
   const [tab, setTab] = useState('Outgoing');
   const [fallbackBalanceFetchedAt] = useState(() => new Date());
-  const { getAuthHeaders } = useUser();
+  const { getAuthHeaders, user: loggedInUser } = useUser();
   const publicClient = usePublicClient();
   const navigate = useNavigate();
-
-  useCTA({
-    label: undefined,
-    onClick: undefined,
-    extraDeps: [fid],
-  });
 
   const parsedFid = Number(fid);
   const isValidFid = !!fid && Number.isInteger(parsedFid) && parsedFid > 0;
@@ -449,13 +451,13 @@ export const ViewUser = () => {
       const data = await gqlClient.request<ViewUserQueryResponse>(
         VIEW_USER_QUERY,
         { id: userId },
-        headers
+        headers,
       );
 
       return transformUserByPk(
         data,
         async () => headers,
-        parsedFid ? [parsedFid.toString()] : []
+        parsedFid ? [parsedFid.toString()] : [],
       );
     },
     enabled: isValidFid,
@@ -502,9 +504,7 @@ export const ViewUser = () => {
   const neynarPrimaryAddress =
     viewedProfile?.verified_addresses?.primary?.eth_address;
   const viewedDisplayName =
-    viewedProfile?.display_name ||
-    viewedProfile?.username ||
-    'Farcaster user';
+    viewedProfile?.display_name || viewedProfile?.username || 'Farcaster user';
   const viewedUsername = viewedProfile?.username;
   const resolvedAddress = preferredAddress || neynarPrimaryAddress;
   const parsedViewedAddress =
@@ -557,7 +557,11 @@ export const ViewUser = () => {
       unconnectedPoolAddresses,
     ],
     queryFn: async () => {
-      if (!publicClient || !parsedViewedAddress || !unconnectedPoolAddresses.length) {
+      if (
+        !publicClient ||
+        !parsedViewedAddress ||
+        !unconnectedPoolAddresses.length
+      ) {
         return 0n;
       }
 
@@ -610,13 +614,20 @@ export const ViewUser = () => {
   const nagSenderNames = useMemo(() => {
     if (!viewedUser?.incoming?.length) return [];
 
+    const loggedInUsername = loggedInUser?.username?.toLowerCase();
+
     const names = viewedUser.incoming
       .filter((beam) => !beam.isReceiverConnected)
       .map((beam) => beam.from?.profile?.username)
+      .filter(
+        (name) =>
+          !!name &&
+          (!loggedInUsername || name.toLowerCase() !== loggedInUsername),
+      )
       .filter((name): name is string => !!name);
 
     return [...new Set(names)];
-  }, [viewedUser]);
+  }, [viewedUser, loggedInUser?.username]);
 
   const canNagUser =
     nagSenderFids.length > 0 &&
@@ -634,17 +645,23 @@ export const ViewUser = () => {
 
     const monthlyUnconnected = flowratePerSecondToMonth(
       unconnectedIncoming,
-      'no-label'
+      'no-label',
     );
 
-    const text =
-      nagSenderNames.length === 1
-        ? `Hey @${viewedUsername}, @${nagSenderNames[0]} is streaming ${monthlyUnconnected} $BEAMR/mo to you. Open the Beamr Mini app to claim.`
-        : nagSenderNames.length === 2
-          ? `Hey @${viewedUsername}, @${nagSenderNames[0]} and @${nagSenderNames[1]} are streaming ${monthlyUnconnected} $BEAMR/mo to you. Open the Beamr Mini app to claim.`
-          : nagSenderNames.length > 2
-            ? `Hey @${viewedUsername}, @${nagSenderNames[0]}, @${nagSenderNames[1]}, and others are streaming ${monthlyUnconnected} $BEAMR/mo to you. Open the Beamr Mini app to claim.`
-            : `Hey @${viewedUsername}, people are streaming ${monthlyUnconnected} $BEAMR/mo to you. Open the Beamr Mini app to claim.`;
+    const infoLine =
+      nagSenderNames.length === 0
+        ? `You can connect to streams sending you ${monthlyUnconnected} $BEAMR/mo!`
+        : nagSenderNames.length === 1
+          ? `${nagSenderNames[0]} is streaming to you. You can connect to streams sending you ${monthlyUnconnected} $BEAMR/mo!`
+          : nagSenderNames.length === 2
+            ? `${nagSenderNames[0]} and ${nagSenderNames[1]} are streaming to you. You can connect to streams sending you ${monthlyUnconnected} $BEAMR/mo!`
+            : `${nagSenderNames[0]}, ${nagSenderNames[1]}, and others are streaming to you. You can connect to streams sending you ${monthlyUnconnected} $BEAMR/mo!`;
+
+    const text = `Hey @${viewedUsername}!
+    
+${infoLine}
+
+Open the Beamr Mini app to claim.`;
 
     sdk.actions.composeCast({
       embeds: [
@@ -676,7 +693,10 @@ export const ViewUser = () => {
   if (!isValidFid) {
     return (
       <PageLayout>
-        <ErrorDisplay title="Invalid user" description="Invalid FID in route." />
+        <ErrorDisplay
+          title="Invalid user"
+          description="Invalid FID in route."
+        />
       </PageLayout>
     );
   }
