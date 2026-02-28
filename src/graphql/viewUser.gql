@@ -1,0 +1,53 @@
+query ViewUser($id: String!) {
+  User_by_pk(id: $id) {
+    id
+    pools {
+      id
+      flowRate
+      totalUnits
+      active
+      hasDistributed
+      metadata {
+        name
+      }
+      creatorAccount {
+        address
+      }
+    }
+    incoming(
+      order_by: {lastUpdated: desc}
+      where: {beamPool: {active: {_eq: true}}}
+    ) {
+      id
+      units
+      isReceiverConnected
+      lastUpdated
+      beamPool {
+        flowRate
+        totalUnits
+        id
+      }
+      from {
+        fid
+        id
+      }
+    }
+    outgoing(
+      order_by: {lastUpdated: desc}
+      where: {beamPool: {active: {_eq: true}}}
+    ) {
+      units
+      id
+      beamPool {
+        flowRate
+        creatorFlowRate
+        totalUnits
+        id
+      }
+      to {
+        id
+        fid
+      }
+    }
+  }
+}

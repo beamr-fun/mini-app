@@ -1,5 +1,5 @@
 module.exports = {
-  schema: 'http://localhost:8080/v1/graphql',
+  schema: 'https://indexer.hyperindex.xyz/b9414c9/v1/graphql',
   documents: ['src/**/*.gql'],
   generates: {
     './src/generated/': {
