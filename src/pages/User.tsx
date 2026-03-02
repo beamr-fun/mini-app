@@ -20,7 +20,6 @@ import {
   NotPoolAddressDisplay,
   NotPrimaryDisplay,
 } from '../components/User/WrongAddressDisplay';
-import { SnapshotVoteBanner } from '../components/SnapshotVoteBanner';
 
 export const User = () => {
   const [tab, setTab] = useState('Sending');
@@ -137,7 +136,6 @@ export const User = () => {
     return (
       <PageLayout>
         <BeamrHeadline />
-        <SnapshotVoteBanner />
         <SwapModal opened={opened} onClose={close} />
         <BalanceDisplay openSwap={open} setTab={setTab} />
         <Card>
@@ -158,7 +156,6 @@ export const User = () => {
   return (
     <PageLayout>
       <BeamrHeadline />
-      <SnapshotVoteBanner />
       <SwapModal opened={opened} onClose={close} />
       <BalanceDisplay openSwap={open} setTab={setTab} />
       <Card>
