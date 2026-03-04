@@ -700,6 +700,23 @@ export const removeFromBlacklist = async ({
   }
 };
 
+export const searchUsers = async (
+  query: string,
+  headers: APIHeaders,
+): Promise<User[]> => {
+  try {
+    const res = await fetch(
+      `${keys.apiUrl}/v1/user/search?q=${encodeURIComponent(query)}&limit=4`,
+      { method: 'GET', headers },
+    );
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error || 'Failed to search users');
+    return data.users as User[];
+  } catch (error) {
+    throw Error;
+  }
+};
+
 export const getUserSubs = async (headers: APIHeaders) => {
   try {
     const res = await fetch(`${keys.apiUrl}/v1/user/receipts`, {

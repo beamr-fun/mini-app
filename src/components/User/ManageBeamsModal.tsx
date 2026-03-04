@@ -17,6 +17,7 @@ import { usePublicClient, useWalletClient } from 'wagmi';
 import { Address } from 'viem'; // needed for cast in handleRemoveBeams
 import { useUser } from '../../hooks/useUser';
 import { removeBeams } from '../../utils/interactions';
+import { addToBlacklist } from '../../utils/api';
 import { flowratePerSecondToMonth } from '../../utils/common';
 import beamrTokenLogo from '../../assets/beamrTokenLogo.png';
 
@@ -28,11 +29,11 @@ export const ManageBeamsModal = ({
   onClose: () => void;
 }) => {
   const { colors } = useMantineTheme();
-  const { userSubscription, user } = useUser();
+  const { userSubscription, user, getAuthHeaders } = useUser();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [isRemoving, setIsRemoving] = useState(false);
+  const [removingAction, setRemovingAction] = useState<'remove' | 'block' | null>(null);
 
   const sorted = useMemo(() => {
     const outgoing = userSubscription?.outgoing ?? [];
@@ -59,7 +60,7 @@ export const ManageBeamsModal = ({
     onClose();
   };
 
-  const handleRemoveBeams = async () => {
+  const handleRemoveBeams = async (block = false) => {
     if (!walletClient || !publicClient || !user?.fid) return;
 
     const selectedBeams = sorted
@@ -73,24 +74,39 @@ export const ManageBeamsModal = ({
 
     if (!selectedBeams.length) return;
 
-    setIsRemoving(true);
+    setRemovingAction(block ? 'block' : 'remove');
     await removeBeams({
       beams: selectedBeams,
       walletClient,
       publicClient,
-      onSuccess: () => {
-        setIsRemoving(false);
+      onSuccess: async () => {
+        if (block) {
+          try {
+            const headers = await getAuthHeaders();
+            if (headers) {
+              const blacklistFids = selectedBeams.map((b) => b.fidRoute[1]);
+              await addToBlacklist({ fid: user.fid, blacklistFids, headers });
+            }
+          } catch {
+            notifications.show({
+              title: 'Error',
+              message: 'Beams removed but failed to block users.',
+              color: 'yellow',
+            });
+          }
+        }
+        setRemovingAction(null);
         setTimeout(() => {
           setSelectedIds([]);
           notifications.show({
-            title: 'Beams removed',
-            message: `Removed ${selectedBeams.length} beam${selectedBeams.length > 1 ? 's' : ''}.`,
+            title: block ? 'Beams removed & users blocked' : 'Beams removed',
+            message: `${selectedBeams.length} beam${selectedBeams.length > 1 ? 's' : ''} removed${block ? ' and users blocked' : ''}.`,
             color: 'green',
           });
         }, 1500);
       },
       onError: (errMsg) => {
-        setIsRemoving(false);
+        setRemovingAction(null);
         notifications.show({
           title: 'Error',
           message: errMsg || 'Failed to remove beams.',
@@ -100,6 +116,7 @@ export const ManageBeamsModal = ({
     });
   };
 
+  const isRemoving = removingAction !== null;
   const hasSelection = selectedIds.length > 0;
 
   return (
@@ -137,8 +154,8 @@ export const ManageBeamsModal = ({
                   size="xs"
                   style={{ width: 'fit-content' }}
                   disabled={!hasSelection || isRemoving}
-                  loading={isRemoving}
-                  onClick={handleRemoveBeams}
+                  loading={removingAction === 'remove'}
+                  onClick={() => handleRemoveBeams(false)}
                 >
                   Remove beam
                 </Button>
@@ -147,7 +164,8 @@ export const ManageBeamsModal = ({
                   size="xs"
                   style={{ width: 'fit-content' }}
                   disabled={!hasSelection || isRemoving}
-                  onClick={() => {}}
+                  loading={removingAction === 'block'}
+                  onClick={() => handleRemoveBeams(true)}
                 >
                   Remove &amp; block
                 </Button>
