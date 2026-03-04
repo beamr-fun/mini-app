@@ -2,7 +2,7 @@ subscription GlobalMostRecent {
   Beam(
     order_by: { lastUpdated: desc }
     limit: 20
-    where: { beamPool: { active: { _eq: true } } }
+    where: { beamPool: { active: { _eq: true } }, units: { _gt: 0 } }
   ) {
     id
     units
