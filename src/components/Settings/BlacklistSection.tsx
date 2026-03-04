@@ -85,13 +85,17 @@ export const BlacklistSection = () => {
     try {
       const headers = await getAuthHeaders();
       if (!headers) throw new Error('Failed to get headers');
-      await addToBlacklist({ fid: user.fid, blacklistFids: [Number(fidStr)], headers });
+      await addToBlacklist({
+        fid: user.fid,
+        blacklistFids: [Number(fidStr)],
+        headers,
+      });
       queryClient.invalidateQueries({ queryKey: ['blacklist', user.fid] });
     } catch {
       notifications.show({
         color: 'red',
         title: 'Error',
-        message: 'Failed to block user',
+        message: 'Failed to exclude user',
       });
     } finally {
       setIsAdding(false);
@@ -104,7 +108,11 @@ export const BlacklistSection = () => {
     try {
       const headers = await getAuthHeaders();
       if (!headers) throw new Error('Failed to get headers');
-      await removeFromBlacklist({ fid: user.fid, blacklistFids: [fid], headers });
+      await removeFromBlacklist({
+        fid: user.fid,
+        blacklistFids: [fid],
+        headers,
+      });
       queryClient.invalidateQueries({ queryKey: ['blacklist', user.fid] });
     } catch {
       notifications.show({
@@ -187,7 +195,7 @@ export const BlacklistSection = () => {
 
       {profiles.length === 0 ? (
         <Text c={colors.gray[5]} fz="sm">
-          No blocked users.
+          No excluded users.
         </Text>
       ) : (
         <Group wrap="wrap" gap="xs">

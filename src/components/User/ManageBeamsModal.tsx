@@ -33,7 +33,9 @@ export const ManageBeamsModal = ({
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [removingAction, setRemovingAction] = useState<'remove' | 'block' | null>(null);
+  const [removingAction, setRemovingAction] = useState<
+    'remove' | 'exclude' | null
+  >(null);
 
   const sorted = useMemo(() => {
     const outgoing = userSubscription?.outgoing ?? [];
@@ -60,7 +62,7 @@ export const ManageBeamsModal = ({
     onClose();
   };
 
-  const handleRemoveBeams = async (block = false) => {
+  const handleRemoveBeams = async (exclude = false) => {
     if (!walletClient || !publicClient || !user?.fid) return;
 
     const selectedBeams = sorted
@@ -74,13 +76,13 @@ export const ManageBeamsModal = ({
 
     if (!selectedBeams.length) return;
 
-    setRemovingAction(block ? 'block' : 'remove');
+    setRemovingAction(exclude ? 'exclude' : 'remove');
     await removeBeams({
       beams: selectedBeams,
       walletClient,
       publicClient,
       onSuccess: async () => {
-        if (block) {
+        if (exclude) {
           try {
             const headers = await getAuthHeaders();
             if (headers) {
@@ -90,7 +92,7 @@ export const ManageBeamsModal = ({
           } catch {
             notifications.show({
               title: 'Error',
-              message: 'Beams removed but failed to block users.',
+              message: 'Beams removed but failed to exclude users.',
               color: 'yellow',
             });
           }
@@ -99,8 +101,8 @@ export const ManageBeamsModal = ({
         setTimeout(() => {
           setSelectedIds([]);
           notifications.show({
-            title: block ? 'Beams removed & users blocked' : 'Beams removed',
-            message: `${selectedBeams.length} beam${selectedBeams.length > 1 ? 's' : ''} removed${block ? ' and users blocked' : ''}.`,
+            title: exclude ? 'Beams removed & users excluded' : 'Beams removed',
+            message: `${selectedBeams.length} beam${selectedBeams.length > 1 ? 's' : ''} removed${exclude ? ' and users excluded' : ''}.`,
             color: 'green',
           });
         }, 1500);
@@ -164,10 +166,10 @@ export const ManageBeamsModal = ({
                   size="xs"
                   style={{ width: 'fit-content' }}
                   disabled={!hasSelection || isRemoving}
-                  loading={removingAction === 'block'}
+                  loading={removingAction === 'exclude'}
                   onClick={() => handleRemoveBeams(true)}
                 >
-                  Remove &amp; block
+                  Remove &amp; exclude
                 </Button>
               </Group>
             </Box>
@@ -191,53 +193,53 @@ export const ManageBeamsModal = ({
             <Divider mb="sm" />
 
             <ScrollArea h="calc(100dvh - 300px)" type="auto">
-            <Stack gap="12px">
-              {sorted.map((item) => {
-                const perUnitFlowRate =
-                  BigInt(item.beamPool?.flowRate) /
-                  BigInt(item.beamPool?.totalUnits);
-                const beamFlowRate = perUnitFlowRate * BigInt(item.units);
-                const percentage = Number(
-                  (
-                    (Number(item.units) / Number(item.beamPool?.totalUnits)) *
-                    100
-                  ).toFixed(2),
-                );
+              <Stack gap="12px">
+                {sorted.map((item) => {
+                  const perUnitFlowRate =
+                    BigInt(item.beamPool?.flowRate) /
+                    BigInt(item.beamPool?.totalUnits);
+                  const beamFlowRate = perUnitFlowRate * BigInt(item.units);
+                  const percentage = Number(
+                    (
+                      (Number(item.units) / Number(item.beamPool?.totalUnits)) *
+                      100
+                    ).toFixed(2),
+                  );
 
-                return (
-                  <Group
-                    key={item.id}
-                    justify="space-between"
-                    px={4}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => toggleSelect(item.id)}
-                  >
-                    <Box onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={selectedIds.includes(item.id)}
-                        onChange={() => toggleSelect(item.id)}
-                        size="sm"
-                        style={{ cursor: 'pointer' }}
+                  return (
+                    <Group
+                      key={item.id}
+                      justify="space-between"
+                      px={4}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => toggleSelect(item.id)}
+                    >
+                      <Box onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          checked={selectedIds.includes(item.id)}
+                          onChange={() => toggleSelect(item.id)}
+                          size="sm"
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </Box>
+                      <Avatar
+                        size={32}
+                        radius="xl"
+                        src={item.to?.profile?.pfp_url || ''}
                       />
-                    </Box>
-                    <Avatar
-                      size={32}
-                      radius="xl"
-                      src={item.to?.profile?.pfp_url || ''}
-                    />
-                    <Box w={32}>
-                      <Avatar src={beamrTokenLogo} size={24} />
-                    </Box>
-                    <Box w={75} ta="right">
-                      {flowratePerSecondToMonth(beamFlowRate)}
-                    </Box>
-                    <Text w={48} ta="right">
-                      {percentage}%
-                    </Text>
-                  </Group>
-                );
-              })}
-            </Stack>
+                      <Box w={32}>
+                        <Avatar src={beamrTokenLogo} size={24} />
+                      </Box>
+                      <Box w={75} ta="right">
+                        {flowratePerSecondToMonth(beamFlowRate)}
+                      </Box>
+                      <Text w={48} ta="right">
+                        {percentage}%
+                      </Text>
+                    </Group>
+                  );
+                })}
+              </Stack>
             </ScrollArea>
           </Stack>
         </Modal.Body>
