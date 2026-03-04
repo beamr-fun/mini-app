@@ -35,7 +35,7 @@ subscription LoggedInUser($id: String!) {
     }
     outgoing(
       order_by: { lastUpdated: desc }
-      where: { beamPool: { active: { _eq: true } } }
+      where: { beamPool: { active: { _eq: true } }, units: { _gt: 0 } }
     ) {
       units
       id
