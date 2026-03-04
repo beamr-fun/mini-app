@@ -610,13 +610,25 @@ export type FcUserPrefs = {
 type BlacklistResponse = { success: boolean; blacklistFids: number[] };
 type BlacklistWithProfilesResponse = BlacklistResponse & { profiles: User[] };
 
-export async function getBlacklist(headers: APIHeaders, includeProfiles: true): Promise<BlacklistWithProfilesResponse>;
-export async function getBlacklist(headers: APIHeaders, includeProfiles: false): Promise<BlacklistResponse>;
-export async function getBlacklist(headers: APIHeaders, includeProfiles?: boolean): Promise<BlacklistResponse | BlacklistWithProfilesResponse>;
-export async function getBlacklist(headers: APIHeaders, includeProfiles = true) {
+export async function getBlacklist(
+  headers: APIHeaders,
+  includeProfiles: true,
+): Promise<BlacklistWithProfilesResponse>;
+export async function getBlacklist(
+  headers: APIHeaders,
+  includeProfiles: false,
+): Promise<BlacklistResponse>;
+export async function getBlacklist(
+  headers: APIHeaders,
+  includeProfiles?: boolean,
+): Promise<BlacklistResponse | BlacklistWithProfilesResponse>;
+export async function getBlacklist(
+  headers: APIHeaders,
+  includeProfiles = true,
+) {
   try {
     const res = await fetch(
-      `${keys.apiUrl}/v1/users/prefs/blacklist?includeProfiles=${includeProfiles}`,
+      `${keys.apiUrl}/v1/user/prefs/blacklist?includeProfiles=${includeProfiles}`,
       { method: 'GET', headers },
     );
 
@@ -642,7 +654,7 @@ export const addToBlacklist = async ({
   headers: APIHeaders;
 }) => {
   try {
-    const res = await fetch(`${keys.apiUrl}/v1/users/prefs/blacklist/add`, {
+    const res = await fetch(`${keys.apiUrl}/v1/user/prefs/blacklist/add`, {
       method: 'POST',
       headers,
       body: JSON.stringify({ fid, blacklistFids }),
@@ -670,7 +682,7 @@ export const removeFromBlacklist = async ({
   headers: APIHeaders;
 }) => {
   try {
-    const res = await fetch(`${keys.apiUrl}/v1/users/prefs/blacklist/remove`, {
+    const res = await fetch(`${keys.apiUrl}/v1/user/prefs/blacklist/remove`, {
       method: 'POST',
       headers,
       body: JSON.stringify({ fid, blacklistFids }),

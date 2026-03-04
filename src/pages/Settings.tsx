@@ -3,6 +3,7 @@ import { PoolSection } from '../components/Settings/PoolSection';
 import { Select, Text } from '@mantine/core';
 import { PageLayout } from '../layouts/PageLayout';
 import { WebhookConnection } from '../components/Settings/WebhookConnection';
+import { BlacklistSection } from '../components/Settings/BlacklistSection';
 import { useQuery } from '@tanstack/react-query';
 import { useUser } from '../hooks/useUser';
 import { notifications } from '@mantine/notifications';
@@ -12,7 +13,7 @@ import {
   fetchUserPrefs,
 } from '../utils/api';
 
-const OPTIONS = ['Pools', 'Subscriber'] as const;
+const OPTIONS = ['Pools', 'Subscriber', 'Blacklist'] as const;
 type Option = (typeof OPTIONS)[number];
 
 export const Settings = () => {
@@ -84,6 +85,14 @@ export const Settings = () => {
       </SettingsLayout>
     );
   }
+  if (panel === 'Blacklist') {
+    return (
+      <SettingsLayout panel={panel} setPanel={setPanel}>
+        <BlacklistSection />
+      </SettingsLayout>
+    );
+  }
+
   return null;
 };
 
