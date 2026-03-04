@@ -6,6 +6,7 @@ import {
   Divider,
   Group,
   Modal,
+  ScrollArea,
   Stack,
   Text,
   useMantineTheme,
@@ -79,12 +80,14 @@ export const ManageBeamsModal = ({
       publicClient,
       onSuccess: () => {
         setIsRemoving(false);
-        setSelectedIds([]);
-        notifications.show({
-          title: 'Beams removed',
-          message: `Removed ${selectedBeams.length} beam${selectedBeams.length > 1 ? 's' : ''}.`,
-          color: 'green',
-        });
+        setTimeout(() => {
+          setSelectedIds([]);
+          notifications.show({
+            title: 'Beams removed',
+            message: `Removed ${selectedBeams.length} beam${selectedBeams.length > 1 ? 's' : ''}.`,
+            color: 'green',
+          });
+        }, 1500);
       },
       onError: (errMsg) => {
         setIsRemoving(false);
@@ -169,6 +172,7 @@ export const ManageBeamsModal = ({
 
             <Divider mb="sm" />
 
+            <ScrollArea h="calc(100dvh - 300px)" type="auto">
             <Stack gap="12px">
               {sorted.map((item) => {
                 const perUnitFlowRate =
@@ -216,6 +220,7 @@ export const ManageBeamsModal = ({
                 );
               })}
             </Stack>
+            </ScrollArea>
           </Stack>
         </Modal.Body>
       </Modal.Content>

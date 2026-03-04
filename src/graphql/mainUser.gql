@@ -20,7 +20,6 @@ subscription LoggedInUser($id: String!) {
     ) {
       id
       units
-
       isReceiverConnected
       lastUpdated
       beamPool {
