@@ -144,10 +144,10 @@ export const BlacklistSection = () => {
   return (
     <Card>
       <Text fz="lg" fw={500} mb="xs">
-        Blocked Users
+        Excluded Users
       </Text>
       <Text c={colors.gray[4]} fz="sm" mb="md">
-        Blocked users cannot receive beams from you.
+        Excluded users cannot receive beams from you.
       </Text>
 
       <Combobox store={combobox} onOptionSubmit={handleAdd}>

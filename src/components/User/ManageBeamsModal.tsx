@@ -192,7 +192,7 @@ export const ManageBeamsModal = ({
 
             <Divider mb="sm" />
 
-            <ScrollArea h="calc(100dvh - 300px)" type="auto">
+            <ScrollArea h="calc(100dvh - 300px)" type="always">
               <Stack gap="12px">
                 {sorted.map((item) => {
                   const perUnitFlowRate =
