@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: ['logic-isolated-throw-anchor.trycloudflare.com'],
+    allowedHosts: ['sent-vocal-plate-retro.trycloudflare.com'],
   },
   preview: {
     host: true,

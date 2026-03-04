@@ -1,7 +1,7 @@
 subscription LoggedInUser($id: String!) {
   User_by_pk(id: $id) {
     id
-    pools(where: {hasDistributed: {_eq: true}}) {
+    pools(where: { hasDistributed: { _eq: true } }) {
       id
       flowRate
       totalUnits
@@ -45,6 +45,7 @@ subscription LoggedInUser($id: String!) {
         totalUnits
         id
       }
+
       to {
         id
         fid

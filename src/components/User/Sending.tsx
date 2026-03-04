@@ -1,14 +1,26 @@
-import { Flex, Stack, Text, useMantineTheme } from '@mantine/core';
+import {
+  Anchor,
+  Flex,
+  Group,
+  Stack,
+  Text,
+  useMantineTheme,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { useUser } from '../../hooks/useUser';
 import { TableHeader, TableRow } from './TableItems';
+import { ManageBeamsModal } from './ManageBeamsModal';
 import { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Settings } from 'lucide-react';
 
 export const Sending = () => {
   const { userSubscription } = useUser();
   const { colors } = useMantineTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const [manageOpened, { open: openManage, close: closeManage }] =
+    useDisclosure(false);
 
   const sorted = useMemo(() => {
     if (!userSubscription) return [];
@@ -49,7 +61,21 @@ export const Sending = () => {
 
   return (
     <Stack gap="sm">
-      <TableHeader sending={true} />
+      <ManageBeamsModal opened={manageOpened} onClose={closeManage} />
+      <Stack gap={4}>
+        <Group justify="flex-end" mb={4} gap={4}>
+          <Anchor
+            component="button"
+            fz="sm"
+            c={colors.gray[5]}
+            onClick={openManage}
+          >
+            Manage beams
+          </Anchor>
+          <Settings size={12} />
+        </Group>
+        <TableHeader sending={true} />
+      </Stack>
 
       <Stack gap="12px">
         {sorted.map((item) => {
@@ -60,7 +86,7 @@ export const Sending = () => {
             (
               (Number(item.units) / Number(item.beamPool?.totalUnits)) *
               100
-            ).toFixed(2)
+            ).toFixed(2),
           );
           return (
             <TableRow
