@@ -602,6 +602,121 @@ export const getTipLimit = async (headers: APIHeaders) => {
   return parsed.data;
 };
 
+export type FcUserPrefs = {
+  fid: number;
+  blacklistFids: number[];
+};
+
+type BlacklistResponse = { success: boolean; blacklistFids: number[] };
+type BlacklistWithProfilesResponse = BlacklistResponse & { profiles: User[] };
+
+export async function getBlacklist(
+  headers: APIHeaders,
+  includeProfiles: true,
+): Promise<BlacklistWithProfilesResponse>;
+export async function getBlacklist(
+  headers: APIHeaders,
+  includeProfiles: false,
+): Promise<BlacklistResponse>;
+export async function getBlacklist(
+  headers: APIHeaders,
+  includeProfiles?: boolean,
+): Promise<BlacklistResponse | BlacklistWithProfilesResponse>;
+export async function getBlacklist(
+  headers: APIHeaders,
+  includeProfiles = true,
+) {
+  try {
+    const res = await fetch(
+      `${keys.apiUrl}/v1/user/prefs/blacklist?includeProfiles=${includeProfiles}`,
+      { method: 'GET', headers },
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to fetch blacklist');
+    }
+
+    return data;
+  } catch (error) {
+    throw Error;
+  }
+}
+
+export const addToBlacklist = async ({
+  fid,
+  blacklistFids,
+  headers,
+}: {
+  fid: number;
+  blacklistFids: number[];
+  headers: APIHeaders;
+}) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/prefs/blacklist/add`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ fid, blacklistFids }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to add to blacklist');
+    }
+
+    return data as { success: boolean; prefs: FcUserPrefs };
+  } catch (error) {
+    throw Error;
+  }
+};
+
+export const removeFromBlacklist = async ({
+  fid,
+  blacklistFids,
+  headers,
+}: {
+  fid: number;
+  blacklistFids: number[];
+  headers: APIHeaders;
+}) => {
+  try {
+    const res = await fetch(`${keys.apiUrl}/v1/user/prefs/blacklist/remove`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ fid, blacklistFids }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.error || 'Failed to remove from blacklist');
+    }
+
+    return data as { success: boolean; prefs: FcUserPrefs };
+  } catch (error) {
+    throw Error;
+  }
+};
+
+export const searchUsers = async (
+  query: string,
+  headers: APIHeaders,
+): Promise<User[]> => {
+  try {
+    const res = await fetch(
+      `${keys.apiUrl}/v1/user/search?q=${encodeURIComponent(query)}&limit=4`,
+      { method: 'GET', headers },
+    );
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error || 'Failed to search users');
+    return data.users as User[];
+  } catch (error) {
+    throw Error;
+  }
+};
+
 export const getUserSubs = async (headers: APIHeaders) => {
   try {
     const res = await fetch(`${keys.apiUrl}/v1/user/receipts`, {

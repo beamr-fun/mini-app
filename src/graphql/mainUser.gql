@@ -1,7 +1,7 @@
 subscription LoggedInUser($id: String!) {
   User_by_pk(id: $id) {
     id
-    pools(where: {hasDistributed: {_eq: true}}) {
+    pools(where: { hasDistributed: { _eq: true } }) {
       id
       flowRate
       totalUnits
@@ -16,11 +16,10 @@ subscription LoggedInUser($id: String!) {
     }
     incoming(
       order_by: { lastUpdated: desc }
-      where: { beamPool: { active: { _eq: true } } }
+      where: { beamPool: { active: { _eq: true } }, units: { _gt: 0 } }
     ) {
       id
       units
-
       isReceiverConnected
       lastUpdated
       beamPool {
@@ -35,7 +34,7 @@ subscription LoggedInUser($id: String!) {
     }
     outgoing(
       order_by: { lastUpdated: desc }
-      where: { beamPool: { active: { _eq: true } } }
+      where: { beamPool: { active: { _eq: true } }, units: { _gt: 0 } }
     ) {
       units
       id
@@ -45,6 +44,7 @@ subscription LoggedInUser($id: String!) {
         totalUnits
         id
       }
+
       to {
         id
         fid

@@ -1,8 +1,21 @@
-import { Address, encodeFunctionData } from 'viem';
+import {
+  Address,
+  BaseError,
+  encodeFunctionData,
+  UserRejectedRequestError,
+} from 'viem';
+
+const parseViemError = (error: unknown): string => {
+  if (error instanceof UserRejectedRequestError) return 'Transaction rejected.';
+  if (error instanceof BaseError) return error.shortMessage;
+  return (error as Error).message ?? 'An unknown error occurred.';
+};
 import { OPERATION_TYPE, prepareOperation } from '@sfpro/sdk/constant';
 import { gdaAbi } from '@sfpro/sdk/abi/core';
 import { ADDR } from '../const/addresses';
 import { SuperfluidAbi } from '../abi/Superfluid';
+import { BeamRABI } from '../abi/BeamR';
+import { ONCHAIN_EVENT } from '../validation/poolMetadata';
 
 export const distributeFlow = async ({
   args: { poolAddress, user, flowRate, otherPoolFlowRates },
@@ -37,7 +50,7 @@ export const distributeFlow = async ({
 
     if (flowRate === 0n && !enableZeroFlowRate) {
       throw new Error(
-        'Flow rate cannot be zero, unless enableZeroFlowRate is true'
+        'Flow rate cannot be zero, unless enableZeroFlowRate is true',
       );
     }
 
@@ -47,7 +60,7 @@ export const distributeFlow = async ({
     // Assuming otherPoolFlowRates are also the 'Gross' (100%) values
     const totalGrossRate = [flowRate, ...otherPoolFlowRates].reduce(
       (acc, rate) => acc + rate,
-      0n
+      0n,
     );
 
     // 3. Calculate the Global Fee (5% of the Total Gross)
@@ -190,6 +203,73 @@ export const distributeFlow = async ({
 //   console.log('Transaction receipt:', receipt);
 // };
 
+//  JSON.stringify({ fidRouting });
+
+export const removeBeams = async ({
+  beams,
+  walletClient,
+  publicClient,
+  onSuccess,
+  onError,
+}: {
+  beams: {
+    poolAddress: Address;
+    memberAddress: Address;
+    fidRoute: [number, number];
+  }[];
+  walletClient: any;
+  publicClient: any;
+  onSuccess: (txHash: string) => void;
+  onError: (errMsg: string) => void;
+}) => {
+  try {
+    if (!walletClient || typeof walletClient.writeContract !== 'function') {
+      throw new Error('Wallet client is not available');
+    }
+    if (
+      !publicClient ||
+      typeof publicClient.waitForTransactionReceipt !== 'function'
+    ) {
+      throw new Error('Public client is not available');
+    }
+
+    const members = beams.map(({ memberAddress }) => ({
+      account: memberAddress,
+      units: 0n,
+    }));
+    const poolAddresses = beams.map(({ poolAddress }) => poolAddress);
+    const fidRouting = beams.map(({ fidRoute }) => fidRoute);
+
+    const hash = await walletClient.writeContract({
+      abi: BeamRABI,
+      address: ADDR.BEAMR,
+      functionName: 'updateMemberUnits',
+      args: [
+        members,
+        poolAddresses,
+        { protocol: ONCHAIN_EVENT, pointer: JSON.stringify({ fidRouting }) },
+      ],
+    });
+
+    if (!hash) {
+      throw new Error('Failed to get transaction hash');
+    }
+
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+    if (receipt.status !== 'success') {
+      console.error('Remove beams transaction failed', receipt);
+      onError('Transaction failed');
+      return;
+    }
+
+    onSuccess(hash);
+  } catch (error) {
+    console.error('Error in removeBeams:', error);
+    onError((error as Error).message);
+  }
+};
+
 export const multiConnect = async ({
   poolIds,
   walletClient,
@@ -218,7 +298,7 @@ export const multiConnect = async ({
           args: [poolAddress, '0x'],
         }),
         userData: '0x',
-      })
+      }),
     );
 
     const hash = await walletClient.writeContract({
