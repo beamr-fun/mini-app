@@ -1,8 +1,6 @@
 import {
-  Avatar,
   Box,
   Button,
-  Checkbox,
   Divider,
   Group,
   Modal,
@@ -12,14 +10,13 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { usePublicClient, useWalletClient } from 'wagmi';
 import { Address } from 'viem'; // needed for cast in handleRemoveBeams
 import { useUser } from '../../hooks/useUser';
 import { removeBeams } from '../../utils/interactions';
 import { addToBlacklist } from '../../utils/api';
-import { flowratePerSecondToMonth } from '../../utils/common';
-import beamrTokenLogo from '../../assets/beamrTokenLogo.png';
+import { BeamRow } from './BeamRow';
 
 export const ManageBeamsModal = ({
   opened,
@@ -32,7 +29,7 @@ export const ManageBeamsModal = ({
   const { userSubscription, user, getAuthHeaders } = useUser();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [removingAction, setRemovingAction] = useState<
     'remove' | 'exclude' | null
   >(null);
@@ -51,14 +48,16 @@ export const ManageBeamsModal = ({
     });
   }, [userSubscription]);
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-    );
-  };
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }, []);
 
   const handleClose = () => {
-    setSelectedIds([]);
+    setSelectedIds(new Set());
     onClose();
   };
 
@@ -66,7 +65,7 @@ export const ManageBeamsModal = ({
     if (!walletClient || !publicClient || !user?.fid) return;
 
     const selectedBeams = sorted
-      .filter((item) => selectedIds.includes(item.id))
+      .filter((item) => selectedIds.has(item.id))
       .map((item) => ({
         poolAddress: item.beamPool?.id as Address,
         memberAddress: item.id.split('_')[1] as Address,
@@ -99,7 +98,7 @@ export const ManageBeamsModal = ({
         }
         setRemovingAction(null);
         setTimeout(() => {
-          setSelectedIds([]);
+          setSelectedIds(new Set());
           notifications.show({
             title: exclude ? 'Beams removed & users excluded' : 'Beams removed',
             message: `${selectedBeams.length} beam${selectedBeams.length > 1 ? 's' : ''} removed${exclude ? ' and users excluded' : ''}.`,
@@ -119,7 +118,7 @@ export const ManageBeamsModal = ({
   };
 
   const isRemoving = removingAction !== null;
-  const hasSelection = selectedIds.length > 0;
+  const hasSelection = selectedIds.size > 0;
 
   return (
     <Modal.Root opened={opened} onClose={handleClose} fullScreen>
@@ -147,7 +146,7 @@ export const ManageBeamsModal = ({
             >
               <Text fz="xs" c={colors.gray[5]} mb="xs">
                 {hasSelection
-                  ? `${selectedIds.length} selected`
+                  ? `${selectedIds.size} selected`
                   : 'Select beams to manage'}
               </Text>
               <Group gap="sm">
@@ -207,36 +206,15 @@ export const ManageBeamsModal = ({
                   );
 
                   return (
-                    <Group
+                    <BeamRow
                       key={item.id}
-                      justify="space-between"
-                      px={4}
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => toggleSelect(item.id)}
-                    >
-                      <Box onClick={(e) => e.stopPropagation()}>
-                        <Checkbox
-                          checked={selectedIds.includes(item.id)}
-                          onChange={() => toggleSelect(item.id)}
-                          size="sm"
-                          style={{ cursor: 'pointer' }}
-                        />
-                      </Box>
-                      <Avatar
-                        size={32}
-                        radius="xl"
-                        src={item.to?.profile?.pfp_url || ''}
-                      />
-                      <Box w={32}>
-                        <Avatar src={beamrTokenLogo} size={24} />
-                      </Box>
-                      <Box w={75} ta="right">
-                        {flowratePerSecondToMonth(beamFlowRate)}
-                      </Box>
-                      <Text w={48} ta="right">
-                        {percentage}%
-                      </Text>
-                    </Group>
+                      id={item.id}
+                      pfpUrl={item.to?.profile?.pfp_url || ''}
+                      beamFlowRate={beamFlowRate}
+                      percentage={percentage}
+                      isSelected={selectedIds.has(item.id)}
+                      onToggle={toggleSelect}
+                    />
                   );
                 })}
               </Stack>
